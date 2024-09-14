@@ -1,0 +1,25 @@
+<RCC>
+    <qresource>
+        <file>images/new.png</file>
+        <file>images/open.png</file>
+        <file>images/page.png</file>
+        <file>images/save.png</file>
+        <file>images/delete.png</file>
+        <file>images/state.png</file>
+        <file>images/initstate.png</file>
+        <file>images/transition.png</file>
+        <file>images/loop.png</file>
+        <file>images/select.png</file>
+        <file>images/compileDot.png</file>
+        <file>images/compileCTask.png</file>
+        <file>images/compileSystemC.png</file>
+        <file>images/compileVHDL.png</file>
+        <file>images/runSimulation.png</file>
+        <file>cursors/delete.png</file>
+        <file>cursors/state.png</file>
+        <file>cursors/initstate.png</file>
+        <file>cursors/transition.png</file>
+        <file>cursors/loop.png</file>
+        <file>cursors/select.png</file>
+    </qresource>
+</RCC>

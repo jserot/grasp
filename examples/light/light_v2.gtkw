@@ -1,0 +1,23 @@
+[*]
+[*] GTKWave Analyzer v3.3.54 (w)1999-2014 BSI
+[*] Wed Sep  4 16:13:17 2024
+[*]
+[dumpfile] "/Users/jserot/Dev/Qt/rfsm-light/examples/light/v1/main.vcd"
+[dumpfile_mtime] "Wed Sep  4 16:12:30 2024"
+[dumpfile_size] 344
+[savefile] "/Users/jserot/Dev/Qt/rfsm-light/examples/light/v1/light_v2.gtkw"
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-4.721611 10 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 193
+[signals_width] 141
+[sst_expanded] 1
+[sst_vpaned_height] 168
+@29
+top.switch
+@28
+top.\light1.state
+top.i
+[pattern_trace] 1
+[pattern_trace] 0

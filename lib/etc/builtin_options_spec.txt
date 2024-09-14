@@ -1,0 +1,9 @@
+# GUI-specific options (others will be extracted from compiler sources)
+ide;general;-dot_external_viewer;Arg.Unit;;use DOTVIEWER external program for viewing .dot files
+ide;general;-dot_qgv;Arg.Unit;;use QGV library for DOT rendering instead of generating DOT files (warning: this may result in poor rendering)
+ide;general;-target_dirs;Arg.Unit;;generated code in separate directories (./dot,./ctask,...)
+ide;general;-stop_time;Arg.Int;set_stop_time;set stop time for the SystemC and VHDL test-bench (default: 100)
+ide;general;-debug;Arg.Unit;;run in debug mode (log all messages)
+ide;general;-sync_externals;Arg.Unit;;launch external programs synchronously (wait for termination)
+ide;dot;-dot_options;Arg.String;;options for calling the DOT program (ex: -Grankdir=LR)
+# RFSMC options

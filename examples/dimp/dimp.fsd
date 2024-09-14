@@ -1,0 +1,110 @@
+{
+  "automatons": [
+    {
+      "name": "A0",
+      "states": [
+        {
+          "attr": "",
+          "id": "_init",
+          "x": 268.0,
+          "y": 66.0
+        },
+        {
+          "attr": "s=1",
+          "id": "E2",
+          "x": 145.0,
+          "y": 480.0
+        },
+        {
+          "attr": "s=0",
+          "id": "E1",
+          "x": 239.0,
+          "y": 272.0
+        },
+        {
+          "attr": "s=0",
+          "id": "E0",
+          "x": 147.0,
+          "y": 129.0
+        }
+      ],
+      "transitions": [
+        {
+          "actions": "k:=k-1",
+          "dst_state": "E2",
+          "event": "h",
+          "guard": "k>0",
+          "location": 3,
+          "src_state": "E2"
+        },
+        {
+          "actions": "k:=k+2",
+          "dst_state": "E1",
+          "event": "h",
+          "guard": "e=1",
+          "location": 3,
+          "src_state": "E1"
+        },
+        {
+          "actions": "",
+          "dst_state": "E0",
+          "event": "h",
+          "guard": "k=0",
+          "location": 0,
+          "src_state": "E2"
+        },
+        {
+          "actions": "",
+          "dst_state": "E2",
+          "event": "h",
+          "guard": "e=0",
+          "location": 0,
+          "src_state": "E1"
+        },
+        {
+          "actions": "k:=1",
+          "dst_state": "E1",
+          "event": "h",
+          "guard": "e=1",
+          "location": 0,
+          "src_state": "E0"
+        },
+        {
+          "actions": "",
+          "dst_state": "E0",
+          "event": "",
+          "guard": "",
+          "location": 0,
+          "src_state": "_init"
+        }
+      ],
+      "vars": [
+        {
+          "name": "k",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "ios": [
+    {
+      "kind": "in",
+      "name": "e",
+      "stim": "ValueChanges 0 0 25 1 35 0 75 1 95 0 145 1 175 0",
+      "type": "bool"
+    },
+    {
+      "kind": "in",
+      "name": "h",
+      "stim": "Periodic 10 10 250",
+      "type": "event"
+    },
+    {
+      "kind": "out",
+      "name": "s",
+      "stim": "None",
+      "type": "bool"
+    }
+  ],
+  "name": "dimp"
+}

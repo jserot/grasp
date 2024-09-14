@@ -1,0 +1,82 @@
+{
+  "automatons": [
+    {
+      "name": "A0",
+      "states": [
+        {
+          "attr": "",
+          "id": "_init",
+          "x": 265.0,
+          "y": 22.0
+        },
+        {
+          "attr": "",
+          "id": "On",
+          "x": 193.0,
+          "y": 283.0
+        },
+        {
+          "attr": "",
+          "id": "Off",
+          "x": 191.0,
+          "y": 103.0
+        }
+      ],
+      "transitions": [
+        {
+          "actions": "i:=0",
+          "dst_state": "Off",
+          "event": "",
+          "guard": "",
+          "location": 0,
+          "src_state": "_init"
+        },
+        {
+          "actions": "c:=1,i:=25",
+          "dst_state": "On",
+          "event": "switch",
+          "guard": "",
+          "location": 0,
+          "src_state": "Off"
+        },
+        {
+          "actions": "c:=c+1,i:=c*25",
+          "dst_state": "On",
+          "event": "switch",
+          "guard": "c<4",
+          "location": 3,
+          "src_state": "On"
+        },
+        {
+          "actions": "i:=0",
+          "dst_state": "Off",
+          "event": "switch",
+          "guard": "c=4",
+          "location": 0,
+          "src_state": "On"
+        }
+      ],
+      "vars": [
+        {
+          "name": "c",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "ios": [
+    {
+      "kind": "in",
+      "name": "switch",
+      "stim": "Sporadic 10 35 50 70 100 120 150",
+      "type": "event"
+    },
+    {
+      "kind": "out",
+      "name": "i",
+      "stim": "None",
+      "type": "int"
+    }
+  ],
+  "name": "light_v4"
+}

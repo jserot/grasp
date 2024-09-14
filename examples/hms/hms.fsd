@@ -1,0 +1,190 @@
+{
+  "automatons": [
+    {
+      "name": "sec",
+      "states": [
+        {
+          "attr": "",
+          "id": "_init",
+          "x": 170.0,
+          "y": 246.0
+        },
+        {
+          "attr": "",
+          "id": "S",
+          "x": 152.0,
+          "y": 372.0
+        }
+      ],
+      "transitions": [
+        {
+          "actions": "c:=0,sec:=c",
+          "dst_state": "S",
+          "event": "",
+          "guard": "",
+          "location": 0,
+          "src_state": "_init"
+        },
+        {
+          "actions": "c:=c+1,sec:=c",
+          "dst_state": "S",
+          "event": "top",
+          "guard": "c<3",
+          "location": 3,
+          "src_state": "S"
+        },
+        {
+          "actions": "c:=0,sec:=c,m",
+          "dst_state": "S",
+          "event": "top",
+          "guard": "c=3",
+          "location": 2,
+          "src_state": "S"
+        }
+      ],
+      "vars": [
+        {
+          "name": "c",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "name": "min",
+      "states": [
+        {
+          "attr": "",
+          "id": "_init",
+          "x": 277.0,
+          "y": 209.0
+        },
+        {
+          "attr": "",
+          "id": "S",
+          "x": 206.0,
+          "y": 334.0
+        }
+      ],
+      "transitions": [
+        {
+          "actions": "c:=0,min:=c,h",
+          "dst_state": "S",
+          "event": "m",
+          "guard": "c=4",
+          "location": 2,
+          "src_state": "S"
+        },
+        {
+          "actions": "c:=c+1,min:=c",
+          "dst_state": "S",
+          "event": "m",
+          "guard": "c<4",
+          "location": 3,
+          "src_state": "S"
+        },
+        {
+          "actions": "c:=0,min:=c",
+          "dst_state": "S",
+          "event": "",
+          "guard": "",
+          "location": 0,
+          "src_state": "_init"
+        }
+      ],
+      "vars": [
+        {
+          "name": "c",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "name": "hr",
+      "states": [
+        {
+          "attr": "",
+          "id": "_init",
+          "x": 278.0,
+          "y": 179.0
+        },
+        {
+          "attr": "",
+          "id": "S",
+          "x": 222.0,
+          "y": 313.0
+        }
+      ],
+      "transitions": [
+        {
+          "actions": "c:=0,hr:=c",
+          "dst_state": "S",
+          "event": "h",
+          "guard": "c=23",
+          "location": 2,
+          "src_state": "S"
+        },
+        {
+          "actions": "c:=c+1,hr:=c",
+          "dst_state": "S",
+          "event": "h",
+          "guard": "c<23",
+          "location": 3,
+          "src_state": "S"
+        },
+        {
+          "actions": "c:=0,hr:=c",
+          "dst_state": "S",
+          "event": "",
+          "guard": "",
+          "location": 0,
+          "src_state": "_init"
+        }
+      ],
+      "vars": [
+        {
+          "name": "c",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "ios": [
+    {
+      "kind": "in",
+      "name": "top",
+      "stim": "Periodic 1 1 30",
+      "type": "event"
+    },
+    {
+      "kind": "out",
+      "name": "sec",
+      "stim": "None",
+      "type": "int"
+    },
+    {
+      "kind": "out",
+      "name": "min",
+      "stim": "None",
+      "type": "int"
+    },
+    {
+      "kind": "out",
+      "name": "hr",
+      "stim": "None",
+      "type": "int"
+    },
+    {
+      "kind": "var",
+      "name": "m",
+      "stim": "None",
+      "type": "event"
+    },
+    {
+      "kind": "var",
+      "name": "h",
+      "stim": "None",
+      "type": "event"
+    }
+  ],
+  "name": "hms"
+}

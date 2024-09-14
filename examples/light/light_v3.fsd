@@ -1,0 +1,111 @@
+{
+  "automatons": [
+    {
+      "name": "A0",
+      "states": [
+        {
+          "attr": "",
+          "id": "_init",
+          "x": 265.0,
+          "y": 22.0
+        },
+        {
+          "attr": "",
+          "id": "Off",
+          "x": 158.0,
+          "y": 87.0
+        },
+        {
+          "attr": "",
+          "id": "E75",
+          "x": 233.0,
+          "y": 438.0
+        },
+        {
+          "attr": "",
+          "id": "E50",
+          "x": 86.0,
+          "y": 322.0
+        },
+        {
+          "attr": "",
+          "id": "E25",
+          "x": 65.0,
+          "y": 198.0
+        },
+        {
+          "attr": "",
+          "id": "E100",
+          "x": 275.0,
+          "y": 225.0
+        }
+      ],
+      "transitions": [
+        {
+          "actions": "i:=0",
+          "dst_state": "Off",
+          "event": "",
+          "guard": "",
+          "location": 0,
+          "src_state": "_init"
+        },
+        {
+          "actions": "i:=25",
+          "dst_state": "E25",
+          "event": "switch",
+          "guard": "",
+          "location": 0,
+          "src_state": "Off"
+        },
+        {
+          "actions": "i:=50",
+          "dst_state": "E50",
+          "event": "switch",
+          "guard": "",
+          "location": 0,
+          "src_state": "E25"
+        },
+        {
+          "actions": "i:=75",
+          "dst_state": "E75",
+          "event": "switch",
+          "guard": "",
+          "location": 0,
+          "src_state": "E50"
+        },
+        {
+          "actions": "i:=100",
+          "dst_state": "E100",
+          "event": "switch",
+          "guard": "",
+          "location": 0,
+          "src_state": "E75"
+        },
+        {
+          "actions": "i:=0",
+          "dst_state": "Off",
+          "event": "switch",
+          "guard": "",
+          "location": 0,
+          "src_state": "E100"
+        }
+      ],
+      "vars": []
+    }
+  ],
+  "ios": [
+    {
+      "kind": "in",
+      "name": "switch",
+      "stim": "Sporadic 10 35 80",
+      "type": "event"
+    },
+    {
+      "kind": "out",
+      "name": "i",
+      "stim": "None",
+      "type": "int"
+    }
+  ],
+  "name": "light_v3"
+}

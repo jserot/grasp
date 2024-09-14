@@ -1,0 +1,126 @@
+{
+  "automatons": [
+    {
+      "name": "A0",
+      "states": [
+        {
+          "attr": "",
+          "id": "_init",
+          "x": 154.0,
+          "y": 103.0
+        },
+        {
+          "attr": "rdy=1",
+          "id": "Idle",
+          "x": 232.0,
+          "y": 164.0
+        },
+        {
+          "attr": "rdy=0",
+          "id": "Compute",
+          "x": 231.0,
+          "y": 398.0
+        }
+      ],
+      "transitions": [
+        {
+          "actions": "a:=a<<1,b:=b>>1,i:=i+1",
+          "dst_state": "Compute",
+          "event": "h",
+          "guard": "i<8,b[0]=0",
+          "location": 4,
+          "src_state": "Compute"
+        },
+        {
+          "actions": "acc:=acc+a,a:=a<<1,b:=b>>1,i:=i+1",
+          "dst_state": "Compute",
+          "event": "h",
+          "guard": "i<8,b[0]=1",
+          "location": 3,
+          "src_state": "Compute"
+        },
+        {
+          "actions": "r:=acc",
+          "dst_state": "Idle",
+          "event": "h",
+          "guard": "i=8",
+          "location": 0,
+          "src_state": "Compute"
+        },
+        {
+          "actions": "a:=n1::int<16>,b:=n2,acc:=0,i:=0",
+          "dst_state": "Compute",
+          "event": "h",
+          "guard": "start=1",
+          "location": 0,
+          "src_state": "Idle"
+        },
+        {
+          "actions": "",
+          "dst_state": "Idle",
+          "event": "",
+          "guard": "",
+          "location": 0,
+          "src_state": "_init"
+        }
+      ],
+      "vars": [
+        {
+          "name": "a",
+          "type": "int"
+        },
+        {
+          "name": "acc",
+          "type": "int"
+        },
+        {
+          "name": "b",
+          "type": "int"
+        },
+        {
+          "name": "i",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "ios": [
+    {
+      "kind": "in",
+      "name": "h",
+      "stim": "Periodic 10 10 180",
+      "type": "event"
+    },
+    {
+      "kind": "in",
+      "name": "n1",
+      "stim": "ValueChanges 20 6",
+      "type": "int"
+    },
+    {
+      "kind": "in",
+      "name": "n2",
+      "stim": "ValueChanges 20 5",
+      "type": "int"
+    },
+    {
+      "kind": "out",
+      "name": "r",
+      "stim": "None",
+      "type": "int"
+    },
+    {
+      "kind": "out",
+      "name": "rdy",
+      "stim": "None",
+      "type": "bool"
+    },
+    {
+      "kind": "in",
+      "name": "start",
+      "stim": "ValueChanges 0 0 15 1 35 0",
+      "type": "bool"
+    }
+  ],
+  "name": "mul8"
+}
