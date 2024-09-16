@@ -72,13 +72,13 @@ ifeq ($(PLATFORM_TYPE), windows)
 	cp $(EXT_DLLS) $(DIST_DIR)/windows
 	cp $(EXT_DLLS) $(DIST_DIR)/windows
 	cp $(GRAPHVIZ_DLLS) $(DIST_DIR)/windows
-	cp rfsm-light.ini options_spec.txt $(DIST_DIR)/windows
+	cp grasp.ini options_spec.txt $(DIST_DIR)/windows
 	cp $(RFSMC) $(DIST_DIR)/windows
 endif
 ifeq ($(PLATFORM_TYPE), macos)
 	rm -rf $(DIST_DIR)/macos/$(APPNAME).app
 	cp -r $(APPNAME).app $(DIST_DIR)/macos
-	cp rfsm-light.ini options_spec.txt $(DIST_DIR)/macos/$(APPNAME).app/Contents/MacOS
+	cp grasp.ini options_spec.txt $(DIST_DIR)/macos/$(APPNAME).app/Contents/MacOS
 	cp $(RFSMC) $(DIST_DIR)/macos/$(APPNAME).app/Contents/MacOS
 endif
 

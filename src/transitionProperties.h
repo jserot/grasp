@@ -1,6 +1,6 @@
 /***********************************************************************/
 /*                                                                     */
-/*       This file is part of the RFSM Light software package          */
+/*       This file is part of the Grasp software package               */
 /*                                                                     */
 /*  Copyright (c) 2019-present, Jocelyn SEROT (jocelyn.serot@uca.fr)   */
 /*                       All rights reserved.                          */

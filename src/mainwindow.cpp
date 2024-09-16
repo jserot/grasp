@@ -1,6 +1,6 @@
 /***********************************************************************/
 /*                                                                     */
-/*       This file is part of the RFSM Light software package          */
+/*       This file is part of the Grasp software package               */
 /*                                                                     */
 /*  Copyright (c) 2019-present, Jocelyn SEROT (jocelyn.serot@uca.fr)   */
 /*                       All rights reserved.                          */
@@ -33,7 +33,7 @@
 #include <QtWidgets>
 #include <QVariant>
 
-const QString MainWindow::title = "RFSM Light";
+const QString MainWindow::title = "Grasp";
 const QList<int> MainWindow::splitterSizes = { 250, 250, 250 };
 const double MainWindow::zoomInFactor = 1.25;
 const double MainWindow::zoomOutFactor = 0.8;
@@ -48,7 +48,7 @@ MainWindow::MainWindow()
     Globals::mainWindow = this;
     QString appDir = QApplication::applicationDirPath();
     qDebug() << "APPDIR=" << appDir;
-    Globals::compilerPaths = new CompilerPaths(appDir + "/rfsm-light.ini", this);
+    Globals::compilerPaths = new CompilerPaths(appDir + "/grasp.ini", this);
     connect(Globals::compilerPaths, SIGNAL(compilerPathChanged(QString)), this, SLOT(compilerPathUpdated(QString)));
     Globals::compilerOptions = new CompilerOptions(appDir + "/options_spec.txt", this);
     Globals::initDir = Globals::compilerPaths->getPath("INITDIR");
@@ -156,10 +156,10 @@ void MainWindow::compilerPathUpdated(QString path)
 void MainWindow::about()
 {
     QMessageBox::about(this,
-      "About RFSM Light",
+      "About Grasp",
       "<p>Finite State Diagram Editor, Simulator and Compiler</p>\
           <p>version " + Globals::version + "</p>\
-         <p><a href=\"github.com/jserot/rfsm-light\">github.com/jserot/rfsm-light</a></p>\
+         <p><a href=\"github.com/jserot/grasp\">github.com/jserot/grasp</a></p>\
          <p>(C) J. Sérot (jocelyn.serot@uca.fr), 2019-now");
 }
 

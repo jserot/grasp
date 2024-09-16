@@ -1,6 +1,6 @@
 /***********************************************************************/
 /*                                                                     */
-/*       This file is part of the RFSM Light software package          */
+/*       This file is part of the Grasp software package               */
 /*                                                                     */
 /*  Copyright (c) 2019-present, Jocelyn SEROT (jocelyn.serot@uca.fr)   */
 /*                       All rights reserved.                          */
@@ -31,7 +31,7 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext &, const QStri
       case QtFatalMsg: txt = QString("Fatal: %1").arg(msg); break;
       }
     if ( traceMode ) {
-      QFile outFile("rfsm-light.log");
+      QFile outFile("grasp.log");
       outFile.open(QIODevice::WriteOnly | QIODevice::Append);
       QTextStream ts(&outFile);
       ts << txt << QT_ENDL;
