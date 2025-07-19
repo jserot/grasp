@@ -1,28 +1,7 @@
 !include(../config) { error("Cannot open config file. Run configure script in top directory") }
 
 CONFIG+=sdk_no_version_check
-
-QT       += core widgets gui
-
-QMAKE_PROJECT_NAME = rfsmlight
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 12.6
-
-TARGET = $$APPNAME
-TEMPLATE = app
-
-equals(USE_QGV,"yes") {
-message("Building with QGV support")
-message($$QGVDIR)
-INCLUDEPATH += $$QGVLIBDIR
-LIBS += -L$$QGVLIBDIR -lQGVCore
-DEPENDPATH += $$QGVLIBDIR
-QMAKE_CXXFLAGS += -DUSE_QGV
-} else {
-message("Building without QGV support")
-}
-
-
-!include(./GraphViz.pri) { error("Cannot open GraphViz.pri file") }
+QT       += widgets
 
 HEADERS += include/nlohmann_json.h \
            globals.h \
@@ -86,9 +65,9 @@ SOURCES += transition.cpp \
            debug.cpp \
            main.cpp \
            mainwindow.cpp
-equals(USE_QGV,"yes") {
-HEADERS += dotviewer.h
-SOURCES += dotviewer.cpp
-}
 
-RESOURCES += resources.qrc
+RESOURCES = resources.qrc
+
+# install
+target.path = .
+INSTALLS += target

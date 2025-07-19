@@ -14,10 +14,10 @@ EQ            = =
 
 CC            = /Library/Developer/CommandLineTools/usr/bin/clang
 CXX           = /Library/Developer/CommandLineTools/usr/bin/clang++
-DEFINES       = -DWITH_CGRAPH -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
-CFLAGS        = -pipe -O2 $(EXPORT_ARCH_ARGS) -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=12.6 -Wall -Wextra -fPIC $(DEFINES)
-CXXFLAGS      = -pipe -stdlib=libc++ -DQGVCORE_LIB -O2 -std=gnu++1z $(EXPORT_ARCH_ARGS) -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=12.6 -Wall -Wextra -fPIC $(DEFINES)
-INCPATH       = -I. -Iprivate -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I../../../../Qt/6.3.1/macos/lib/QtGui.framework/Headers -I../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers -I. -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/AGL.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/AGL.framework/Headers -I../../../../Qt/6.3.1/macos/mkspecs/macx-clang -F/Users/jserot/Qt/6.3.1/macos/lib
+DEFINES       = -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
+CFLAGS        = -pipe -O2 $(EXPORT_ARCH_ARGS) -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=10.14 -Wall -Wextra -fPIC $(DEFINES)
+CXXFLAGS      = -pipe -stdlib=libc++ -O2 -std=gnu++1z $(EXPORT_ARCH_ARGS) -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=10.14 -Wall -Wextra -fPIC $(DEFINES)
+INCPATH       = -I. -I../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I../../../../Qt/6.3.1/macos/lib/QtGui.framework/Headers -I../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers -I. -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/AGL.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/AGL.framework/Headers -I../../../../Qt/6.3.1/macos/mkspecs/macx-clang -F/Users/jserot/Qt/6.3.1/macos/lib
 QMAKE         = /Users/jserot/Qt/6.3.1/macos/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -36,11 +36,11 @@ DEL_DIR       = rmdir
 MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
-DISTNAME      = Grasp1.3.1
-DISTDIR = /Users/jserot/Dev/Qt/grasp/src/.tmp/Grasp1.3.1
+DISTNAME      = Grasp1.0.0
+DISTDIR = /Users/jserot/Dev/Qt/grasp/src/.tmp/Grasp1.0.0
 LINK          = /Library/Developer/CommandLineTools/usr/bin/clang++
-LFLAGS        = -stdlib=libc++ -headerpad_max_install_names $(EXPORT_ARCH_ARGS) -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=12.6 -Wl,-rpath,@executable_path/../Frameworks -Wl,-rpath,/Users/jserot/Qt/6.3.1/macos/lib
-LIBS          = $(SUBLIBS) -F/Users/jserot/Qt/6.3.1/macos/lib -L/opt/homebrew/Cellar/graphviz/12.2.1/lib -lgvc -lcgraph -lcdt -framework QtWidgets -framework QtGui -framework AppKit -framework ImageIO -framework Metal -framework QtCore -framework DiskArbitration -framework IOKit -framework AGL -framework OpenGL   
+LFLAGS        = -stdlib=libc++ -headerpad_max_install_names $(EXPORT_ARCH_ARGS) -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=10.14 -Wl,-rpath,@executable_path/../Frameworks -Wl,-rpath,/Users/jserot/Qt/6.3.1/macos/lib
+LIBS          = $(SUBLIBS) -F/Users/jserot/Qt/6.3.1/macos/lib -framework QtWidgets -framework QtGui -framework AppKit -framework ImageIO -framework Metal -framework QtCore -framework DiskArbitration -framework IOKit -framework AGL -framework OpenGL   
 AR            = /Library/Developer/CommandLineTools/usr/bin/ar cq
 RANLIB        = /Library/Developer/CommandLineTools/usr/bin/ranlib -s
 SED           = sed
@@ -379,12 +379,10 @@ DIST          = ../../../../Qt/6.3.1/macos/mkspecs/features/spec_pre.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/default_pre.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/mac/default_pre.prf \
 		../config \
-		GraphViz.pri \
 		../../../../Qt/6.3.1/macos/mkspecs/features/resolve_config.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/default_post.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/mac/default_post.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/mac/objective_c.prf \
-		../../../../Qt/6.3.1/macos/mkspecs/features/link_pkgconfig.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/mac/mac.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/warn_on.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/qt.prf \
@@ -711,12 +709,10 @@ Makefile: Grasp.pro ../../../../Qt/6.3.1/macos/mkspecs/macx-clang/qmake.conf ../
 		../../../../Qt/6.3.1/macos/mkspecs/features/default_pre.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/mac/default_pre.prf \
 		../config \
-		GraphViz.pri \
 		../../../../Qt/6.3.1/macos/mkspecs/features/resolve_config.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/default_post.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/mac/default_post.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/mac/objective_c.prf \
-		../../../../Qt/6.3.1/macos/mkspecs/features/link_pkgconfig.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/mac/mac.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/warn_on.prf \
 		../../../../Qt/6.3.1/macos/mkspecs/features/qt.prf \
@@ -964,12 +960,10 @@ Makefile: Grasp.pro ../../../../Qt/6.3.1/macos/mkspecs/macx-clang/qmake.conf ../
 ../../../../Qt/6.3.1/macos/mkspecs/features/default_pre.prf:
 ../../../../Qt/6.3.1/macos/mkspecs/features/mac/default_pre.prf:
 ../config:
-GraphViz.pri:
 ../../../../Qt/6.3.1/macos/mkspecs/features/resolve_config.prf:
 ../../../../Qt/6.3.1/macos/mkspecs/features/default_post.prf:
 ../../../../Qt/6.3.1/macos/mkspecs/features/mac/default_post.prf:
 ../../../../Qt/6.3.1/macos/mkspecs/features/mac/objective_c.prf:
-../../../../Qt/6.3.1/macos/mkspecs/features/link_pkgconfig.prf:
 ../../../../Qt/6.3.1/macos/mkspecs/features/mac/mac.prf:
 ../../../../Qt/6.3.1/macos/mkspecs/features/warn_on.prf:
 ../../../../Qt/6.3.1/macos/mkspecs/features/qt.prf:
@@ -1008,7 +1002,7 @@ Grasp.app/Contents/Resources/empty.lproj:
 Grasp.app/Contents/Info.plist: 
 	@test -d Grasp.app/Contents || mkdir -p Grasp.app/Contents
 	@$(DEL_FILE) Grasp.app/Contents/Info.plist
-	@sed -e "s,@SHORT_VERSION@,1.3,g" -e "s,\$${QMAKE_SHORT_VERSION},1.3,g" -e "s,@FULL_VERSION@,1.3.1,g" -e "s,\$${QMAKE_FULL_VERSION},1.3.1,g" -e "s,@TYPEINFO@,????,g" -e "s,\$${QMAKE_PKGINFO_TYPEINFO},????,g" -e "s,@BUNDLEIDENTIFIER@,com.yourcompany.Grasp,g" -e "s,\$${PRODUCT_BUNDLE_IDENTIFIER},com.yourcompany.Grasp,g" -e "s,\$${MACOSX_DEPLOYMENT_TARGET},12.6,g" -e "s,\$${IPHONEOS_DEPLOYMENT_TARGET},,g" -e "s,\$${TVOS_DEPLOYMENT_TARGET},,g" -e "s,\$${WATCHOS_DEPLOYMENT_TARGET},,g" -e "s,\$${IOS_LAUNCH_SCREEN},LaunchScreen,g" -e "s,@ICON@,,g" -e "s,\$${ASSETCATALOG_COMPILER_APPICON_NAME},,g" -e "s,@EXECUTABLE@,Grasp,g" -e "s,@LIBRARY@,Grasp,g" -e "s,\$${EXECUTABLE_NAME},Grasp,g" -e "s,@TYPEINFO@,????,g" -e "s,\$${QMAKE_PKGINFO_TYPEINFO},????,g" ../../../../Qt/6.3.1/macos/mkspecs/macx-clang/Info.plist.app >Grasp.app/Contents/Info.plist
+	@sed -e "s,@SHORT_VERSION@,1.0,g" -e "s,\$${QMAKE_SHORT_VERSION},1.0,g" -e "s,@FULL_VERSION@,1.0.0,g" -e "s,\$${QMAKE_FULL_VERSION},1.0.0,g" -e "s,@TYPEINFO@,????,g" -e "s,\$${QMAKE_PKGINFO_TYPEINFO},????,g" -e "s,@BUNDLEIDENTIFIER@,com.yourcompany.Grasp,g" -e "s,\$${PRODUCT_BUNDLE_IDENTIFIER},com.yourcompany.Grasp,g" -e "s,\$${MACOSX_DEPLOYMENT_TARGET},10.14,g" -e "s,\$${IPHONEOS_DEPLOYMENT_TARGET},,g" -e "s,\$${TVOS_DEPLOYMENT_TARGET},,g" -e "s,\$${WATCHOS_DEPLOYMENT_TARGET},,g" -e "s,\$${IOS_LAUNCH_SCREEN},LaunchScreen,g" -e "s,@ICON@,,g" -e "s,\$${ASSETCATALOG_COMPILER_APPICON_NAME},,g" -e "s,@EXECUTABLE@,Grasp,g" -e "s,@LIBRARY@,Grasp,g" -e "s,\$${EXECUTABLE_NAME},Grasp,g" -e "s,@TYPEINFO@,????,g" -e "s,\$${QMAKE_PKGINFO_TYPEINFO},????,g" ../../../../Qt/6.3.1/macos/mkspecs/macx-clang/Info.plist.app >Grasp.app/Contents/Info.plist
 
 all: Makefile \
 		Grasp.app/Contents/PkgInfo \
@@ -1085,7 +1079,7 @@ moc_nameInputDialog.cpp: nameInputDialog.h \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/QDialog \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/qdialog.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib nameInputDialog.h -o moc_nameInputDialog.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib nameInputDialog.h -o moc_nameInputDialog.cpp
 
 moc_automaton.cpp: automaton.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QStringListModel \
@@ -1105,7 +1099,7 @@ moc_automaton.cpp: automaton.h \
 		stimulus.h \
 		include/nlohmann_json.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib automaton.h -o moc_automaton.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib automaton.h -o moc_automaton.cpp
 
 moc_automatonPanel.cpp: automatonPanel.h \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/QFrame \
@@ -1113,7 +1107,7 @@ moc_automatonPanel.cpp: automatonPanel.h \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/QVBoxLayout \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/qboxlayout.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib automatonPanel.h -o moc_automatonPanel.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib automatonPanel.h -o moc_automatonPanel.cpp
 
 moc_commandExec.cpp: commandExec.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QString \
@@ -1121,7 +1115,7 @@ moc_commandExec.cpp: commandExec.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QProcess \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/qprocess.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib commandExec.h -o moc_commandExec.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib commandExec.h -o moc_commandExec.cpp
 
 moc_compiler.cpp: compiler.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QString \
@@ -1129,7 +1123,7 @@ moc_compiler.cpp: compiler.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QProcess \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/qprocess.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib compiler.h -o moc_compiler.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib compiler.h -o moc_compiler.cpp
 
 moc_dynamicPanel.cpp: dynamicPanel.h \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/QGroupBox \
@@ -1137,7 +1131,7 @@ moc_dynamicPanel.cpp: dynamicPanel.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QMap \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/qmap.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib dynamicPanel.h -o moc_dynamicPanel.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib dynamicPanel.h -o moc_dynamicPanel.cpp
 
 moc_stateValuations.cpp: stateValuations.h \
 		dynamicPanel.h \
@@ -1146,7 +1140,7 @@ moc_stateValuations.cpp: stateValuations.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QMap \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/qmap.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib stateValuations.h -o moc_stateValuations.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib stateValuations.h -o moc_stateValuations.cpp
 
 moc_stateProperties.cpp: stateProperties.h \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/QDialog \
@@ -1154,7 +1148,7 @@ moc_stateProperties.cpp: stateProperties.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QRegularExpression \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/qregularexpression.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib stateProperties.h -o moc_stateProperties.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib stateProperties.h -o moc_stateProperties.cpp
 
 moc_transitionGuards.cpp: transitionGuards.h \
 		dynamicPanel.h \
@@ -1163,7 +1157,7 @@ moc_transitionGuards.cpp: transitionGuards.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QMap \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/qmap.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib transitionGuards.h -o moc_transitionGuards.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib transitionGuards.h -o moc_transitionGuards.cpp
 
 moc_transitionActions.cpp: transitionActions.h \
 		dynamicPanel.h \
@@ -1172,13 +1166,13 @@ moc_transitionActions.cpp: transitionActions.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QMap \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/qmap.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib transitionActions.h -o moc_transitionActions.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib transitionActions.h -o moc_transitionActions.cpp
 
 moc_transitionProperties.cpp: transitionProperties.h \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/QDialog \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/qdialog.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib transitionProperties.h -o moc_transitionProperties.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib transitionProperties.h -o moc_transitionProperties.cpp
 
 moc_iovPanel.cpp: iovPanel.h \
 		dynamicPanel.h \
@@ -1194,7 +1188,7 @@ moc_iovPanel.cpp: iovPanel.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/qlist.h \
 		rowDesc.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib iovPanel.h -o moc_iovPanel.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib iovPanel.h -o moc_iovPanel.cpp
 
 moc_modelPanel.cpp: modelPanel.h \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/QComboBox \
@@ -1215,7 +1209,7 @@ moc_modelPanel.cpp: modelPanel.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/qlist.h \
 		rowDesc.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib modelPanel.h -o moc_modelPanel.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib modelPanel.h -o moc_modelPanel.cpp
 
 moc_stimuli.cpp: stimuli.h \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/QDialog \
@@ -1227,13 +1221,13 @@ moc_stimuli.cpp: stimuli.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QList \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/qlist.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib stimuli.h -o moc_stimuli.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib stimuli.h -o moc_stimuli.cpp
 
 moc_imageviewer.cpp: imageviewer.h \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/QScrollArea \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/qscrollarea.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib imageviewer.h -o moc_imageviewer.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib imageviewer.h -o moc_imageviewer.cpp
 
 moc_textviewer.cpp: textviewer.h \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/QPlainTextEdit \
@@ -1246,7 +1240,7 @@ moc_textviewer.cpp: textviewer.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QRegularExpression \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/qregularexpression.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib textviewer.h -o moc_textviewer.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib textviewer.h -o moc_textviewer.cpp
 
 moc_syntaxHighlighters.cpp: syntaxHighlighters.h \
 		../../../../Qt/6.3.1/macos/lib/QtGui.framework/Headers/QSyntaxHighlighter \
@@ -1256,7 +1250,7 @@ moc_syntaxHighlighters.cpp: syntaxHighlighters.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QRegularExpression \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/qregularexpression.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib syntaxHighlighters.h -o moc_syntaxHighlighters.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib syntaxHighlighters.h -o moc_syntaxHighlighters.cpp
 
 moc_compilerPaths.cpp: compilerPaths.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QObject \
@@ -1268,7 +1262,7 @@ moc_compilerPaths.cpp: compilerPaths.h \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/QAbstractButton \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/qabstractbutton.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib compilerPaths.h -o moc_compilerPaths.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib compilerPaths.h -o moc_compilerPaths.cpp
 
 moc_compilerOptions.cpp: compilerOptions.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QObject \
@@ -1287,7 +1281,7 @@ moc_compilerOptions.cpp: compilerOptions.h \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/QVariant \
 		../../../../Qt/6.3.1/macos/lib/QtCore.framework/Headers/qvariant.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib compilerOptions.h -o moc_compilerOptions.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib compilerOptions.h -o moc_compilerOptions.cpp
 
 moc_mainwindow.cpp: mainwindow.h \
 		globals.h \
@@ -1332,7 +1326,7 @@ moc_mainwindow.cpp: mainwindow.h \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/QStatusBar \
 		../../../../Qt/6.3.1/macos/lib/QtWidgets.framework/Headers/qstatusbar.h \
 		../../../../Qt/6.3.1/macos/libexec/moc
-	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Dev/Qt/grasp/src/private -I/opt/homebrew/Cellar/graphviz/12.2.1/include -I/opt/homebrew/Cellar/graphviz/12.2.1/include/graphviz -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib mainwindow.h -o moc_mainwindow.cpp
+	/Users/jserot/Qt/6.3.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=199711L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=14 -D__clang_minor__=0 -D__clang_patchlevel__=3 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/jserot/Qt/6.3.1/macos/mkspecs/macx-clang -I/Users/jserot/Dev/Qt/grasp/src -I/Users/jserot/Qt/6.3.1/macos/lib/QtWidgets.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtGui.framework/Headers -I/Users/jserot/Qt/6.3.1/macos/lib/QtCore.framework/Headers -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -I/Library/Developer/CommandLineTools/usr/lib/clang/14.0.3/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/Library/Developer/CommandLineTools/usr/include -F/Users/jserot/Qt/6.3.1/macos/lib mainwindow.h -o moc_mainwindow.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -2957,9 +2951,21 @@ moc_mainwindow.o: moc_mainwindow.cpp
 
 ####### Install
 
-install:  FORCE
+install_target: first FORCE
+	@test -d $(INSTALL_ROOT)/Users/jserot/Dev/Qt/grasp/src/. || mkdir -p $(INSTALL_ROOT)/Users/jserot/Dev/Qt/grasp/src/.
+	$(DEL_FILE) -r $(INSTALL_ROOT)/Users/jserot/Dev/Qt/grasp/src/Grasp.app
+	
+	$(QINSTALL) Grasp.app $(INSTALL_ROOT)/Users/jserot/Dev/Qt/grasp/src/Grasp.app
+	-$(STRIP) $(INSTALL_ROOT)/Users/jserot/Dev/Qt/grasp/src/Grasp.app/Contents/MacOS/$(QMAKE_TARGET)
 
-uninstall:  FORCE
+uninstall_target: FORCE
+	-$(DEL_FILE) -r $(INSTALL_ROOT)/Users/jserot/Dev/Qt/grasp/src/Grasp.app
+	-$(DEL_DIR) $(INSTALL_ROOT)/Users/jserot/Dev/Qt/grasp/src/./ 
+
+
+install: install_target  FORCE
+
+uninstall: uninstall_target  FORCE
 
 FORCE:
 

@@ -52,9 +52,8 @@ src/release/
 src/Makefile.*
 src/moc_*.*
 src/qrc_resources.*
-src/rfsm-light.app/
+src/grasp.app/
 src/gui/options_spec.txt
-src/RfsmLight_resource.rc
 src/BROWSE
 doc/figs/*.pdf
 doc/etc/
