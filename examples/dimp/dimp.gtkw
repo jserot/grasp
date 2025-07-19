@@ -1,0 +1,24 @@
+[*]
+[*] GTKWave Analyzer v3.3.54 (w)1999-2014 BSI
+[*] Fri Sep 13 15:06:17 2024
+[*]
+[dumpfile] "/Users/jserot/Dev/Qt/rfsm-light/examples/dimp/dimp.vcd"
+[dumpfile_mtime] "Fri Sep 13 15:05:58 2024"
+[dumpfile_size] 1235
+[savefile] "/Users/jserot/Dev/Qt/rfsm-light/examples/dimp/dimp.gtkw"
+[timestart] 0
+[size] 1043 591
+[pos] -1 -1
+*-6.212388 93 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 193
+[signals_width] 133
+[sst_expanded] 1
+[sst_vpaned_height] 165
+@28
+top.h
+top.e
+top.s
+@25
+top.\A0.k[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

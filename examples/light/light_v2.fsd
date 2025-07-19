@@ -1,0 +1,69 @@
+{
+  "automatons": [
+    {
+      "name": "A0",
+      "states": [
+        {
+          "attr": "",
+          "id": "_init",
+          "x": 265.0,
+          "y": 22.0
+        },
+        {
+          "attr": "",
+          "id": "On",
+          "x": 160.0,
+          "y": 258.0
+        },
+        {
+          "attr": "",
+          "id": "Off",
+          "x": 158.0,
+          "y": 87.0
+        }
+      ],
+      "transitions": [
+        {
+          "actions": "i:=0",
+          "dst_state": "Off",
+          "event": "",
+          "guard": "",
+          "location": 0,
+          "src_state": "_init"
+        },
+        {
+          "actions": "i:=0",
+          "dst_state": "Off",
+          "event": "switch",
+          "guard": "",
+          "location": 0,
+          "src_state": "On"
+        },
+        {
+          "actions": "i:=1",
+          "dst_state": "On",
+          "event": "switch",
+          "guard": "",
+          "location": 0,
+          "src_state": "Off"
+        }
+      ],
+      "vars": []
+    }
+  ],
+  "ios": [
+    {
+      "kind": "in",
+      "name": "switch",
+      "stim": "Sporadic 10 35 80",
+      "type": "event"
+    },
+    {
+      "kind": "out",
+      "name": "i",
+      "stim": "None",
+      "type": "bool"
+    }
+  ],
+  "name": "light_v2"
+}

@@ -1,0 +1,88 @@
+{
+  "automatons": [
+    {
+      "name": "A0",
+      "states": [
+        {
+          "attr": "",
+          "id": "_init",
+          "x": 196.0,
+          "y": 91.0
+        },
+        {
+          "attr": "s=1",
+          "id": "E1",
+          "x": 230.0,
+          "y": 358.0
+        },
+        {
+          "attr": "s=0",
+          "id": "E0",
+          "x": 232.0,
+          "y": 158.0
+        }
+      ],
+      "transitions": [
+        {
+          "actions": "",
+          "dst_state": "E0",
+          "event": "",
+          "guard": "",
+          "location": 0,
+          "src_state": "_init"
+        },
+        {
+          "actions": "k:=1",
+          "dst_state": "E1",
+          "event": "h",
+          "guard": "e=1",
+          "location": 0,
+          "src_state": "E0"
+        },
+        {
+          "actions": "",
+          "dst_state": "E0",
+          "event": "h",
+          "guard": "k=4",
+          "location": 0,
+          "src_state": "E1"
+        },
+        {
+          "actions": "k:=k+1",
+          "dst_state": "E1",
+          "event": "h",
+          "guard": "k<4",
+          "location": 3,
+          "src_state": "E1"
+        }
+      ],
+      "vars": [
+        {
+          "name": "k",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "ios": [
+    {
+      "kind": "in",
+      "name": "e",
+      "stim": "ValueChanges 0 0 25 1 35 0",
+      "type": "bool"
+    },
+    {
+      "kind": "in",
+      "name": "h",
+      "stim": "Periodic 10 10 100",
+      "type": "event"
+    },
+    {
+      "kind": "out",
+      "name": "s",
+      "stim": "None",
+      "type": "bool"
+    }
+  ],
+  "name": "gensig"
+}

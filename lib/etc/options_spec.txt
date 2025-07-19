@@ -1,0 +1,42 @@
+# GUI-specific options (others will be extracted from compiler sources)
+ide;general;-dot_external_viewer;Arg.Unit;;use DOTVIEWER external program for viewing .dot files
+ide;general;-dot_qgv;Arg.Unit;;use QGV library for DOT rendering instead of generating DOT files (warning: this may result in poor rendering)
+ide;general;-target_dirs;Arg.Unit;;generated code in separate directories (./dot,./ctask,...)
+ide;general;-stop_time;Arg.Int;set_stop_time;set stop time for the SystemC and VHDL test-bench (default: 100)
+ide;general;-debug;Arg.Unit;;run in debug mode (log all messages)
+ide;general;-sync_externals;Arg.Unit;;launch external programs synchronously (wait for termination)
+ide;dot;-dot_options;Arg.String;;options for calling the DOT program (ex: -Grankdir=LR)
+# RFSMC options
+noide;general;-main;Arg.String;set_main_prefix;set prefix for the generated main files
+noide;general;-dump_typed;Arg.Unit;set_dump_typed;dump typed representation of model(s)/program to stdout
+noide;general;-dump_static;Arg.Unit;set_dump_static;dump static representation of model(s)/program to stdout
+noide;general;-target_dir;Arg.String;set_target_dir;set target directory (default: .)
+noide;general;-lib;Arg.String;set_lib_dir;set location of the support library (default: <opam_prefix>/share/rfsm)
+noide;general;-dot;Arg.Unit;set_dot;generate .dot representation of model(s)/program
+noide;general;-sim;Arg.Unit;set_sim;run simulation (generating .vcd file)
+noide;general;-ctask;Arg.Unit;set_ctask;generate CTask code
+noide;general;-systemc;Arg.Unit;set_systemc;generate SystemC code
+noide;general;-vhdl;Arg.Unit;set_vhdl;generate VHDL code
+noide;general;-version;Arg.Unit;set_print_version;print version of the compiler and quit
+noide;general;-show_models;Arg.Unit;set_show_models;generate separate representations for uninstanciated FSM models 
+noide;dot;-dot_qual_ids;Arg.Unit;set_dot_qual_ids;print qualified identifiers in DOT representations
+noide;gui;-gui;Arg.Unit;set_gui;generate report and error messages for interacting with rfsm-light
+noide;gui;-check_fragment;Arg.Unit;set_check_fragment;check a program fragment (for GUI use only)
+ide;dot;-dot_no_captions;Arg.Unit;set_dot_no_captions;Remove captions in .dot representation(s)
+ide;dot;-dot_short_trans;Arg.Unit;set_dot_short_trans;Print single-line transition labels (default is multi-lines)
+ide;dot;-dot_abbrev_types;Arg.Unit;set_dot_abbrev_types;Print abbreviated types (default is to print definitions)
+ide;dot;-dot_boxed;Arg.Unit;set_dot_boxed;Draw FSM instances in boxes
+noide;sim;-sim_trace;Arg.Int;set_sim_trace;set trace level for simulation (default: 0)
+ide;sim;-vcd_int_size;Arg.Int;set_vcd_default_int_size;set default int size for VCD traces (default: 8)
+ide;general;-synchronous_actions;Arg.Unit;set_synchronous_actions;interpret actions synchronously
+ide;systemc;-sc_time_unit;Arg.String;set_systemc_time_unit;set time unit for the SystemC test-bench (default: SC_NS)
+ide;systemc;-sc_trace;Arg.Unit;set_sc_trace;set trace mode for SystemC backend (default: false)
+ide;systemc;-stop_time;Arg.Int;set_stop_time;set stop time for the SystemC and VHDL test-bench (default: 100)
+ide;systemc;-sc_double_float;Arg.Unit;set_sc_double_float;implement float type as C++ double instead of float (default: false)
+ide;vhdl;-vhdl_trace;Arg.Unit;set_vhdl_trace;set trace mode for VHDL backend (default: false)
+ide;vhdl;-vhdl_time_unit;Arg.String;set_vhdl_time_unit;set time unit for the VHDL test-bench
+ide;vhdl;-vhdl_ev_duration;Arg.Int;set_vhdl_ev_duration;set duration of event signals (default: 1 ns)
+ide;vhdl;-vhdl_rst_duration;Arg.Int;set_vhdl_ev_duration;set duration of reset signals (default: 1 ns)
+ide;vhdl;-vhdl_numeric_std;Arg.Unit;set_vhdl_use_numeric_std;translate integers as numeric_std [un]signed (default: false)
+ide;vhdl;-vhdl_bool_as_bool;Arg.Unit;set_vhdl_bool_as_bool;translate all booleans as boolean (default: false)
+ide;vhdl;-vhdl_dump_ghw;Arg.Unit;set_vhdl_dump_ghw;make GHDL generate trace files in .ghw format instead of .vcd

@@ -1,0 +1,101 @@
+{
+  "ios": [
+    {
+      "kind": "in",
+      "name": "clic",
+      "stim": "Sporadic 25 75 95",
+      "type": "event"
+    },
+    {
+      "kind": "in",
+      "name": "clk",
+      "stim": "Periodic 10 10 120",
+      "type": "event"
+    },
+    {
+      "kind": "out",
+      "name": "doubleClic",
+      "stim": "None",
+      "type": "event"
+    },
+    {
+      "kind": "out",
+      "name": "simpleClic",
+      "stim": "None",
+      "type": "event"
+    }
+  ],
+  "name": "ctlr",
+  "automatons": [
+  {
+  "name": "A0",
+  "vars": [
+   {
+      "kind": "var",
+      "name": "ctr",
+      "stim": "None",
+      "type": "int"
+    }],
+  "states": [
+    {
+      "attr": "",
+      "id": "Idle",
+      "x": 220.0,
+      "y": 187.0
+    },
+    {
+      "attr": "",
+      "id": "Wait",
+      "x": 220.0,
+      "y": 387.0
+    },
+    {
+      "attr": "",
+      "id": "_init",
+      "x": 164.0,
+      "y": 120.0
+    }
+  ],
+  "transitions": [
+    {
+      "actions": "",
+      "dst_state": "Idle",
+      "event": "",
+      "guard": "",
+      "location": 0,
+      "src_state": "_init"
+    },
+    {
+      "actions": "ctr:=0",
+      "dst_state": "Wait",
+      "event": "clic",
+      "guard": "",
+      "location": 0,
+      "src_state": "Idle"
+    },
+    {
+      "actions": "doubleClic",
+      "dst_state": "Idle",
+      "event": "clic",
+      "guard": "",
+      "location": 0,
+      "src_state": "Wait"
+    },
+    {
+      "actions": "simpleClic",
+      "dst_state": "Idle",
+      "event": "clk",
+      "guard": "ctr=4",
+      "location": 0,
+      "src_state": "Wait"
+    },
+    {
+      "actions": "ctr:=ctr+1",
+      "dst_state": "Wait",
+      "event": "clk",
+      "guard": "ctr<4",
+      "location": 3,
+      "src_state": "Wait"
+    }
+  ]}]
+}

@@ -1,0 +1,125 @@
+{
+  "automatons": [
+    {
+      "name": "A1",
+      "states": [
+        {
+          "attr": "",
+          "id": "_init",
+          "x": 314.0,
+          "y": 217.0
+        },
+        {
+          "attr": "",
+          "id": "S2",
+          "x": 208.0,
+          "y": 476.0
+        },
+        {
+          "attr": "",
+          "id": "S1",
+          "x": 206.0,
+          "y": 289.0
+        }
+      ],
+      "transitions": [
+        {
+          "actions": "v:=0",
+          "dst_state": "S1",
+          "event": "",
+          "guard": "",
+          "location": 0,
+          "src_state": "_init"
+        },
+        {
+          "actions": "v:=1",
+          "dst_state": "S1",
+          "event": "h1",
+          "guard": "",
+          "location": 0,
+          "src_state": "S2"
+        },
+        {
+          "actions": "",
+          "dst_state": "S2",
+          "event": "h1",
+          "guard": "",
+          "location": 0,
+          "src_state": "S1"
+        }
+      ],
+      "vars": []
+    },
+    {
+      "name": "A2",
+      "states": [
+        {
+          "attr": "",
+          "id": "_init",
+          "x": 110.0,
+          "y": 222.0
+        },
+        {
+          "attr": "",
+          "id": "S4",
+          "x": 196.0,
+          "y": 453.0
+        },
+        {
+          "attr": "",
+          "id": "S3",
+          "x": 198.0,
+          "y": 290.0
+        }
+      ],
+      "transitions": [
+        {
+          "actions": "",
+          "dst_state": "S3",
+          "event": "",
+          "guard": "",
+          "location": 0,
+          "src_state": "_init"
+        },
+        {
+          "actions": "",
+          "dst_state": "S4",
+          "event": "h2",
+          "guard": "v=1",
+          "location": 0,
+          "src_state": "S3"
+        },
+        {
+          "actions": "v:=0",
+          "dst_state": "S3",
+          "event": "h2",
+          "guard": "",
+          "location": 0,
+          "src_state": "S4"
+        }
+      ],
+      "vars": []
+    }
+  ],
+  "ios": [
+    {
+      "kind": "in",
+      "name": "h1",
+      "stim": "Periodic 10 5 60",
+      "type": "event"
+    },
+    {
+      "kind": "var",
+      "name": "v",
+      "stim": "None",
+      "type": "int"
+    },
+    {
+      "kind": "in",
+      "name": "h2",
+      "stim": "Periodic 10 10 60",
+      "type": "event"
+    }
+  ],
+  "name": "sync"
+}

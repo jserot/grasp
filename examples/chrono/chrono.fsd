@@ -1,0 +1,88 @@
+{
+  "automatons": [
+    {
+      "name": "A0",
+      "states": [
+        {
+          "attr": "",
+          "id": "_init",
+          "x": 130.0,
+          "y": 102.0
+        },
+        {
+          "attr": "",
+          "id": "Stopped",
+          "x": 228.0,
+          "y": 158.0
+        },
+        {
+          "attr": "",
+          "id": "Running",
+          "x": 228.0,
+          "y": 352.0
+        }
+      ],
+      "transitions": [
+        {
+          "actions": "c:=c+1,sec:=c",
+          "dst_state": "Running",
+          "event": "h",
+          "guard": "startStop=0",
+          "location": 3,
+          "src_state": "Running"
+        },
+        {
+          "actions": "",
+          "dst_state": "Stopped",
+          "event": "h",
+          "guard": "startStop=1",
+          "location": 0,
+          "src_state": "Running"
+        },
+        {
+          "actions": "c:=0,sec:=0",
+          "dst_state": "Running",
+          "event": "h",
+          "guard": "startStop=1",
+          "location": 0,
+          "src_state": "Stopped"
+        },
+        {
+          "actions": "",
+          "dst_state": "Stopped",
+          "event": "",
+          "guard": "",
+          "location": 0,
+          "src_state": "_init"
+        }
+      ],
+      "vars": [
+        {
+          "name": "c",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "ios": [
+    {
+      "kind": "in",
+      "name": "h",
+      "stim": "Periodic 10 10 110",
+      "type": "event"
+    },
+    {
+      "kind": "in",
+      "name": "startStop",
+      "stim": "ValueChanges 0 0 25 1 35 0 75 1 85 0",
+      "type": "bool"
+    },
+    {
+      "kind": "out",
+      "name": "sec",
+      "stim": "None",
+      "type": "int"
+    }
+  ],
+  "name": "chrono"
+}
