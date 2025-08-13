@@ -20,6 +20,9 @@ class CompilerPaths;
 class CompilerOptions;
 class Compiler;
 class CommandExec;
+class QDockWidget;
+class Model;
+class QTabWidget;
 
 class Globals
 {
@@ -41,7 +44,7 @@ public:
     const static QString version;
     const static QStringList guiOnlyOpts;
     static QWidget *mainWindow;
-    // const static QString defaultModelName;
+    static QTabWidget* diagrams; 
     static const QRegularExpression re_lid;
 };
 

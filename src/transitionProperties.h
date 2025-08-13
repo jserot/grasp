@@ -16,7 +16,7 @@
 
 class Transition;
 class State;
-class Automaton;
+class Diagram;
 class QComboBox;
 class TransitionGuards;
 class TransitionActions;
@@ -26,18 +26,21 @@ class TransitionProperties : public QDialog
   Q_OBJECT
 
 public:
-  TransitionProperties(Transition *transition, Automaton *automaton, bool isInitial, QWidget *parent);
+  TransitionProperties(Transition *transition, Diagram *diagram, bool isInitial, QWidget *parent);
   ~TransitionProperties();
 
 private:
   Transition *transition;
-  Automaton *automaton;
+  Diagram *diagram;
 
   QComboBox* start_state_field;
   QComboBox* end_state_field;
   QComboBox* event_field;
   TransitionGuards *guards_panel;
   TransitionActions *actions_panel;
+
+signals:
+    void modelModified(void);
     
 protected slots:
   void accept();

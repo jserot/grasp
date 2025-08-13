@@ -16,7 +16,7 @@
 #include <QRegularExpression>
 
 class State;
-class Automaton;
+class Diagram;
 class QLineEdit;
 class StateValuations;
 class Compiler;
@@ -28,16 +28,18 @@ class StateProperties : public QDialog
   static const QRegularExpression re_uid;
 
 public:
-  StateProperties(State *state, Automaton *automaton, QWidget *parent);
+  StateProperties(State *state, Diagram *diagram, QWidget *parent);
   ~StateProperties();
 
 private:
   State *state;
-  Automaton *automaton;
-  //Compiler *compiler;
+  Diagram *diagram;
 
   QLineEdit* state_name_field;
   StateValuations *valuations_panel;
+
+signals:
+    void modelModified(void);
     
 protected slots:
   void accept();

@@ -12,49 +12,87 @@
 
 
 #include <QtWidgets>
-#include "imageviewer.h"
-#include "qt_compat.h"
+#include "imageViewer.h"
 
 #include <QtGui>
 #include <QPainter>
 
+const double ImageViewer::zoomInFactor = 1.25;
+const double ImageViewer::zoomOutFactor = 0.8;
+const double ImageViewer::minScaleFactor = 0.2;
+const double ImageViewer::maxScaleFactor = 2.0;
 
-ImageViewer::ImageViewer(const QPixmap& pixmap, QWidget *parent) : QScrollArea(parent)
+ImageViewer::ImageViewer(QString fname) : QScrollArea()
 {
   image = new QLabel;
   image->setBackgroundRole(QPalette::Base);
   image->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-  image->setPixmap(pixmap);
+  QImage img(fname);
+  image->setPixmap(QPixmap::fromImage(img));
   image->setScaledContents(true);
   setBackgroundRole(QPalette::Dark);
   setWidget(image);
-  fittedToWindow = false;
+  setAttribute(::Qt::WA_DeleteOnClose);
+  setContextMenuPolicy(Qt::CustomContextMenu);
+  QFileInfo f(fname);
+  setWindowTitle(f.fileName());
+  scaleFactor = 1.0;
+
+  zoomInAction = new QAction(tr("Zoom In"), this);
+  zoomInAction->setShortcut(tr("Ctrl++"));
+  zoomInAction->setEnabled(true);
+  connect(zoomInAction, SIGNAL(triggered()), this, SLOT(zoomIn()));
+
+  zoomOutAction = new QAction(tr("Zoom Out"), this);
+  zoomOutAction->setShortcut(tr("Ctrl+-"));
+  zoomOutAction->setEnabled(true);
+  connect(zoomOutAction, SIGNAL(triggered()), this, SLOT(zoomOut()));
+
+  normalSizeAction = new QAction(tr("Normal size (100%)"), this);
+  normalSizeAction->setEnabled(true);
+  connect(normalSizeAction, SIGNAL(triggered()), this, SLOT(normalSize()));
+
+  contextMenu = new QMenu(tr("Context menu"), this);
+  contextMenu->addAction(zoomInAction);
+  contextMenu->addAction(zoomOutAction);
+  contextMenu->addAction(normalSizeAction);
+
+  connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 }
 
-void ImageViewer::scaleImage(double scaleFactor)
+void ImageViewer::showContextMenu(QPoint pos)
 {
-  image->resize(scaleFactor * PIXMAP_SIZE(image));
-  adjustScrollBar(this->horizontalScrollBar(), scaleFactor);
-  adjustScrollBar(this->verticalScrollBar(), scaleFactor);
-  update();
-  updateGeometry();
+  qDebug() << "ImageViewer::contextMenu()";
+  Q_ASSERT(contextMenu);
+  contextMenu->exec(mapToGlobal(pos));
 }
 
-bool ImageViewer::isFittedToWindow()
+void ImageViewer::zoomIn()
 {
-    return fittedToWindow;
+  scaleImage(zoomInFactor);
+}
+
+void ImageViewer::zoomOut()
+{
+  scaleImage(zoomOutFactor);
 }
 
 void ImageViewer::normalSize()
 {
   image->adjustSize();
+  scaleFactor = 1.0;
 }
 
-void ImageViewer::fitToWindow(const bool &t)
+void ImageViewer::scaleImage(double factor)
 {
-  setWidgetResizable(t);
-  if ( !t ) normalSize();
-  fittedToWindow = t;
+  scaleFactor *= factor;
+  image->resize(scaleFactor * image->pixmap().size());
+  adjustScrollBar(this->horizontalScrollBar(), factor);
+  adjustScrollBar(this->verticalScrollBar(), factor);
+  zoomInAction->setEnabled(scaleFactor < maxScaleFactor);
+  zoomOutAction->setEnabled(scaleFactor > minScaleFactor);
+  update();
+  updateGeometry();
 }
 
 void ImageViewer::adjustScrollBar(QScrollBar *scrollBar, double factor)
@@ -64,4 +102,9 @@ void ImageViewer::adjustScrollBar(QScrollBar *scrollBar, double factor)
 
 ImageViewer::~ImageViewer()
 {
+  qDebug() << "ImageViewer::delete";
+  delete zoomInAction;
+  delete zoomOutAction;
+  delete normalSizeAction;
+  delete contextMenu;
 }

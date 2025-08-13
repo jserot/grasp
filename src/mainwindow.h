@@ -14,13 +14,14 @@
 
 #include "globals.h"
 #include "state.h"
-#include "modelPanel.h"
+#include "modelProperties.h"
 #include "model.h"
 
 #include <QMainWindow>
 #include <QFileInfo>
 #include <QFrame>
 #include <QStatusBar>
+#include <QDockWidget>
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -30,8 +31,9 @@ class QComboBox;
 class QFontComboBox;
 class QButtonGroup;
 class QLineEdit;
-class QGraphicsTextItem;
-class QFont;
+class QDockWidget;
+//class QGraphicsTextItem;
+//class QFont;
 class QToolButton;
 class QAbstractButton;
 class QTabWidget;
@@ -49,6 +51,9 @@ class MainWindow : public QMainWindow
 public:
    MainWindow();
 
+  Model *getModel() { return model; }
+  QTabWidget *getDiagrams() { return diagrams; }
+
 public slots:
     void modelModified();
 private slots:
@@ -56,18 +61,18 @@ private slots:
     void saveAs();
     void openFile();
     void newModel();
-    void editModel(QAction *);    
-    void addAutomatonToModel();
-    void duplicateAutomaton();
+    Diagram* diagramOf(int index);
+    void editDiagram(QAction *);    
+    void addDiagramTab(Diagram* diagram);
+    void newDiagram();
+    void duplicateDiagram();
     void quit();
     void about();
-    bool checkAutomaton();
+    bool checkDiagram();
     bool checkModel();
     bool checkModelWithStimuli();
     void renderDots();
-#ifndef USE_QGV
     void renderDot();
-#endif
     void generateRfsmModel();
     void generateRfsmTestbench();
     void generateCTask();
@@ -76,20 +81,10 @@ private slots:
     void generateVHDLModel();
     void generateVHDLTestbench();
     void runSimulation();
-    void closeAutomatonTab(int index);
-    void closeResultTab(int index);
-    void resultTabChanged(int index);
-    void automatonTabChanged(int index);
-    void automatonTabChangeName(int index);
-    void zoomIn(); 
-    void zoomOut();
-    void normalSize();
-    void fitToWindow();
-    void closeAutomatonTabs();
-    void closeResultTabs();
+  void closeDiagram(int index, bool confirm = true);
+    void closeDiagramTabs();
     void setCompilerPaths();
     void setCompilerOptions();
-    void setCodeFont();
     void updateCursor();
     void resetCursor();
     void compilerPathUpdated(QString path); 
@@ -100,28 +95,27 @@ private:
     void updateActions();
     void updateViewActions();
     void createMenus();
-    void createToolbars();
-    void createPropertiesPanel();
+    void createToolbar();
+    void createDockWindow(Model *model);
 
     void checkUnsavedChanges();
     QString getCurrentFileName();
     void saveToFile(QString fname);
     QString generateRfsm(bool withTestbench);
-    void addResultTab(QString fname);
-    void addAutomatonTab(Automaton *a);
-    void addAutomatonTabs(Model *m);
-#ifdef USE_QGV
-    void addDotTab(void);
-#endif
+    void openTextFile(QString fname);
+    void openTextFiles(QStringList fname);
+    void openImageFile(QString fname);
+    void addDiagramTabs();
     void openResultFile(QString fname);
+    void openResultFiles(QStringList fname);
+    Diagram *currentDiagram();
     
-    Model* model;
-    QMap<QWidget*,Automaton*> panelToAutomaton;
+    Model* model; // The model (ios + diagrams)
+    ModelProperties *model_panel; // For editing model IOs
+    QDockWidget* dock; // Holding the model_panel
+    QTabWidget *diagrams; // The tabs holding the graphical representations of the model diagrams
     QFrame *toolbar;
     QButtonGroup *buttons;
-    ModelPanel* model_panel; // Left panel (model IOs and properties)
-    QTabWidget *automatons_panel; // Center panel (automata editor)
-    QTabWidget *results_panel; // Right panel (DOT rendering and generated code)
     QStatusBar *statusBar;
 
     QAction *newModelAction;
@@ -130,13 +124,11 @@ private:
     QAction *saveFileAsAction;
     QAction *aboutAction;
     QAction *exitAction;
-    QAction *checkAutomatonAction;
+    QAction *checkDiagramAction;
     QAction *checkModelAction;
     QAction *checkModelWithStimuliAction;
     QAction *renderDotsAction;
-#ifndef USE_QGV
     QAction *renderDotAction;
-#endif
     QAction *generateRfsmModelAction;
     QAction *generateRfsmTestbenchAction;
     QAction *generateCTaskAction;
@@ -145,28 +137,22 @@ private:
     QAction *generateVHDLModelAction;
     QAction *generateVHDLTestbenchAction;
     QAction *runSimulationAction;
-    QAction *zoomInAction;
-    QAction *zoomOutAction;
-    QAction *normalSizeAction;
-    QAction *fitToWindowAction;
     QAction *closeResultsAction;
     QAction *pathConfigAction;
     QAction *compilerOptionsAction;
     QAction *fontConfigAction;
     QActionGroup *modelActions;
-    QAction* addAutomatonAction;
-    QAction* duplAutomatonAction;
+    QAction* addDiagramAction;
+    QAction* duplDiagramAction;
     QAction* dumpModelAction;
-    QActionGroup *automatonActions;
+    QActionGroup *diagramActions;
     QAction* selectItemAction;
-    // QAction* editItemAction;
     QAction* addStateAction;
     QAction* addInitStateAction;
     QAction* addTransitionAction;
     QAction* addSelfTransitionAction;
     QAction* deleteItemAction;
 
-    //QMenu *aboutMenu;
     QMenu *fileMenu;
     QMenu *modelMenu;
     QMenu *compileMenu;
@@ -188,29 +174,21 @@ private:
     void exportRfsmTestbench();
     bool dotTransform(QFileInfo f, QString wDir);
     bool executeCmd(QString wDir, QString cmd, QStringList args, bool sync=true);
-    void scaleImage(double factor);
+    bool isMainFile(QString fname);
 
     bool unsaved_changes;
     QString currentFileName;
-    QWidget* selectedTab(); // TODO: disambiguate; there are now two tab collections
     double currentScaleFactor;
 
     QCursor default_cursor;
     QMap<Globals::Mode,QCursor> cursors;
     void initCursors();
 
-    QFont codeFont;
     static const QString title;
-    static const QList<int> splitterSizes;
-    static const double zoomInFactor;
-    static const double zoomOutFactor;
-    static const double minScaleFactor;
-    static const double maxScaleFactor;
 
     void logMessage(QString msg);
 
 public:
-  Model* getModel() const { return model; }
   void setUnsavedChanges(bool unsaved_changes = true);
 };
 

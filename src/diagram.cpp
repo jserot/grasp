@@ -12,8 +12,9 @@
 
 #include "globals.h"
 #include "model.h"
-#include "automaton.h"
+#include "diagram.h"
 #include "transition.h"
+#include "diagramProperties.h"
 #include "stateProperties.h"
 #include "fragmentChecker.h"
 #include "transitionProperties.h"
@@ -27,22 +28,19 @@
 #include <QTextStream>
 #include <QDebug>
 #include <QGuiApplication>
-#ifdef USE_QGV
-#include "QGVScene.h"
-#include "QGVNode.h"
-#include "QGVEdge.h"
-#endif
-#include "qt_compat.h"
 
-QString Automaton::statePrefix = "S";
-int Automaton::stateCounter = 0;
-QColor Automaton::lineColor = Qt::lightGray;
-QColor Automaton::boxColor = Qt::black;
+#define QEVENT_LEAVE QEvent::GraphicsSceneLeave
+#define SKIP_EMPTY_PARTS Qt::SkipEmptyParts
 
-const int Automaton::canvas_width = 500;
-const int Automaton::canvas_height = 1000;
+QString Diagram::statePrefix = "S";
+int Diagram::stateCounter = 0;
+QColor Diagram::lineColor = Qt::lightGray;
+QColor Diagram::boxColor = Qt::black;
 
-Automaton::Automaton(
+const int Diagram::canvas_width = 500;
+const int Diagram::canvas_height = 1000;
+
+Diagram::Diagram(
   Model *model,
   QString name,
   QList<Iov*> vars,
@@ -51,21 +49,21 @@ Automaton::Automaton(
   QWidget *parent)
   : QGraphicsScene(parent)
 {
-  Q_UNUSED(parent); // Kept for future use ?
   this->name = name;
   this->model = model;
   this->parent = parent;
+  this->view = new QGraphicsView(this);
   setSceneRect(QRectF(0, 0, canvas_width, canvas_height));
   foreach ( Iov* var, vars) {
-      qDebug () << "Creating automaton: adding var" << var->name << var->type;
+      qDebug () << "Creating diagram: adding var" << var->name << var->type;
       this->vars.append(var);
       }
     foreach ( State *state, states ) {
-      qDebug () << "Creating automaton: adding state" << state->getId();
+      qDebug () << "Creating diagram: adding state" << state->getId();
       addState(state);
       }
     foreach ( Transition *transition, transitions ) {
-      qDebug () << "Creating automaton: adding transition" << transition->getSrcState()->getId() << " -> " << transition->getDstState()->getId();
+      qDebug () << "Creating diagram: adding transition" << transition->getSrcState()->getId() << " -> " << transition->getDstState()->getId();
       addTransition(transition);
       transition->updatePosition();
       }
@@ -73,17 +71,18 @@ Automaton::Automaton(
     connect(this, SIGNAL(modelModified()), Globals::mainWindow, SLOT(modelModified()));
     connect(this, SIGNAL(mouseEnter()), Globals::mainWindow, SLOT(updateCursor()));
     connect(this, SIGNAL(mouseLeave()), Globals::mainWindow, SLOT(resetCursor()));
+    qDebug() << "Diagram::ctor: this=" << this << "view=" << view;
 }
 
-Automaton::Automaton(Model *model, QWidget *parent)
-    : Automaton(model, QString(), QList<Iov*>(), QList<State*>(), QList<Transition*>(), parent)
+Diagram::Diagram(Model *model, QString name, QWidget *parent)
+  : Diagram(model, name, QList<Iov*>(), QList<State*>(), QList<Transition*>(), parent)
 {
 }
 
-Automaton *Automaton::duplicate()
+Diagram *Diagram::duplicate()
 {
     // Note: QGraphicsItems have no copy constructors...
-    qDebug() << "Duplicating automaton" << name;
+    qDebug() << "Duplicating diagram" << name;
     QMap<State*,State*> copied_states;
     for ( State *state : this->states() ) {
       State *copied_state = 
@@ -110,32 +109,37 @@ Automaton *Automaton::duplicate()
       Iov *copied_var = new Iov(var->name, var->kind, var->type, var->stim); 
       copied_vars.append(copied_var);
       }
-    Automaton *copied_automaton = new Automaton(this->model, QString(), copied_vars, copied_states.values(), copied_transitions, parent); 
-    return copied_automaton;
+    QString new_name = name + name.last(1); // S0 -> S00 
+    Diagram *copied_diagram =
+      new Diagram(this->model, new_name, copied_vars, copied_states.values(), copied_transitions, parent); 
+    return copied_diagram;
 }
 
-Automaton::~Automaton()
+Diagram::~Diagram()
 {
+  qDebug() << "Diagram::delete:" << this;
   for ( Iov* var: vars ) delete var;
   // for ( State* state: states.values() ) delete state; // States and transitions, being GraphicsItem will be deleted when the ...
   // for ( Transition* transition: transitions ) delete transition; // ... QGraphicsScene destructor, as a parent, will be called (?)
+  // Q_ASSERT(view);
+  // delete view;  // This crashes the program when the app is closed
 }
 
 
-Iov* Automaton::addVar(const QString name, const Iov::IoType type)
+Iov* Diagram::addVar(const QString name, const Iov::IoType type)
 {
-  qDebug () << "Automaton::addVar" << name << type;
-  Iov *var = new Iov(name, Iov::IoVar, type, Stimulus(""));
+  qDebug () << "Diagram::addVar" << name << type;
+  Iov *var = new Iov(name, Iov::IoVar, type, Stimulus("None"));
   vars.append(var);
   return var;
 }
 
-void Automaton::removeVar(Iov *var)
+void Diagram::removeVar(Iov *var)
 {
   vars.removeOne(var);
 }
 
-void Automaton::clear(void)
+void Diagram::clear(void)
 {
   name = "";
   vars.clear();
@@ -143,13 +147,13 @@ void Automaton::clear(void)
   QGraphicsScene::clear();
 }
 
-void Automaton::addState(State *state)
+void Diagram::addState(State *state)
 {
   state->setBrush(boxColor);
   addItem(state);
 }
 
-State* Automaton::addState(QPointF pos, QString id, QStringList attrs)
+State* Diagram::addState(QPointF pos, QString id, QStringList attrs)
 {
   State* state = new State(id, attrs);
   state->setPos(pos);
@@ -157,7 +161,7 @@ State* Automaton::addState(QPointF pos, QString id, QStringList attrs)
   return state;
 }
 
-State* Automaton::addPseudoState(QPointF pos)
+State* Diagram::addPseudoState(QPointF pos)
 {
   State* state = new State(); // Pseudo-state
   state->setPos(pos);
@@ -165,45 +169,57 @@ State* Automaton::addPseudoState(QPointF pos)
   return state;
 }
 
-void Automaton::editState(State *state)
+void Diagram::editState(State *state)
 {
   qDebug() << "Editing state" << state->getId();
-  StateProperties dialog(state, this, view);
-  int r = dialog.exec();
-  qDebug() << "state properties dialog returned" << r;
-  switch ( r ) {
-    case QDialog::Accepted:
-      qDebug() << "state" << state->getId() << "updated";
-      update();
-      emit modelModified(); // To main window
-      break;
-    case QDialog::Rejected:
-      qDebug() << "state" << state->getId() << "unchanged";
-      break;
-   }
+  StateProperties *dialog = new StateProperties(state, this, view);
+  dialog->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->show();
+  // NOTE : the following _modal_ formulation seems not to work correctly
+  //        When returning from the dialog the main GUI loop sometimes becomes partially unresponsive
+  // StateProperties dialog(state, this, view);
+  // int r = dialog.exec();
+  // qDebug() << "state properties dialog returned" << r;
+  // switch ( r ) {
+  //   case QDialog::Accepted:
+  //     qDebug() << "state" << state->getId() << "updated";
+  //     update();
+  //     emit modelModified(); To main window
+  //     break;
+  //   case QDialog::Rejected:
+  //     qDebug() << "state" << state->getId() << "unchanged";
+  //     break;
+  //  }
   state->setSelected(false);
 }
 
-void Automaton::editTransition(Transition *transition)
+void Diagram::editTransition(Transition *transition)
 {
   qDebug() << "Editing transition" << transition->toString();
   bool isInitial = transition->isInitial();
   QStringList inpEvents = model->getInpEvents();
   if ( !isInitial && inpEvents.isEmpty() ) {
       QMessageBox::warning(Globals::mainWindow, "Error", "No input event available to trigger this transition. Please define one.");
+      qDebug() << "No input event. Removing transition" << transition->toString();
       removeTransition(transition);
-      qDebug() << "Transition" << transition->toString() << "deleted";
       return;
       }
-  TransitionProperties dialog(transition,this,isInitial,view);
-  if ( dialog.exec() == QDialog::Accepted ) {
-    qDebug() << "Transition" << transition->toString() << "updated";
-    update();
-    emit modelModified(); // To main window
-    }
+  TransitionProperties *dialog = new TransitionProperties(transition,this,isInitial,view);
+  dialog->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->show();
+  // NOTE : the following _modal_ formulation seems not to work correctly
+  //        When returning from the dialog the main GUI loop sometimes becomes partially unresponsive
+  // TransitionProperties dialog(transition,this,isInitial,view);
+  // if ( dialog.exec() == QDialog::Accepted ) {
+  //   qDebug() << "Transition" << transition->toString() << "updated";
+  //   update();
+  //   emit modelModified(); // To main window
+  //   }
 }
 
-QList<State*> Automaton::states()
+QList<State*> Diagram::states()
 {
   QList<State*> states;
   for ( const auto item: items() )
@@ -212,7 +228,7 @@ QList<State*> Automaton::states()
   return states;
 }
 
-QList<Transition*> Automaton::transitions()
+QList<Transition*> Diagram::transitions()
 {
   QList<Transition*> transitions;
   for ( const auto item: items() )
@@ -221,7 +237,7 @@ QList<Transition*> Automaton::transitions()
   return transitions;
 }
 
-State* Automaton::initState()
+State* Diagram::initState()
 {
   QList<Transition*> transitions;
   for ( const auto item: items() )
@@ -232,7 +248,7 @@ State* Automaton::initState()
   return NULL;
 }
 
-Transition* Automaton::initTransition()
+Transition* Diagram::initTransition()
 {
   QList<Transition*> transitions;
   for ( const auto item: items() )
@@ -243,19 +259,19 @@ Transition* Automaton::initTransition()
   return NULL;
 }
 
-State* Automaton::getState(QString id)
+State* Diagram::getState(QString id)
 {
   foreach ( State* s, states() )
     if ( s->getId() == id ) return s;
   return NULL;
 }
 
-QList<Iov*> Automaton::getVars()
+QList<Iov*> Diagram::getVars()
 {
   return vars;
 }
 
-QStringList Automaton::getVarNames()
+QStringList Diagram::getVarNames()
 {
   QStringList r;
   for ( const auto var : vars )
@@ -263,14 +279,14 @@ QStringList Automaton::getVarNames()
   return r;
 }
 
-bool Automaton::hasPseudoState()
+bool Diagram::hasPseudoState()
 {
   foreach ( State* s, states() )
     if ( s->isPseudo() ) return true;
   return false;
 }
 
-void Automaton::addTransition(Transition *transition)
+void Diagram::addTransition(Transition *transition)
 {
   State *srcState = transition->getSrcState();
   State *dstState = transition->getDstState();
@@ -280,7 +296,7 @@ void Automaton::addTransition(Transition *transition)
   addItem(transition);
 }
 
-Transition* Automaton::addTransition(State* srcState,
+Transition* Diagram::addTransition(State* srcState,
                                State* dstState,
                                QString event,
                                QStringList guards,
@@ -292,7 +308,7 @@ Transition* Automaton::addTransition(State* srcState,
   return transition;
 }
 
-bool Automaton::event(QEvent *event)
+bool Diagram::event(QEvent *event)
 {
   // qDebug() << "Got event " << event->type();
   switch ( event->type() ) {
@@ -311,14 +327,15 @@ bool Automaton::event(QEvent *event)
   return QGraphicsScene::event(event);
 }
 
-void Automaton::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
+void Diagram::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     State *state;
     Transition *transition;
     QGraphicsItem *item;
     Qt::MouseButton buttonPressed = mouseEvent->button();
-    qDebug() << "Automaton::mousePressEvent: " << buttonPressed << QGuiApplication::keyboardModifiers();
-    if ( buttonPressed == Qt::LeftButton ) {
+    qDebug() << "Diagram::mousePressEvent: " << buttonPressed << QGuiApplication::keyboardModifiers();
+    switch ( buttonPressed ) {
+    case Qt::LeftButton:
       switch ( Globals::mode ) {
         case Globals::InsertState:
           state = addState(mouseEvent->scenePos(), statePrefix + QString::number(stateCounter++), QStringList());
@@ -379,31 +396,38 @@ void Automaton::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             item = itemAt(mouseEvent->scenePos(), QTransform());
             qDebug() << "** SelectItem got" << item;
             if ( item != NULL ) {
-              if ( QGuiApplication::keyboardModifiers().testFlag(Qt::ControlModifier) ) // LeftClick+Ctl
-                editItem(item);
-              else
+              // if ( QGuiApplication::keyboardModifiers().testFlag(Qt::ControlModifier) ) // LeftClick+Ctl
+              //   editItem(item);
+              // else
                 QGraphicsScene::mousePressEvent(mouseEvent); // Default behavior (select and move, ...)
-            }
+              }
         } // Mode
-      } //  Left-button
-    else if ( buttonPressed == Qt::RightButton /* && mode == SelectItem */ ) {
-      qDebug() << "** RightSelectItem at" << mouseEvent->scenePos();
+      break;
+    case Qt::RightButton: // if ( mode == SelectItem ) 
+        //qDebug() << "** RightSelectItem at" << mouseEvent->scenePos();
       item = itemAt(mouseEvent->scenePos(), QTransform());
       qDebug() << "** RightSelectItem got" << item;
-      if ( item != NULL ) editItem(item);
-    }
+      if ( item != NULL )
+        editItem(item);
+      else {
+        edit();
+        }
+      break;
+    default:
+      break;
+    } // buttonPressed
 }
 
-void Automaton::editItem(QGraphicsItem *item)
+void Diagram::editItem(QGraphicsItem *item)
 {
   Q_ASSERT(item);
   switch ( item->type() ) {
   case State::Type:
-    qDebug() << "Automaton::editItem: state " << *qgraphicsitem_cast<State *>(item);
+    qDebug() << "Diagram::editItem: state " << *qgraphicsitem_cast<State *>(item);
     editState(qgraphicsitem_cast<State *>(item));
     break;
   case Transition::Type:
-    qDebug() << "Automaton::editItem transition" << *qgraphicsitem_cast<Transition *>(item);
+    qDebug() << "Diagram::editItem transition" << *qgraphicsitem_cast<Transition *>(item);
     editTransition(qgraphicsitem_cast<Transition *>(item));
     break;
   default:
@@ -411,7 +435,15 @@ void Automaton::editItem(QGraphicsItem *item)
   }
 }
 
-// void Automaton::contextMenuEvent(QGraphicsSceneContextMenuEvent *contextMenuEvent)
+void Diagram::edit()
+{
+  DiagramProperties *dialog = new DiagramProperties(this, this->view);
+  dialog->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->show();  // Non-modal diagram
+}
+
+// void Diagram::contextMenuEvent(QGraphicsSceneContextMenuEvent *contextMenuEvent)
 // {
 //   QGraphicsItem *item = itemAt(contextMenuEvent->scenePos(), QTransform());
 //   if ( item ) {
@@ -421,7 +453,7 @@ void Automaton::editItem(QGraphicsItem *item)
 //   QGraphicsScene::contextMenuEvent(contextMenuEvent);
 // }
 
-void Automaton::removeState(State *state)
+void Diagram::removeState(State *state)
 {
   qDebug() << "Removing state" << state->getId();
   state->removeTransitions();
@@ -430,9 +462,9 @@ void Automaton::removeState(State *state)
   delete state;
 }
 
-void Automaton::removeTransition(Transition *transition)
+void Diagram::removeTransition(Transition *transition)
 {
-  qDebug() << "Removing transition" << transition->toString();
+  qDebug() << "Diagram::removeTransition" << transition->toString();
   State *srcState = transition->getSrcState();
   State *dstState = transition->getDstState();
   if ( transition->isInitial() ) {
@@ -448,7 +480,7 @@ void Automaton::removeTransition(Transition *transition)
   delete transition;
 }
 
-void Automaton::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
+void Diagram::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
   if ( (Globals::mode == Globals::InsertTransition || Globals::mode == Globals::InsertPseudoState) && line != 0 ) {
     QLineF newLine(line->line().p1(), mouseEvent->scenePos());
@@ -459,10 +491,10 @@ void Automaton::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
     }
 }
 
-void Automaton::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
+void Diagram::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
   Qt::MouseButton buttonPressed = mouseEvent->button();
-  // qDebug() << "Automaton::mouseReleaseEvent: " << buttonPressed;
+  // qDebug() << "Diagram::mouseReleaseEvent: " << buttonPressed;
   if ( buttonPressed != Qt::LeftButton ) return;
   if ( line != 0 && (Globals::mode == Globals::InsertTransition || Globals::mode == Globals::InsertPseudoState) ) {
     QList<QGraphicsItem *> srcStates = items(line->line().p1());
@@ -494,7 +526,7 @@ void Automaton::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
   QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
 
-bool Automaton::isItemChange(int type)
+bool Diagram::isItemChange(int type)
 {
     foreach (QGraphicsItem *item, selectedItems()) {
         if (item->type() == type)
@@ -505,17 +537,17 @@ bool Automaton::isItemChange(int type)
 
 // Basic model checking
 
-void Automaton::report_error(QString msg)
+void Diagram::report_error(QString msg)
 {
   QMessageBox::warning(Globals::mainWindow, "", msg);
 }
 
-void Automaton::check_state(State *s)
+void Diagram::check_state(State *s)
 {
   Q_ASSERT(states().contains(s)); 
 }
 
-bool Automaton::check_transition(Transition *t, QList<Iov*>& global_ios)
+bool Diagram::check_transition(Transition *t, QList<Iov*>& global_ios)
 {
   Q_UNUSED(global_ios);
   check_state(t->getSrcState());
@@ -548,10 +580,10 @@ bool Automaton::check_transition(Transition *t, QList<Iov*>& global_ios)
   return true;
 }
 
-bool Automaton::check(QList<Iov*>& global_ios)
+bool Diagram::check(QList<Iov*>& global_ios)
 {
   if ( name.isEmpty() ) {
-    report_error("No name specified for automaton");
+    report_error("No name specified for diagram");
     return false;
     }
   for ( Transition *t : transitions() ) 
@@ -561,9 +593,9 @@ bool Automaton::check(QList<Iov*>& global_ios)
 
 // Reading and saving
 
-Automaton* Automaton::fromJson(nlohmann::json& json, Model *model, QWidget *parent)
+Diagram* Diagram::fromJson(nlohmann::json& json, Model *model, QWidget *parent)
 {
-    qDebug() << "Reading automaton from JSON state";
+    qDebug() << "Reading diagram from JSON state";
 
     QString name = QString::fromStdString(json.at("name"));
 
@@ -599,7 +631,7 @@ Automaton* Automaton::fromJson(nlohmann::json& json, Model *model, QWidget *pare
         default: location = State::None; break;
         }
       if ( ! states.contains(src_state) || ! states.contains(dst_state) )
-        throw std::invalid_argument("Automaton::fromString: invalid state id");
+        throw std::invalid_argument("Diagram::fromString: invalid state id");
       State *srcState = states.value(src_state);
       State *dstState = states.value(dst_state);
       Transition *transition = new Transition(srcState,
@@ -618,15 +650,15 @@ Automaton* Automaton::fromJson(nlohmann::json& json, Model *model, QWidget *pare
       Iov *var = new Iov(QString::fromStdString(name),
                         Iov::IoVar,
                         Iov::ioTypeOfString(QString::fromStdString(type)),
-                        Stimulus(""));
+                        Stimulus("None"));
       vars.append(var);
       }
 
     // ... and, if (and only if) parsing succeeds, we update the model.
-    return new Automaton(model, name, vars, states.values(), transitions, parent);
+    return new Diagram(model, name, vars, states.values(), transitions, parent);
 }
 
-void Automaton::toJson(nlohmann::json& json_top)
+void Diagram::toJson(nlohmann::json& json_top)
 {
     json_top["name"] = this->name.toStdString();
 
@@ -685,12 +717,12 @@ QString dotTransitionLabel(QString label, QString lrpad="")
        + lrpad + l.at(1) + lrpad;
 }
 
-QString Automaton::qual_id(QString id) { return id + "_" + name; }
+QString Diagram::qual_id(QString id) { return id + "_" + name; }
 
-void Automaton::exportDot(QTextStream &os)
+void Diagram::exportDot(QTextStream &os)
 {
   if ( ! vars.isEmpty() ) 
-    os << qual_id("_vars") << " [label=\"" << Iov::stringOfList(vars) << "\", shape=rect, style=rounded]\n";
+    os << qual_id("_vars") << " [label=\"" << Iov::stringOfList(vars,false) << "\", shape=rect, style=rounded]\n";
   for ( const auto item: items() ) {
     if ( item->type() == State::Type ) {
       State* state = qgraphicsitem_cast<State *>(item);
@@ -716,37 +748,6 @@ void Automaton::exportDot(QTextStream &os)
       }
     }
 }
-
-#ifdef USE_QGV
-// Direct DOT rendering using QGV library (since 1.3.0)
-
-void Automaton::renderDot(QGVScene *scene, QMap<QString,QGVNode*> nodes)
-{
-  for ( const auto item: items() ) {
-    if ( item->type() == State::Type ) {
-      State* state = qgraphicsitem_cast<State *>(item);
-      QString id = state->getId();
-      QGVNode *node = dotScene->addNode(id);
-      if ( state->isPseudo() ) {
-        node->setAttribute("shape", "none"); 
-        node->setAttribute("label", "");
-        }
-      nodes.insert(id,node);
-      }
-    }
-  for ( const auto item: items() ) {
-    if ( item->type() == Transition::Type ) {
-      Transition* transition = qgraphicsitem_cast<Transition *>(item);
-      QString src_id = transition->getSrcState()->getId();
-      QString dst_id = transition->getDstState()->getId();
-      QString label = transition->isInitial() ? "" : dotTransitionLabel(transition->getLabel(),"  ");
-      if ( nodes.contains(src_id) && nodes.contains(dst_id) )
-        dotScene->addEdge(nodes[src_id], nodes[dst_id], label);
-    }
-  }
-}
-#endif
-
 
 // RFSM export
 
@@ -810,7 +811,7 @@ QString stringOfIoKind(Iov::IoKind k)
 //   }
 // }
 
-void Automaton::exportRfsmInstance(QTextStream& os, QList<Iov*>& global_ios)
+void Diagram::exportRfsmInstance(QTextStream& os, QList<Iov*>& global_ios)
 {
     // TO FIX : not all global IOs should be used as instance parameters
     // Each instance model should be able to use a subset of the global IOs
@@ -825,13 +826,13 @@ void Automaton::exportRfsmInstance(QTextStream& os, QList<Iov*>& global_ios)
     os << ")\n";
 }
 
-void Automaton::exportRfsmModel(QTextStream& os, QList<Iov*>& global_ios)
+void Diagram::exportRfsmModel(QTextStream& os, QList<Iov*>& global_ios)
 {
     QString indent = QString(2, ' ');
     bool first;
 
     // TODO : compute actual_ios using an extension of the fragment checker mechanism
-    // For now, let's assume local_ios = global_ios (i.e. all automatons take all IOs
+    // For now, let's assume local_ios = global_ios (i.e. all diagrams take all IOs
     //QList<Iov*> actual_ios;
     os << "fsm model " << name << "(";
     if ( global_ios.length() > 0 ) {
@@ -886,9 +887,9 @@ void Automaton::exportRfsmModel(QTextStream& os, QList<Iov*>& global_ios)
     os << "}\n";
 }
 
-void Automaton::dump() // For debug only
+void Diagram::dump() // For debug only
 {
-  qDebug() << "Automaton " << name;
+  qDebug() << "Diagram " << name;
   qDebug() << "  vars =";
   foreach ( Iov* var, vars )
     qDebug() << "    " <<  var->toString();

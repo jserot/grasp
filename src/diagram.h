@@ -26,19 +26,17 @@ class QPointF;
 class QGraphicsLineItem;
 class QFont;
 class QColor;
-#ifdef USE_QGV
-class QGVScene;
-#endif
 class Model;
+class QTabWidget;
 QT_END_NAMESPACE
 
-class Automaton : public QGraphicsScene
+class Diagram : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    explicit Automaton(Model *enclosingModel, QWidget *parent = 0);
-    explicit Automaton(Model *enclosingModel, QString name, QList<Iov*> vars, QList<State*> states, QList<Transition*> transitions, QWidget *parent);
-    ~Automaton();
+    explicit Diagram(Model *enclosingModel, QString name, QWidget *parent = 0);
+    explicit Diagram(Model *enclosingModel, QString name, QList<Iov*> vars, QList<State*> states, QList<Transition*> transitions, QWidget *parent);
+    ~Diagram();
 
     QString getName() const { return name; }
     void setName(QString n) { name = n; }
@@ -46,7 +44,7 @@ public:
     void setView(QGraphicsView* v) { view = v; }
     Model *enclosingModel() { return model; }
 
-    Automaton *duplicate();
+    Diagram *duplicate();
 
     void clear(void);
 
@@ -68,18 +66,18 @@ public:
 
     void save(nlohmann::json json_res);
 
+    void edit();
+
     bool check(QList<Iov*>& global_ios);
 
     void dump(); // for debug only
 
-#ifdef USE_QGV
-    void renderDot(QGVScene *scene, QMap<QString,QGVNode*> nodes);
-#endif
     void exportDot(QTextStream &os);
     void exportRfsmModel(QTextStream& os, QList<Iov*>& global_ios);
     void exportRfsmInstance(QTextStream& os, QList<Iov*>& global_ios);
 
-    static Automaton* fromJson(nlohmann::json& json, Model *model, QWidget *parent);
+    static Diagram* fromJson(nlohmann::json& json, Model *model, QWidget *parent);
+    // This function is declared as static because it will be called a non-instance context in Model::readFromFile
     void toJson(nlohmann::json& json);
 
 signals:
@@ -95,7 +93,6 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
     void editItem(QGraphicsItem *item);
 //  void contextMenuEvent(QGraphicsSceneContextMenuEvent *contextMenuEvent) override;
-
 
     void addState(State *state);
     void addTransition(Transition *transition);
@@ -128,7 +125,6 @@ private:
     State *startState;
 
     QWidget *parent;
-    //QWidget *mainWindow;
 
     static QColor lineColor;
     static QColor boxColor;

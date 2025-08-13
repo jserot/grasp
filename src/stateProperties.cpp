@@ -29,7 +29,7 @@
 
 const QRegularExpression StateProperties::re_uid("[A-Z][A-Za-z0-9_]*");
 
-StateProperties::StateProperties(State *state, Automaton *automaton, QWidget *parent)
+StateProperties::StateProperties(State *state, Diagram *diagram, QWidget *parent)
   : QDialog(parent)
 {
   QString id = state->getId();
@@ -62,23 +62,24 @@ StateProperties::StateProperties(State *state, Automaton *automaton, QWidget *pa
 
   setLayout(layout);
 
-  // connect(cancel_button, &QPushButton::clicked, this, &QDialog::reject);
-  // connect(accept_button, &QPushButton::clicked, this, &QDialog::accept);
   connect(cancel_button, &QPushButton::clicked, this, &StateProperties::cancel);
   connect(accept_button, &QPushButton::clicked, this, &StateProperties::accept);
 
+  Q_ASSERT(Globals::mainWindow);
+  connect(this, SIGNAL(modelModified()), Globals::mainWindow, SLOT(modelModified()));
+
   this->state = state;
-  this->automaton = automaton;
-  //this->compiler = compiler;
+  this->diagram = diagram;
 }
 
 void StateProperties::accept()
 {
+  qDebug() << "StateProperties::accept";
   QString id = state_name_field->text();
   state->setId(id);
   QStringList valuations = valuations_panel->retrieve();
   bool ok = true;
-  FragmentChecker checker(Globals::compiler,automaton,this);
+  FragmentChecker checker(Globals::compiler,diagram,this);
   // First, check each valuation separately
   foreach ( QString valuation, valuations) {
     if ( ! checker.check_state_valuation(valuation) ) {
@@ -104,11 +105,14 @@ void StateProperties::accept()
   if ( ok ) {
     state->setAttrs(valuations);
     qDebug() << "StateProperties::accept(ok)";
+    update();
+    emit modelModified(); // To main window
     QDialog::done(Accepted);
     }
   else {
     qDebug() << "StateProperties::accept(nok)";
     // Do not accept and leave dialog opened
+    // TODO: check this ! 
   }
 }
 

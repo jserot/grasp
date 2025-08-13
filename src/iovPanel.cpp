@@ -11,7 +11,6 @@
 /***********************************************************************/
 
 #include "iovPanel.h"
-#include "qt_compat.h"
 
 #include <QHBoxLayout>
 #include <QLineEdit>
@@ -27,12 +26,16 @@
 #include "stimuli.h"
 #include "globals.h"
 
-IovPanel::IovPanel(Iov::IoKind kind, QString title, QString rowPrefix, Client& client, QRegularExpressionValidator *name_validator)
+#define QCOMBOBOX_INDEX_CHANGED (&QComboBox::currentIndexChanged)
+#define QCOMBOBOX_ACTIVATED (&QComboBox::activated)
+
+QRegularExpressionValidator *IovPanel::name_validator = new QRegularExpressionValidator(Globals::re_lid);
+
+IovPanel::IovPanel(Iov::IoKind kind, QString title, QString rowPrefix, Client client)
   : DynamicPanel(title)
 {
   this->kind = kind;
   this->client = client;
-  this->name_validator = name_validator;
   this->rowPrefix = rowPrefix;
 
   Q_ASSERT(Globals::mainWindow);
@@ -109,20 +112,22 @@ void IovPanel::addRowFields(QHBoxLayout *row_layout, void *row_data)
 {
   Iov *io;
   Model *model;
-  Automaton *automaton;
+  Diagram *diagram;
+  qDebug() << "IovPanel::addRowFields: " << row_data;
   if ( row_data )
     io = (Iov*)(row_data);
   else {
     switch ( client.icKind ) {
     case IcModel: 
+      //model = Globals::theModel;
       model = client.icClient.model;
       Q_ASSERT(model);
       io = model->addIo("", kind, Iov::TyEvent, Stimulus(Stimulus::None));
       break;
-    case IcAutomaton: 
-      automaton = client.icClient.automaton;
-      Q_ASSERT(automaton);
-      io = automaton->addVar("", Iov::TyInt);
+    case IcDiagram: 
+      diagram = client.icClient.diagram;
+      Q_ASSERT(diagram);
+      io = diagram->addVar("", Iov::TyInt);
       break;
       }
     }
@@ -151,7 +156,7 @@ void IovPanel::addRowFields(QHBoxLayout *row_layout, void *row_data)
   connect(type_selector, QCOMBOBOX_INDEX_CHANGED, this, &IovPanel::typeEdited);
 
   QComboBox *stim_selector;
-  if ( kind == Iov::IoIn ) {
+  if ( client.icKind == IcModel && kind == Iov::IoIn ) {
     stim_selector = new QComboBox();
     stim_selector->addItem("None", QVariant(Stimulus::None));
     stim_selector->addItem("Periodic", QVariant(Stimulus::Periodic));
@@ -174,6 +179,8 @@ void IovPanel::addRowFields(QHBoxLayout *row_layout, void *row_data)
 
 void IovPanel::deleteRowFields(QHBoxLayout *row_layout)
 {
+  Model *model;
+  Diagram *diagram;
   QLineEdit *name_selector = qobject_cast<QLineEdit*>(row_layout->itemAt(0)->widget());
   Q_ASSERT(name_selector);
   QComboBox *type_selector = qobject_cast<QComboBox*>(row_layout->itemAt(1)->widget());
@@ -185,8 +192,16 @@ void IovPanel::deleteRowFields(QHBoxLayout *row_layout)
   Iov* io = row_desc->io;
   qDebug() << "Removing Io/Var" << io->toString();
   switch ( client.icKind ) {
-    case IcModel: client.icClient.model->removeIo(io); break;
-    case IcAutomaton: client.icClient.automaton->removeVar(io); break;
+    case IcModel:
+      model = client.icClient.model;
+      Q_ASSERT(model);
+      model->removeIo(io);
+      break;
+    case IcDiagram:
+      diagram = client.icClient.diagram;
+      Q_ASSERT(diagram);
+      diagram->removeVar(io);
+      break;
     }
   widgetToRow.remove(name_selector);
   widgetToRow.remove(type_selector);
@@ -220,59 +235,64 @@ void IovPanel::nameChanged()
 
 void IovPanel::nameEdited()
 {
-  qDebug() << "** Iov::nameEdited called by" << sender();
-   // TOFIX : this may be called spuriously when the automaton scene is scrolled and a new automaton tab is added...
+  Model *model;
+  Diagram *diagram;
+  //qDebug() << "IovPanel::nameEdited called by" << sender();
   QLineEdit* name_selector = qobject_cast<QLineEdit*>(sender());
   Q_ASSERT(name_selector);
   RowDesc *row_desc = widgetToRow.value(name_selector);
   Q_ASSERT(row_desc);
+  Iov* io = row_desc->io;
+  qDebug() << "IovPanel: setting name for IOV" << io->toString();
   QString name = name_selector->text().trimmed();
   QStringList defined;
-  Model *model;
-  Automaton *automaton;
   switch ( client.icKind ) {
     case IcModel:
       model = client.icClient.model;
+      Q_ASSERT(model);
       defined = model->getInputs() + model->getOutputs() + model->getShared();
       break;
-    case IcAutomaton:
-      automaton = client.icClient.automaton;
-      defined = automaton->getVarNames();
+    case IcDiagram:
+      diagram = client.icClient.diagram;
+      Q_ASSERT(diagram);
+      defined = diagram->getVarNames();
       break;
     }
   if ( defined.contains(name) ) {
     QMessageBox::warning( this, "Error", "The name " + name + " is already used. Please choose another none");
     //name_selector->setText("");
     }
-  // else {
-    Iov* io = row_desc->io;
-    qDebug() << "Setting input name to" << name;
-    io->name = name;
-  //   }
+  io->name = name;
+  qDebug() << "IovPanel: updated IOV:" << io->toString();
   emit modelModified();
 }
 
 void IovPanel::typeEdited()
 {
+  //qDebug() << "IovPanel::typeEdited called by" << sender();
   QComboBox* type_selector = qobject_cast<QComboBox*>(sender());
   Q_ASSERT(type_selector);
   RowDesc *row_desc = widgetToRow.value(type_selector);
   Q_ASSERT(row_desc);
   Iov* io = row_desc->io;
+  qDebug() << "IovPanel: setting type for IOV" << io->toString();
   io->type = (Iov::IoType)(type_selector->currentIndex());
   qDebug () << "Setting IO type: " << io->type;
-  if ( row_desc->io->kind == Iov::IoIn ) 
+  if ( client.icKind == IcModel && row_desc->io->kind == Iov::IoIn ) 
     updateStimChoices(row_desc);
+  qDebug() << "IovPanel: updated IOV:" << io->toString();
   emit modelModified();
 }
 
 void IovPanel::stimEdited()
 {
+  //qDebug() << "IovPanel::typeEdited called by" << sender();
   QComboBox* stim_selector = qobject_cast<QComboBox*>(sender());
   Q_ASSERT(stim_selector);
   RowDesc *row_desc = widgetToRow.value(stim_selector);
   Q_ASSERT(row_desc);
   Iov* io = row_desc->io;
+  qDebug() << "IovPanel: setting stimuli for IOV" << io->toString();
   QString io_name = io->name;
   Stimulus::Kind kind = (Stimulus::Kind)(stim_selector->currentIndex()); 
   switch ( kind ) {
@@ -286,6 +306,7 @@ void IovPanel::stimEdited()
     delete stimDialog;
     break;
     }
+  qDebug() << "IovPanel: updated IOV:" << io->toString();
   emit modelModified();
 }
 

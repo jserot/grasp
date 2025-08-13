@@ -11,8 +11,10 @@
 /***********************************************************************/
 
 #include "commandExec.h"
-#include "qt_compat.h"
 #include <QDebug>
+
+#define QT_ENDL Qt::endl
+#define SKIP_EMPTY_PARTS Qt::SkipEmptyParts
 
 CommandExec::CommandExec()
 {

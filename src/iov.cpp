@@ -54,11 +54,11 @@ QString Iov::toString(bool withStim)
   return r;
 }
 
-QString Iov::stringOfList(QList<Iov*> ios)
+QString Iov::stringOfList(QList<Iov*> ios, bool withStim)
 {
   QString r;
   foreach ( Iov* io, ios)
-    r += io->toString() + "\\l";
+    r += io->toString(withStim) + "\\l";
   return r;
 }
 

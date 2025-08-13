@@ -26,7 +26,7 @@
     }
   ],
   "name": "ctlr",
-  "automatons": [
+  "diagrams": [
   {
   "name": "A0",
   "vars": [

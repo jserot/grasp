@@ -1,6 +1,6 @@
 !include(../config) { error("Cannot open config file. Run configure script in top directory") }
 
-CONFIG+=sdk_no_version_check
+CONFIG   += debug
 QT       += widgets
 
 HEADERS += include/nlohmann_json.h \
@@ -8,9 +8,8 @@ HEADERS += include/nlohmann_json.h \
            transition.h  \
            state.h  \
            iov.h  \
-           nameInputDialog.h  \
-           automaton.h  \
-           automatonPanel.h  \
+           diagram.h  \
+           diagramProperties.h  \
            model.h  \
            commandExec.h \
            compiler.h \
@@ -22,12 +21,14 @@ HEADERS += include/nlohmann_json.h \
            transitionActions.h \
            transitionProperties.h \
            iovPanel.h \
-           modelPanel.h \
+           modelProperties.h \
            stimulus.h \
            stimuli.h \
            command.h \
-           imageviewer.h \
-           textviewer.h \
+           imageViewer.h \
+           textViewer.h \
+           textsViewer.h \
+           textProperties.h \
            syntaxHighlighters.h \
            compilerPaths.h \
            compilerOption.h \
@@ -38,9 +39,8 @@ SOURCES += transition.cpp \
            globals.cpp \
            state.cpp \
            iov.cpp  \
-           nameInputDialog.cpp  \
-           automaton.cpp \
-           automatonPanel.cpp  \
+           diagram.cpp \
+           diagramProperties.cpp  \
            model.cpp \
            commandExec.cpp \
            compiler.cpp \
@@ -52,7 +52,7 @@ SOURCES += transition.cpp \
            transitionActions.cpp \
            transitionProperties.cpp \
            iovPanel.cpp \
-           modelPanel.cpp \
+           modelProperties.cpp \
            stimulus.cpp \
            stimuli.cpp \
            command.cpp \
@@ -60,8 +60,10 @@ SOURCES += transition.cpp \
            compilerPaths.cpp \
            compilerOption.cpp \
            compilerOptions.cpp \
-           textviewer.cpp \
-           imageviewer.cpp \
+           textViewer.cpp \
+           textsViewer.cpp \
+           textProperties.cpp \
+           imageViewer.cpp \
            debug.cpp \
            main.cpp \
            mainwindow.cpp

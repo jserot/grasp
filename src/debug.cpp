@@ -16,7 +16,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <stdio.h>
-#include "qt_compat.h"
+
+#define QT_ENDL Qt::endl
 
 bool traceMode = false;
 

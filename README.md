@@ -1,13 +1,12 @@
 ## Grasp 
 
 ![](./doc/snapshot.png)
-![](./doc/wave.png)
 
-**Grasp** is a tool for editing and simulating systems modeled as concurrent _reactive finite state
-machines_.  A reactive state machine describes a behavior as a set of *states* connected by
-*transitions* triggered by an *event* and a set of boolean *guards* and triggering a sequence of
-*actions*. **Grasp** can also generate an implementation of the model (including a *testbench* for
-testing it) in
+**Grasp** (Graph interface for ReActive State machine-based Programs) is a tool for editing and
+  simulating systems modeled as concurrent _reactive finite state machines_.  A reactive state
+  machine describes a behavior as a set of _states_ connected by _transitions_ triggered by an
+  _event_ and a set of boolean _guards_ and triggering a sequence of _actions_. **Grasp** can also
+  generate an implementation of the model (including a _testbench_ for testing it) in
 
     - `CTask` (a C dialect with primitives for describing event-based synchronisation)
 
@@ -16,19 +15,15 @@ testing it) in
     - `VHDL` 
 
 
-**Grasp** is actually a front-end to the [RFSM](https://github.com/jserot/rfsm) State Diagram
+**Grasp** is a descendant of [Rfsm-Light](https://github.com/jserot/rfsm-light), which was limited
+to systems made of a single reactive state machine. Both are actually 
+front-ends to the [RFSM](https://github.com/jserot/rfsm) State Diagram
 simulator and compiler. 
 
 ## DOCUMENTATION
 
 A minimalistic "Howto" is available
 [here](https://github.com/jserot/grasp/blob/master/doc/using.md)
-
-This sequence of short videos can be used as a tutorial
-1. [Tutorial part 1](https://github.com/jserot/grasp/releases/download/1.3.1/Light-v1.mov)
-2. [Tutorial part 2](https://github.com/jserot/grasp/releases/download/1.3.1/Light-v2.mov)
-3. [Tutorial part 3](https://github.com/jserot/grasp/releases/download/1.3.1/Light-v3.mov)
-4. [Tutorial part 4](https://github.com/jserot/grasp/releases/download/1.3.1/Light-v4.mov)
 
 ## INSTALLATION
 

@@ -17,6 +17,7 @@
 QT_BEGIN_NAMESPACE
 class QImage;
 class QLabel;
+class QMenu;
 QT_END_NAMESPACE
 
 class ImageViewer : public QScrollArea
@@ -24,21 +25,29 @@ class ImageViewer : public QScrollArea
   Q_OBJECT
 
 public:
-  ImageViewer(const QPixmap& pixmap, QWidget *parent);
+  ImageViewer(QString fname);
   ~ImageViewer();
 
   void scaleImage(double scaleFactor);
-
   bool isFittedToWindow(void);
 
 public slots:
-  void fitToWindow(const bool& bValue);
+  void showContextMenu(QPoint pos);
+  void zoomIn();
+  void zoomOut();
   void normalSize();
 
+protected:
+    QAction *zoomInAction;
+    QAction *zoomOutAction;
+    QAction *normalSizeAction;
+    QMenu *contextMenu;
 private:
+    static const double zoomInFactor;
+    static const double zoomOutFactor;
     static const double minScaleFactor;
     static const double maxScaleFactor;
-    bool fittedToWindow;
+    double scaleFactor;
     QLabel *image;
 
     void adjustScrollBar(QScrollBar *scrollBar, double factor);

@@ -18,12 +18,21 @@
 class TextViewer : public QPlainTextEdit
 {
   Q_OBJECT
-
 public:
-  TextViewer(QFile& file, const QFont& font, QWidget *parent = 0);
+  TextViewer(QString fname);
   ~TextViewer();
 
+  static QFont defaultFont;
+  void setFont(QFont font);
+  QFont getFont();
+
+protected:
+  virtual QSize sizeHint () const override;
+
+protected slots:
+  void contextMenu();
 private:
+  QFont currentFont;
   SyntaxHighlighter* highlighter;
 };
 

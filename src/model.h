@@ -15,8 +15,9 @@
 #include <QStringListModel>
 #include <QTextStream>
 #include <QGraphicsScene>
+#include <QList>
 
-#include "automaton.h"
+#include "diagram.h"
 #include "iov.h"
 #include "include/nlohmann_json.h"
 
@@ -26,20 +27,17 @@ class QPointF;
 class QGraphicsLineItem;
 class QFont;
 class QColor;
-#ifdef USE_QGV
-class QGVScene;
-#endif
 QT_END_NAMESPACE
 
 class Model
 {
 public:
-    explicit Model(QString name, QWidget *parent = 0);
+    explicit Model();
 
-    QString getName() const { return name; }
+    ~Model();
+
     void setName(QString n) { name = n; }
-
-    //Automaton *currentAutomaton(void) { return focus; }
+    QString getName() const { return name; }
 
     void clear(void);
     void update(void);
@@ -47,10 +45,10 @@ public:
     Iov* addIo(const QString name, const Iov::IoKind kind, const Iov::IoType type, const Stimulus stim);
     void removeIo(Iov *io);
 
-    void addAutomaton(Automaton *automaton);
-    void removeAutomaton(Automaton *automaton);
+    void addDiagram(Diagram *diagram);
+    void removeDiagram(Diagram *diagram);
 
-    QList<Iov*> getIos() { return ios; };
+    QList<Iov*>& getIos() { return ios; };
     QStringList getInputs();
     QStringList getOutputs();
     QStringList getShared();
@@ -58,9 +56,9 @@ public:
     QStringList getInpEvents();
     QStringList getInpNonEvents();
     QStringList getOutpNonEvents();
-    QList<Automaton*> getAutomatons() { return automatons; };
+    QList<Diagram*>& getDiagrams() { return diagrams; };
 
-    void readFromFile(QString fname);
+    static Model* readFromFile(QString fname);
     void saveToFile(QString fname);
 
     void report_error(QString msg);
@@ -68,24 +66,19 @@ public:
 
     void dump(); // for debug only
 
-#ifdef USE_QGV
-    void renderDot(QGVScene *scene);
-#endif
     QStringList exportDots(QString basename, QStringList options);
-#ifndef USE_QGV
     void exportDot(QString fname, QStringList options);
-#endif
     void exportRfsm(QString fname, bool withTestbench = false);
 
 protected:
     void export_rfsm_ios(QTextStream& os);
-    QString exportSingleDot(Automaton *automaton, QString basename, QStringList options);
+    QString exportSingleDot(Diagram *diagram, QString basename, QStringList options);
 
 private:
     QString name;
     QList<Iov*> ios;
-    QList<Automaton*> automatons;
-    //Automaton *focus;
-    const static QString automatonPrefix;
+    QList<Diagram*> diagrams;
+    const static QString diagramPrefix;
+    const static QString defaultName;
 };
 

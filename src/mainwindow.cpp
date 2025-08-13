@@ -2,7 +2,7 @@
 /*                                                                     */
 /*       This file is part of the Grasp software package               */
 /*                                                                     */
-/*  Copyright (c) 2019-present, Jocelyn SEROT (jocelyn.serot@uca.fr)   */
+/*  Copyright (c) 2025-present, Jocelyn SEROT (jocelyn.serot@uca.fr)   */
 /*                       All rights reserved.                          */
 /*                                                                     */
 /*    This source code is licensed under the license found in the      */
@@ -15,31 +15,22 @@
 #include "state.h"
 #include "model.h"
 #include "mainwindow.h"
-#include "imageviewer.h"
-#include "textviewer.h"
-#ifdef USE_QGV
-#include "dotviewer.h"
-#endif
+#include "imageViewer.h"
+#include "textViewer.h"
+#include "textsViewer.h"
 #include "compilerPaths.h"
 #include "compilerOptions.h"
 #include "commandExec.h"
 #include "compiler.h"
 #include "debug.h"
 #include "stimuli.h"
-#include "modelPanel.h"
-#include "automatonPanel.h"
-#include "nameInputDialog.h"
+#include "modelProperties.h"
 
 #include <QtWidgets>
 #include <QVariant>
+#include <QListWidget>
 
 const QString MainWindow::title = "Grasp";
-const QList<int> MainWindow::splitterSizes = { 250, 250, 250 };
-const double MainWindow::zoomInFactor = 1.25;
-const double MainWindow::zoomOutFactor = 0.8;
-const double MainWindow::minScaleFactor = 0.2;
-const double MainWindow::maxScaleFactor = 2.0;
-// const QStringList guiOnlyOpts = { "-dot_external_viewer", "-sync_externals" };
 
 MainWindow::MainWindow()
 {
@@ -57,64 +48,39 @@ MainWindow::MainWindow()
     Globals::compiler = new Compiler(compilerPath);
     Globals::executor = new CommandExec();
 
+    model = NULL;
+
     // GUI setup
 
     createActions();
     createMenus();
-    createToolbars();
+    createToolbar();
 
-    QSplitter *splitter = new QSplitter;
+    QHBoxLayout *layout = new QHBoxLayout;
 
-    QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    //sizePolicy.setHorizontalStretch(0);
-    //sizePolicy.setVerticalStretch(0);
-    //sizePolicy.setHeightForWidth(splitter->sizePolicy().hasHeightForWidth());
-    splitter->setSizePolicy(sizePolicy);
-    splitter->setMinimumSize(QSize(0, 300));
-    splitter->setOrientation(Qt::Horizontal);
+    // Diagram tabs
 
-    setCentralWidget(splitter);
+    diagrams = new QTabWidget();
+    diagrams->setMinimumHeight(400);
+    diagrams->setMinimumWidth(300);
+    diagrams->setDocumentMode(false);
+    diagrams->setTabsClosable(true);
+    diagrams->setMovable(true);
+    Globals::diagrams = diagrams;
 
-    model = new Model(QString(),this);
-    Q_ASSERT(model);
+    connect(diagrams, SIGNAL(tabCloseRequested(int)), this, SLOT(closeDiagram(int)));
+    //connect(diagrams, SIGNAL(currentChanged(int)), this, SLOT(diagramTabChanged(int)));
+    //connect(diagrams, SIGNAL(tabBarDoubleClicked(int)), this, SLOT(diagramTabChangeName(int)));
 
-    // Left panel
+    layout->addWidget(diagrams);
 
-    model_panel = new ModelPanel(model,this); 
-    model_panel->setMinimumWidth(280);
-    model_panel->setMaximumWidth(360);
+    //setCentralWidget(diagrams);
+    QWidget *widget = new QWidget;
+    widget->setLayout(layout);
+    setCentralWidget(widget);
 
-    splitter->addWidget(model_panel);
-
-    // Central panel (automatons) 
-
-    automatons_panel = new QTabWidget(splitter);
-    automatons_panel->setMinimumHeight(400);
-    automatons_panel->setMinimumWidth(300);
-    automatons_panel->setDocumentMode(false);
-    automatons_panel->setTabsClosable(true);
-    automatons_panel->setMovable(true);
-    addAutomatonTabs(model);
-
-    connect(automatons_panel, SIGNAL(tabCloseRequested(int)), this, SLOT(closeAutomatonTab(int)));
-    connect(automatons_panel, SIGNAL(currentChanged(int)), this, SLOT(automatonTabChanged(int)));
-    //connect(automatons_panel, SIGNAL(tabBarDoubleClicked(int)), this, SLOT(automatonTabChangeName(int)));
-
-    splitter->addWidget(automatons_panel);
-
-    // Right panel (DOT rendering and generated code)
-
-    results_panel = new QTabWidget(splitter);
-    results_panel->setMinimumHeight(400);
-    results_panel->setMinimumWidth(300);
-    results_panel->setDocumentMode(false);
-    results_panel->setTabsClosable(true);
-    results_panel->setMovable(true);
-
-    connect(results_panel, SIGNAL(tabCloseRequested(int)), this, SLOT(closeResultTab(int)));
-    connect(results_panel, SIGNAL(currentChanged(int)), this, SLOT(resultTabChanged(int)));
-
-    //splitter->addWidget(results_panel);
+    // Dock window
+    dock = NULL; // The dock window will be created (by [createDockWindow]) when creating or reading a model from file
 
     // Status bar
 
@@ -126,24 +92,26 @@ MainWindow::MainWindow()
     setWindowTitle(title);
     setUnifiedTitleAndToolBarOnMac(true);
 
-    codeFont.setFamily("Courier");
-    codeFont.setFixedPitch(true);
-    codeFont.setPointSize(11);
-
     initCursors();
 
-    unsaved_changes = false;
-    updateActions();
-    
-    splitter->setSizes(splitterSizes); 
+    updateActions(); // Most of actions will be disabled before a model is created / read from file
 
-    currentScaleFactor = 1.0;
+    unsaved_changes = false;
 }
 
+Diagram *MainWindow::currentDiagram()
+{
+  int index = diagrams->currentIndex();
+  Q_ASSERT(index >= 0);  // TO CHECK : this fn cannot be called if there's no diagram
+  QGraphicsView *view = qobject_cast<QGraphicsView*>(diagrams->widget(index));
+  Q_ASSERT(view);
+  return qobject_cast<Diagram*>(view->scene());
+}
 
 void MainWindow::modelModified()
 {
-  qDebug() << "Model modified !";
+  qDebug() << "MainWindow::modelModified called by " << sender();
+  updateActions();
   setUnsavedChanges(true);
 }
 
@@ -160,7 +128,7 @@ void MainWindow::about()
       "<p>Finite State Diagram Editor, Simulator and Compiler</p>\
           <p>version " + Globals::version + "</p>\
          <p><a href=\"github.com/jserot/grasp\">github.com/jserot/grasp</a></p>\
-         <p>(C) J. Sérot (jocelyn.serot@uca.fr), 2019-now");
+         <p>(C) J. Sérot (jocelyn.serot@uca.fr), 2025-now");
 }
 
 // Actions
@@ -195,10 +163,10 @@ void MainWindow::createActions()
     saveFileAction->setToolTip(tr("Save current model as..."));
     connect(saveFileAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
  
-    checkAutomatonAction = new QAction(tr("Check automaton"), this);
-    checkAutomatonAction->setShortcut(tr("Ctrl+A"));
-    saveFileAction->setToolTip(tr("Check current automaton"));
-    connect(checkAutomatonAction, SIGNAL(triggered()), this, SLOT(checkAutomaton()));
+    checkDiagramAction = new QAction(tr("Check current diagram"), this);
+    checkDiagramAction->setShortcut(tr("Ctrl+A"));
+    saveFileAction->setToolTip(tr("Check current diagram"));
+    connect(checkDiagramAction, SIGNAL(triggered()), this, SLOT(checkDiagram()));
 
     checkModelAction = new QAction(tr("Check model"), this);
     checkModelAction->setShortcut(tr("Ctrl+K"));
@@ -207,20 +175,18 @@ void MainWindow::createActions()
 
     checkModelWithStimuliAction = new QAction(tr("Check model and stimuli"), this);
     checkModelWithStimuliAction->setShortcut(tr("Ctrl+Shift+K"));
-    checkModelWithStimuliAction->setToolTip(tr("Check model and stimuli"));
+    // checkModelWithStimuliAction->setToolTip(tr("Check model and stimuli"));
     connect(checkModelWithStimuliAction, SIGNAL(triggered()), this, SLOT(checkModelWithStimuli()));
 
-    renderDotsAction = new QAction(QIcon(":/images/compileDot.png"), tr("Generate DOT representations"), this);
-    renderDotsAction->setToolTip(tr("Generate DOT representations"));
-    renderDotsAction->setShortcut(tr("Ctrl+R"));
-    connect(renderDotsAction, SIGNAL(triggered()), this, SLOT(renderDots()));
-
-#ifndef USE_QGV
     renderDotAction = new QAction(QIcon(":/images/compileDot.png"), tr("Generate DOT representation"), this);
-    renderDotAction->setToolTip(tr("Generate DOT representation"));
-    renderDotAction->setShortcut(tr("Ctrl+Shift+R"));
+    renderDotAction->setToolTip(tr("Generate single DOT representation (with diagrams as sub-graphs)"));
+    renderDotAction->setShortcut(tr("Ctrl+R"));
     connect(renderDotAction, SIGNAL(triggered()), this, SLOT(renderDot()));
-#endif
+
+    renderDotsAction = new QAction(QIcon(":/images/compileDot.png"), tr("Generate separate DOT representations"), this);
+    renderDotsAction->setToolTip(tr("Generate separate DOT representations (one graph per diagram)"));
+    renderDotsAction->setShortcut(tr("Ctrl+Shift+R"));
+    connect(renderDotsAction, SIGNAL(triggered()), this, SLOT(renderDots()));
 
     generateRfsmModelAction = new QAction(tr("Generate RFSM code (model only)"), this);
     connect(generateRfsmModelAction, SIGNAL(triggered()), this, SLOT(generateRfsmModel()));
@@ -250,53 +216,31 @@ void MainWindow::createActions()
     runSimulationAction->setToolTip(tr("Simulate and open VCD viewer"));
     connect(runSimulationAction, SIGNAL(triggered()), this, SLOT(runSimulation()));
 
-    zoomInAction = new QAction(tr("Zoom In"), this);
-    zoomInAction->setShortcut(tr("Ctrl++"));
-    connect(zoomInAction, SIGNAL(triggered()), this, SLOT(zoomIn()));
-
-    zoomOutAction = new QAction(tr("Zoom Out"), this);
-    zoomOutAction->setShortcut(tr("Ctrl+-"));
-    connect(zoomOutAction, SIGNAL(triggered()), this, SLOT(zoomOut()));
-
-    normalSizeAction = new QAction(tr("Normal size (100%)"), this);
-    connect(normalSizeAction, SIGNAL(triggered()), this, SLOT(normalSize()));
-
-    fitToWindowAction = new QAction(tr("Fit to Window"), this);
-    fitToWindowAction->setShortcut(tr("Ctrl+F"));
-    connect(fitToWindowAction, SIGNAL(triggered()), this, SLOT(fitToWindow()));
-    fitToWindowAction->setCheckable(true);
-
-    closeResultsAction = new QAction(tr("Close all results_panel"), this);
-    connect(closeResultsAction, SIGNAL(triggered()), this, SLOT(closeResultTabs()));
-
     pathConfigAction = new QAction(tr("Compiler and tools"), this);
     connect(pathConfigAction, SIGNAL(triggered()), this, SLOT(setCompilerPaths()));
 
     compilerOptionsAction = new QAction(tr("Compiler options"), this);
     connect(compilerOptionsAction, SIGNAL(triggered()), this, SLOT(setCompilerOptions()));
 
-    fontConfigAction = new QAction(tr("Code font"), this);
-    QObject::connect(fontConfigAction, SIGNAL(triggered()), this, SLOT(setCodeFont()));
-    
     modelActions = new QActionGroup(this);
 
-    addAutomatonAction = new QAction(QIcon(":/images/page.png")," Add automaton to model", modelActions);
-    connect(addAutomatonAction, SIGNAL(triggered()), this, SLOT(addAutomatonToModel()));
+    addDiagramAction = new QAction(QIcon(":/images/page.png")," Add diagram to model", modelActions);
+    connect(addDiagramAction, SIGNAL(triggered()), this, SLOT(newDiagram()));
 
-    duplAutomatonAction = new QAction(QIcon(":/images/page.png")," Duplicate current automaton", modelActions);
-    connect(duplAutomatonAction, SIGNAL(triggered()), this, SLOT(duplicateAutomaton()));
+    duplDiagramAction = new QAction(QIcon(":/images/page.png")," Duplicate current diagram", modelActions);
+    connect(duplDiagramAction, SIGNAL(triggered()), this, SLOT(duplicateDiagram()));
 
-    // dumpModelAction = new QAction("Dump", modelActions); // For debug only
-    // connect(dumpModelAction, SIGNAL(triggered()), this, SLOT(dumpModel())); // For debug only
+    dumpModelAction = new QAction("Dump", modelActions); // For debug only
+    connect(dumpModelAction, SIGNAL(triggered()), this, SLOT(dumpModel())); // For debug only
 
-    automatonActions = new QActionGroup(this);
+    diagramActions = new QActionGroup(this);
 
-    selectItemAction = new QAction(QIcon(":/images/select.png")," Select item", automatonActions);
-    addStateAction = new QAction(QIcon(":/images/state.png")," Add state", automatonActions);
-    addInitStateAction = new QAction(QIcon(":/images/initstate.png")," Add initial state", automatonActions);
-    addTransitionAction = new QAction(QIcon(":/images/transition.png")," Add transition", automatonActions);
-    addSelfTransitionAction = new QAction(QIcon(":/images/loop.png")," Add self transition", automatonActions);
-    deleteItemAction = new QAction(QIcon(":/images/delete.png")," Delete item", automatonActions);
+    selectItemAction = new QAction(QIcon(":/images/select.png")," Select item", diagramActions);
+    addStateAction = new QAction(QIcon(":/images/state.png")," Add state", diagramActions);
+    addInitStateAction = new QAction(QIcon(":/images/initstate.png")," Add initial state", diagramActions);
+    addTransitionAction = new QAction(QIcon(":/images/transition.png")," Add transition", diagramActions);
+    addSelfTransitionAction = new QAction(QIcon(":/images/loop.png")," Add self transition", diagramActions);
+    deleteItemAction = new QAction(QIcon(":/images/delete.png")," Delete item", diagramActions);
 
     selectItemAction->setData(QVariant::fromValue((int)Globals::SelectItem));
     addStateAction->setData(QVariant::fromValue((int)Globals::InsertState));
@@ -319,49 +263,36 @@ void MainWindow::createActions()
     addSelfTransitionAction->setChecked(false);
     deleteItemAction->setChecked(false);
 
-    connect(automatonActions, SIGNAL(triggered(QAction*)), this, SLOT(editModel(QAction*)));
+    connect(diagramActions, SIGNAL(triggered(QAction*)), this, SLOT(editDiagram(QAction*)));
 }
 
 void MainWindow::updateActions()
 {
-  updateViewActions(); // Nothing else for now
-}
-
-void MainWindow::updateViewActions()
-{
-  QWidget *widget;
-  QString kind;
-  if ( results_panel->count() == 0 ) {
-    closeResultsAction->setEnabled(false);
-    goto unselect;
-    }
-  closeResultsAction->setEnabled(true);
-  widget = results_panel->widget(results_panel->currentIndex());  
-  if ( widget == NULL ) goto unselect;
-  kind = widget->metaObject()->className();
-  if ( kind == "ImageViewer" ) {
-    ImageViewer* viewer = static_cast<ImageViewer*>(widget);
-    bool b = viewer->isFittedToWindow();
-    fitToWindowAction->setEnabled(true);
-    fitToWindowAction->setChecked(b);
-    zoomInAction->setEnabled(!b);
-    zoomOutAction->setEnabled(!b);
-    normalSizeAction->setEnabled(!b);
-    return;
-    }
-  else if ( kind == "DotViewer" ) {
-    fitToWindowAction->setEnabled(true);
-    fitToWindowAction->setChecked(true);
-    zoomInAction->setEnabled(true);
-    zoomOutAction->setEnabled(true);
-    normalSizeAction->setEnabled(true);
-    return;
-    }
- unselect:
-    fitToWindowAction->setEnabled(false);
-    zoomInAction->setEnabled(false);
-    zoomOutAction->setEnabled(false);
-    normalSizeAction->setEnabled(false);
+    bool enabled = model;
+    saveFileAction->setEnabled(enabled);
+    saveFileAsAction->setEnabled(enabled);
+    checkDiagramAction->setEnabled(enabled);
+    checkModelAction->setEnabled(enabled);
+    checkModelWithStimuliAction->setEnabled(enabled);
+    dumpModelAction->setEnabled(enabled);
+    renderDotAction->setEnabled(enabled);
+    renderDotsAction->setEnabled(enabled);
+    generateRfsmModelAction->setEnabled(enabled);
+    generateRfsmTestbenchAction->setEnabled(enabled);
+    generateCTaskAction->setEnabled(enabled);
+    generateSystemCModelAction->setEnabled(enabled);
+    generateSystemCTestbenchAction->setEnabled(enabled);
+    generateVHDLModelAction->setEnabled(enabled);
+    generateVHDLTestbenchAction->setEnabled(enabled);
+    runSimulationAction->setEnabled(enabled);
+    addDiagramAction->setEnabled(enabled);
+    duplDiagramAction->setEnabled(enabled);
+    selectItemAction->setEnabled(enabled);
+    addStateAction->setEnabled(enabled);
+    addInitStateAction->setEnabled(enabled);
+    addTransitionAction->setEnabled(enabled);
+    addSelfTransitionAction->setEnabled(enabled);
+    deleteItemAction->setEnabled(enabled);
 }
 
 // Menus
@@ -377,22 +308,23 @@ void MainWindow::createMenus()
     fileMenu->addAction(exitAction);
 
     modelMenu = menuBar()->addMenu(tr("&Model"));
-    modelMenu->addAction(addAutomatonAction);
-    modelMenu->addAction(duplAutomatonAction);
-    modelMenu->addAction(checkAutomatonAction);
+    modelMenu->addAction(addDiagramAction);
+    modelMenu->addAction(duplDiagramAction);
+    modelMenu->addAction(checkDiagramAction);
     modelMenu->addAction(checkModelAction);
     modelMenu->addAction(checkModelWithStimuliAction);
+    modelMenu->addAction(dumpModelAction); // For debug only
 
     compileMenu = menuBar()->addMenu(tr("&Compile"));
-    compileMenu->addAction(renderDotsAction);
-#ifndef USE_QGV
     compileMenu->addAction(renderDotAction);
-#endif
-    compileMenu->addAction(generateCTaskAction);
-    compileMenu->addAction(generateSystemCModelAction);
-    compileMenu->addAction(generateVHDLModelAction);
+    compileMenu->addAction(renderDotsAction);
     compileMenu->addSeparator();
+    compileMenu->addAction(generateCTaskAction);
+    compileMenu->addSeparator();
+    compileMenu->addAction(generateSystemCModelAction);
     compileMenu->addAction(generateSystemCTestbenchAction);
+    compileMenu->addSeparator();
+    compileMenu->addAction(generateVHDLModelAction);
     compileMenu->addAction(generateVHDLTestbenchAction);
     compileMenu->addSeparator();
     compileMenu->addAction(generateRfsmModelAction);
@@ -401,12 +333,6 @@ void MainWindow::createMenus()
     compileMenu->addAction(runSimulationAction);
 
     viewMenu = menuBar()->addMenu(tr("&View"));
-    viewMenu->addAction(zoomInAction);
-    viewMenu->addAction(zoomOutAction);
-    viewMenu->addAction(normalSizeAction);
-    viewMenu->addAction(fitToWindowAction);
-    viewMenu->addSeparator();
-    viewMenu->addAction(closeResultsAction);
 
     configMenu = menuBar()->addMenu("&Configuration");
     configMenu->addAction(pathConfigAction);
@@ -414,47 +340,37 @@ void MainWindow::createMenus()
     configMenu->addAction(fontConfigAction);
 }
 
-void MainWindow::createToolbars()
+void MainWindow::createToolbar()
 {
      QWidget *spacer1 = new QWidget(this);
      spacer1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-     QWidget *spacer2 = new QWidget(this);
+     QWidget *spacer2 = new QWidget(this);
      spacer2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-     modelToolBar = addToolBar(tr("Model"));
-     modelToolBar->addAction(newModelAction);
-     modelToolBar->addAction(openFileAction);
-     modelToolBar->addAction(saveFileAction);
-     modelToolBar->addAction(addAutomatonAction);
-     //modelToolBar->addAction(duplAutomatonAction);
-     //modelToolBar->addAction(dumpModelAction);
-
-     editToolBar = addToolBar(tr("Edit automaton"));
-     editToolBar->addWidget(spacer1); 
+     editToolBar = addToolBar(tr("Edit diagram"));
+     editToolBar->addWidget(spacer1);
      editToolBar->addAction(selectItemAction);
      editToolBar->addAction(addStateAction);
      editToolBar->addAction(addInitStateAction);
      editToolBar->addAction(addTransitionAction);
      editToolBar->addAction(addSelfTransitionAction);
      editToolBar->addAction(deleteItemAction);
-
-     compileToolBar = addToolBar(tr("Compile"));
-     compileToolBar->addWidget(spacer2);
-     compileToolBar->addAction(renderDotsAction);
-// #ifndef USE_QGV
-//      compileToolBar->addAction(renderDotAction);
-// #endif
-     compileToolBar->addAction(generateCTaskAction);
-     compileToolBar->addAction(generateSystemCModelAction);
-     compileToolBar->addAction(generateVHDLModelAction);
-     compileToolBar->addAction(runSimulationAction);
+     editToolBar->addWidget(spacer2);
 }
 
-void MainWindow::createPropertiesPanel()
+// Dock for model IOs
+
+void MainWindow::createDockWindow(Model *model)
 {
-  model_panel = new ModelPanel(model,this);
-  model_panel->setMinimumWidth(180);
-  model_panel->setMaximumWidth(360);
+    if ( dock ) delete dock;
+
+    dock = new QDockWidget(tr("Model IOs"), this);
+    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+
+    model_panel = new ModelProperties(model, dock);
+    dock->setWidget(model_panel);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
+    viewMenu->addAction(dock->toggleViewAction());
 }
 
 // File IO
@@ -482,59 +398,65 @@ void MainWindow::checkUnsavedChanges()
 void MainWindow::openFile()
 {
     checkUnsavedChanges();
-    
     QString fname = QFileDialog::getOpenFileName(this, "Open file", Globals::initDir, "FSD file (*.fsd)");
     if ( fname.isEmpty() ) return;
-    try {
-      model->readFromFile(fname);
+    Model *new_model = Model::readFromFile(fname);
+    if ( new_model ) {
+      qDebug() << "MainWindow::openFile: read model completed";
+      new_model->dump();
+      if ( model ) delete model; // This also deletes the enclosed diagrams
+      model = new_model;
+      closeDiagramTabs();
+      addDiagramTabs();
+      createDockWindow(model);
+      currentFileName = fname;
+      setUnsavedChanges(false);
+      updateActions();
       }
-    catch(const std::exception& e) {
-      QMessageBox::warning(this, "Error", "Unable to import : " + QString(e.what()));
-      return;
+    else {
+      QMessageBox::warning(this, "Error", "Error when reading file " + fname);
+      // Leave current model unchanged
       }
-    closeAutomatonTabs();
-    addAutomatonTabs(model);
-    model_panel->update();
-    currentFileName = fname;
-    setUnsavedChanges(false);
 }
 
-bool MainWindow::checkAutomaton()
+bool MainWindow::checkDiagram()
 { 
-  if ( ! model ) return true;
-  int index = automatons_panel->currentIndex();
-  if ( index < 0 ) return true;
-  QWidget *panel = automatons_panel->widget(index);
-  Q_ASSERT(panel);
-  Automaton *automaton = panelToAutomaton.value(panel);
-  Q_ASSERT(automaton);
-  qDebug() << "Checking automaton" << automaton->getName();
+  Q_ASSERT(model); 
+  Diagram *diagram = currentDiagram();
+  Q_ASSERT(diagram);
+  qDebug() << "Checking diagram" << diagram->getName();
   QList<Iov*> global_ios = model->getIos();
-  return automaton->check(global_ios);
+  return diagram->check(global_ios);
 }
 
 bool MainWindow::checkModel()
 { 
-  return model ? model->check(false) : true;
+  Q_ASSERT(model);
+  return model->check(false);
 }
 
 bool MainWindow::checkModelWithStimuli()
 { 
-  return model ? model->check(true) : true;
+  Q_ASSERT(model); 
+  return model->check(true);
 }
 
 void MainWindow::newModel()
 {
   checkUnsavedChanges();
-  model_panel->clear();
-  closeAutomatonTabs();
-  model->clear();
+  if ( model ) delete model; // This will delete all the enclosed diagrams
+  model = new Model;
+  closeDiagramTabs();
+  createDockWindow(model);
+  newDiagram();
   currentFileName.clear();
   setUnsavedChanges(false);
+  updateActions();
 }
 
 void MainWindow::saveToFile(QString fname)
 {
+  Q_ASSERT(model); 
   model->saveToFile(fname);
   logMessage("Saved file " + fname);
   setUnsavedChanges(false);
@@ -542,10 +464,6 @@ void MainWindow::saveToFile(QString fname)
 
 void MainWindow::save()
 {
-  if ( model->getName().isEmpty() ) {
-      QMessageBox::warning(Globals::mainWindow, "Error", "Please give a name to the model before saving it.");
-      return;
-      }
   if ( currentFileName.isEmpty() ) saveAs();
   else saveToFile(currentFileName);
 }
@@ -558,32 +476,42 @@ void MainWindow::saveAs()
   currentFileName = fname;
 }
 
-// Model and automaton editing
+// Model and diagram editing
 
-void MainWindow::addAutomatonToModel()
+void MainWindow::addDiagramTab(Diagram* diagram)
 {
-  Automaton *automaton = new Automaton(model);
-  model->addAutomaton(automaton);
-  //model->focus = automaton;
-  addAutomatonTab(automaton);
+  Q_ASSERT(model);
+  QGraphicsView* view = diagram->getView();
+  QString name = diagram->getName();
+  int index = diagrams->addTab(view, name);
+  diagrams->setCurrentIndex(index);
+  qDebug() << "MainWindow::addDiagramTab: view=" << view;
   setUnsavedChanges(true);
 }
 
-void MainWindow::duplicateAutomaton()
+void MainWindow::newDiagram()
 {
-  int index = automatons_panel->currentIndex();
-  if ( index < 0 ) return;
-  QWidget *panel = automatons_panel->widget(index);
-  Q_ASSERT(panel);
-  Automaton *automaton = panelToAutomaton.value(panel);
-  Q_ASSERT(automaton);
-  Automaton *automaton2 = automaton->duplicate();
-  model->addAutomaton(automaton2);
-  addAutomatonTab(automaton2);
+  Q_ASSERT(model); 
+  QString name = "A" + QString::number(diagrams->count());
+  Diagram *diagram = new Diagram(model, name, diagrams);
+  model->addDiagram(diagram);
+  addDiagramTab(diagram);
   setUnsavedChanges(true);
 }
 
-void MainWindow::editModel(QAction *action)
+void MainWindow::duplicateDiagram()
+{
+  Q_ASSERT(model); 
+  Diagram *diagram = currentDiagram();
+  Q_ASSERT(diagram);
+  Diagram *diagram2 = diagram->duplicate();
+  model->addDiagram(diagram2);
+  addDiagramTab(diagram2);
+  diagram2->edit();
+  setUnsavedChanges(true);
+}
+
+void MainWindow::editDiagram(QAction *action)
 {
   Globals::mode = static_cast<Globals::Mode>(action->data().value<int>());
 }
@@ -612,6 +540,7 @@ QString removeSuffix(QString fname)
 
 void MainWindow::renderDots()
 {
+    Q_ASSERT(model); 
     QString sFname = getCurrentFileName();
     qDebug() << "renderDots" << sFname;
     if ( sFname.isEmpty() ) return;
@@ -624,9 +553,9 @@ void MainWindow::renderDots()
       }
 }
 
-#ifndef USE_QGV
 void MainWindow::renderDot()
 {
+    Q_ASSERT(model); 
     QString sFname = getCurrentFileName();
     if ( sFname.isEmpty() ) return;
     QString rFname = changeSuffix(sFname, ".dot");
@@ -635,11 +564,12 @@ void MainWindow::renderDot()
     logMessage("Wrote file " + rFname);
     openResultFile(rFname);
 }
-#endif
 
 QString MainWindow::generateRfsm(bool withTestbench ) // TODO : factorize
 {
-  if ( ! checkModelWithStimuli() ) return "";
+  Q_ASSERT(model); 
+  if ( withTestbench && ! checkModelWithStimuli() ) return "";
+  if ( ! withTestbench && ! checkModel() ) return "";
   QString sFname = getCurrentFileName();
   if ( sFname.isEmpty() ) return "";
   QString rFname = changeSuffix(sFname, ".fsm");
@@ -649,6 +579,7 @@ QString MainWindow::generateRfsm(bool withTestbench ) // TODO : factorize
 
 void MainWindow::generateRfsmModel()
 {
+  Q_ASSERT(model); 
   QString rFname = generateRfsm(false);
   if ( ! rFname.isEmpty() ) {
     logMessage("Wrote file " + rFname);
@@ -658,6 +589,7 @@ void MainWindow::generateRfsmModel()
 
 void MainWindow::generateRfsmTestbench()
 {
+  Q_ASSERT(model); 
   QString rFname = generateRfsm(true);
   if ( ! rFname.isEmpty() ) {
     logMessage("Wrote file " + rFname);
@@ -665,103 +597,88 @@ void MainWindow::generateRfsmTestbench()
     }
 }
 
-// Central panel (automatons)
+// Diagrams
 
-void MainWindow::addAutomatonTab(Automaton* automaton)
+Diagram* MainWindow::diagramOf(int index)
 {
-  AutomatonPanel *automaton_panel = new AutomatonPanel(automaton,automatons_panel);
-  automatons_panel->addTab(automaton_panel, automaton->getName());
-  automatons_panel->setCurrentIndex(automatons_panel->count()-1);
-  panelToAutomaton.insert(automaton_panel,automaton);
+  QGraphicsView *view = qobject_cast<QGraphicsView*>(diagrams->widget(index));
+  Q_ASSERT(view);
+  //Diagram* diagram = viewToDiagram.value(view);
+  Diagram* diagram = qobject_cast<Diagram*>(view->scene());
+  Q_ASSERT(diagram);
+  return diagram;
 }
 
-
-void MainWindow::addAutomatonTabs(Model *model)
+void MainWindow::addDiagramTabs()
 {
-  for ( Automaton* automaton: model->getAutomatons() )
-    addAutomatonTab(automaton);
+  Q_ASSERT(model);
+  for ( Diagram* diagram: model->getDiagrams() )
+    addDiagramTab(diagram);
 }
 
-void MainWindow::closeAutomatonTab(int index)
+void MainWindow::closeDiagram(int index, bool confirm)
 {
-  qDebug() << "Closing automaton tab" << index;
-  QWidget *panel = automatons_panel->widget(index);
-  Q_ASSERT(panel);
-  Automaton *automaton = panelToAutomaton.value(panel);
-  Q_ASSERT(automaton);
-  qDebug() << "** Removing automaton" << automaton->getName();
-  automatons_panel->removeTab(index);
-  model->removeAutomaton(automaton);
-  panelToAutomaton.remove(panel);
-  delete panel; // removeTab does _not_ delete the tabbed widget
-}
-
-void MainWindow::closeAutomatonTabs()
-{
-  while ( automatons_panel->count() > 0 )
-    closeAutomatonTab(automatons_panel->currentIndex());
-  //updateActions();
-}
-
-void MainWindow::automatonTabChanged(int index)
-{
-  Q_UNUSED(index);
-  //updateActions();
-}
-
-void MainWindow::automatonTabChangeName(int index)
-{
-  QWidget *panel = automatons_panel->widget(index);
-  Q_ASSERT(panel);
-  Automaton *automaton = panelToAutomaton.value(panel);
-  Q_ASSERT(automaton);
-  qDebug() << "** Changing name for automaton" << index;
-  NameInputDialog dialog(automaton->getName(),panel);
-  if ( dialog.exec() == QDialog::Accepted ) {
-    QString name = dialog.getResult();
-    automaton->setName(name);
-    automatons_panel->setTabText(index,name);
-    modelModified();
+  Q_ASSERT(model);
+  QGraphicsView *view = qobject_cast<QGraphicsView*>(diagrams->widget(index));
+  Q_ASSERT(view);
+  qDebug() << "Closing diagram tab" << index << "/" << diagrams->count();
+  Diagram *diagram = qobject_cast<Diagram*>(view->scene());
+  Q_ASSERT(diagram);
+  if ( confirm ) {
+    QMessageBox save_message;
+    save_message.setText("Do you really want to close this tab ? This will remove the corresponding diagram from the model.");
+    save_message.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    save_message.setDefaultButton(QMessageBox::No);
+    if ( save_message.exec() != QMessageBox::Yes ) return;
     }
+  qDebug() << "Removing diagram" << diagram->getName();
+  diagrams->removeTab(index);
+  model->removeDiagram(diagram);
+  delete diagram; // removeTab does _not_ delete the tabbed widget
+  setUnsavedChanges(true);
 }
 
-// Right panel (DOT rendering and generated code)
+void MainWindow::closeDiagramTabs() // Note: this does _not_ delete the displayed diagram !
+{
+  while ( diagrams->count() > 0 )
+    diagrams->removeTab(diagrams->currentIndex());
+}
 
-void MainWindow::addResultTab(QString fname)
+// Popup windows (DOT rendering and generated code)
+
+void MainWindow::openTextFiles(QStringList fnames)
+{
+  foreach ( QString fname, fnames ) {
+    QFile file(fname);
+    if ( ! file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
+      QMessageBox::warning(this,"Error:","cannot open file:\n"+fname);
+      return;
+      }
+    }
+  TextsViewer *viewer = new TextsViewer(fnames);
+  viewer->show();
+}
+
+void MainWindow::openTextFile(QString fname)
 {
   QFile file(fname);
   if ( ! file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
-      QMessageBox::warning(this,"Error:","cannot open file:\n"+fname);
-      return;
+    QMessageBox::warning(this,"Error:","cannot open file:\n"+fname);
+    return;
     }
-  QFileInfo f(fname);
-  QString tabName = f.suffix() == "gif" ? changeSuffix(f.fileName(),".dot") : f.fileName();
-  for ( int i=0; i<results_panel->count(); i++ )
-    if ( results_panel->tabText(i) == tabName ) closeResultTab(i); // Do not open two tabs with the same name
-  if ( f.suffix() == "gif" ) {
-    QPixmap pixmap(f.filePath());
-    ImageViewer *viewer = new ImageViewer(pixmap, results_panel);
-    results_panel->addTab(viewer, tabName);
-    } 
-  else {
-    TextViewer *viewer = new TextViewer(file, codeFont, results_panel);
-    results_panel->addTab(viewer, tabName);
-    }
-  results_panel->setCurrentIndex(results_panel->count()-1);
+  TextViewer *viewer = new TextViewer(fname);
+  viewer->show();
 }
 
-void MainWindow::closeResultTab(int index) // TODO: factorize with automatons tab
+void MainWindow::openImageFile(QString fname)
 {
-  QWidget *w = results_panel->widget(index);
-  results_panel->removeTab(index);
-  if ( w ) delete w; // removeTab does _not_ delete the tabbed widget
-}
-
-void MainWindow::closeResultTabs()
-{
-  while ( results_panel->count() > 0 )
-    closeResultTab(results_panel->currentIndex());
-  updateActions();
+  QFile file(fname);
+  if ( ! file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
+    QMessageBox::warning(this,"Error:","cannot open file:\n"+fname);
+    return;
+    }
+  ImageViewer *viewer = new ImageViewer(fname);
+  viewer->show();
 }
 
 void MainWindow::openResultFile(QString fname)
@@ -776,7 +693,7 @@ void MainWindow::openResultFile(QString fname)
       customView("DOTVIEWER", args, wDir, true);
     else {
       if ( dotTransform(f, wDir) )
-        openResultFile(changeSuffix(fname, ".gif"));
+        openImageFile(changeSuffix(fname, ".gif"));
       }
     }
   else if ( f.suffix() == "vcd" ) {
@@ -786,8 +703,13 @@ void MainWindow::openResultFile(QString fname)
     customView("VCDVIEWER", args, wDir, true);
     }
   else {
-    addResultTab(fname);
+    openTextFile(fname);
     }
+}
+
+void MainWindow::openResultFiles(QStringList fnames)
+{
+  openTextFiles(fnames); // TO FIX : also handle multi-dot !
 }
 
 void MainWindow::customView(QString toolName, QStringList args, QString wDir, bool detach)
@@ -803,14 +725,17 @@ void MainWindow::customView(QString toolName, QStringList args, QString wDir, bo
      }
 }
 
-void MainWindow::resultTabChanged(int index)
-{
-  Q_UNUSED(index);
-  updateActions();
+bool MainWindow::isMainFile(QString fname) {
+  QString mainName = model->getName();
+  if ( mainName.isEmpty() ) mainName = "main";
+  mainName += ".cpp";
+  QFileInfo f(fname);
+  return f.fileName() == mainName;
 }
 
 void MainWindow::generate(QString target, bool withTestbench)
 {
+  Q_ASSERT(model);
   QString fname = generateRfsm(withTestbench);
   QFileInfo fi(fname);
   if ( fname.isEmpty() ) return;
@@ -830,7 +755,8 @@ void MainWindow::generate(QString target, bool withTestbench)
     }
   foreach ( QString opt, genOpts)
     if ( genOpts.contains(opt) ) genOpts.removeOne(opt);
-  QString mainName = model->getName().isEmpty() ? "main" : model->getName();
+  QString mainName = model->getName();
+  if ( mainName.isEmpty() ) mainName = "main";
   QStringList args =
     QStringList()
     << "-" + target
@@ -842,17 +768,23 @@ void MainWindow::generate(QString target, bool withTestbench)
   if ( target == "ctask" || target == "systemc" ) args << "-show_models";
   if ( Globals::compiler->run(fi.fileName(), args, wDir) ) {
     QStringList resFiles = Globals::compiler->getOutputFiles(target, wDir, mainName); 
-    if ( ! resFiles.isEmpty() ) {
     logMessage("Generated file(s) : " + resFiles.join(", "));
-    foreach ( QString rFile, resFiles) 
-      openResultFile(rFile);
+    if ( ! withTestbench && target == "systemc" ) 
+      resFiles.removeIf([this](QString fname) { return this->isMainFile(fname); });
+    switch ( resFiles.size() ) {
+      case 0: 
+        break;
+      case 1: 
+        openResultFile(resFiles.first());
+        break;
+      default:
+        openResultFiles(resFiles);
       }
     }
   else {
     QStringList compileErrors = Globals::compiler->getErrors();
     QMessageBox::warning(this, "", "Error when compiling model\n" + compileErrors.join("\n"));
     }
-  updateActions();
 }
 
 void MainWindow::generateCTask() { generate("ctask", false); }
@@ -882,95 +814,7 @@ bool MainWindow::dotTransform(QFileInfo f, QString wDir)
     }
 }
 
-void MainWindow::setCodeFont()
-{
-  bool ok;
-  QFont font = QFontDialog::getFont(&ok, QFont("Courier", 10), this);
-  //qDebug() << "Got font " << font.toString();
-  if ( ok ) {
-    for ( int i=0; i<results_panel->count(); i++ )
-      (static_cast<QPlainTextEdit*>(results_panel->widget(i)))->document()->setDefaultFont(font);
-    codeFont = font;
-    }
-}
-
-void MainWindow::zoomIn()
-{
-  scaleImage(zoomInFactor);
-}
-
-
-void MainWindow::zoomOut()
-{
-  scaleImage(zoomOutFactor);
-}
-
-void MainWindow::normalSize()
-{
-  QWidget *w = selectedTab();
-  QString k = w->metaObject()->className();
-  if ( k == "ImageViewer" ) {
-    ImageViewer* viewer = static_cast<ImageViewer*>(w);
-    if ( viewer == NULL ) return;
-    viewer->normalSize();
-    }
-  // updateSelectedTabTitle(); // TODO ? 
-}
-
-void MainWindow::fitToWindow()
-{
-  QWidget *w = selectedTab();
-  QString k = w->metaObject()->className();
-  if ( k == "ImageViewer" ) {
-    ImageViewer* viewer = static_cast<ImageViewer*>(w);
-    if ( viewer == NULL ) return;
-    viewer->fitToWindow(fitToWindowAction->isChecked() );
-    }
-  // updateSelectedTabTitle(); // TODO ? 
-  //updateViewActions(viewer);
-}
-
-QWidget* MainWindow::selectedTab()
-{
-  int i = results_panel->currentIndex();
-  if ( i < 0 ) return NULL;
-  QWidget *tab = results_panel->widget(i);
-  return tab;
-}
-
-void MainWindow::scaleImage(double factor)
-{
-  QWidget *w = selectedTab();
-  QString k = w->metaObject()->className();
-  currentScaleFactor = factor * currentScaleFactor;
-  if ( k == "ImageViewer" ) {
-    ImageViewer* viewer = static_cast<ImageViewer*>(w);
-    if ( viewer == NULL ) return;
-    viewer->scaleImage(currentScaleFactor); // Absolute scaling
-   }
-  else if ( k == "DotViewer" ) {
-    QGraphicsView* dotView = static_cast<QGraphicsView*>(w);
-    if ( dotView == NULL ) return;
-    dotView->scale(factor, factor); // Relative scaling
-  }
-  zoomInAction->setEnabled(currentScaleFactor < maxScaleFactor);
-  zoomOutAction->setEnabled(currentScaleFactor > minScaleFactor);
-  // updateSelectedTabTitle(); // TODO ? 
-}
-
-#ifdef USE_QGV
-void MainWindow::addDotTab(void)
-{
-  QString tabName = "dot";
-  for ( int i=0; i<results_panel->count(); i++ )
-    if ( results_panel->tabText(i) == tabName ) closeResultTab(i); // Do not open two tabs with the same name
-  DotViewer *view = new DotViewer(model, 200, 400, results_panel); // TODO: let the dotViewer class decide of the canvas dimensions ?
-  results_panel->addTab(view, tabName);
-  results_panel->setCurrentIndex(results_panel->count()-1);
-}
-#endif
-
-// Dynamic cursor handling (since 1.3.0)
+// Dynamic cursor handling
 
 void MainWindow::initCursors()
 {
@@ -1020,6 +864,7 @@ void MainWindow::logMessage(QString msg)
 
 void MainWindow::dumpModel(void) // For debug only
 {
+  Q_ASSERT(model);
   model->dump(); 
 }
 

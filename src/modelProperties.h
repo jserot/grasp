@@ -24,22 +24,19 @@ class ModelIovs;
 class QLineEdit;
 class QGroupBox;
 
-class ModelPanel : public QFrame
+class ModelProperties : public QFrame
 {
   Q_OBJECT
 private:
-  MainWindow* main_window;
-  Model *model;
+  Model *model; // The edited model
 
-  QGroupBox* name_panel;
-  QLineEdit* model_name_field;
   IovPanel *inps_panel;
   IovPanel *outps_panel;
   IovPanel *vars_panel;
   
 public:
-  explicit ModelPanel(Model *model, MainWindow* parent);
-  ~ModelPanel();
+  explicit ModelProperties(Model *model, QWidget* parent);
+  ~ModelProperties();
 
   QSize sizeHint() const { return QSize(275,300); }; 
 
@@ -47,18 +44,7 @@ signals:
   void modelModified();
   
 public slots:
-  void setModelName();
-  void fillModelName();
-  void clearModelName();
-  void fillIovPanel();
-  void clearIovPanel();
   void clear();
   void fill();
   void update();
-
-  void modelUpdated();
-  void dumpModel(); // for debug only
-
-private:
-  static QRegularExpressionValidator *io_name_validator;
 };

@@ -38,6 +38,6 @@ public:
   static QString stringOfKind(IoKind k);
   static QString stringOfType(IoType t);
   QString toString(bool withStim=true);
-  static QString stringOfList(QList<Iov*> ios);
+  static QString stringOfList(QList<Iov*> ios, bool withStim);
   };
 

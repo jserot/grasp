@@ -12,27 +12,24 @@
 
 
 #include <QtWidgets>
-#include "dotviewer.h"
-#include "QGVScene.h"
-#include "model.h"
+#include <QTabWidget>
+#include "textsViewer.h"
 
-const int DotViewer::minCanvasWidth = 200;
-const int DotViewer::minCanvasHeight = 400;
-
-DotViewer::DotViewer(Model *model, int width, int height, QWidget *parent) : QGraphicsView(parent)
+TextsViewer::TextsViewer(QStringList fnames) : QTabWidget()
 {
-  scene = new QGVScene("DOT", this);
-  scene->setSceneRect(QRectF(0, 0, width, height));
-  setScene(scene);
-  setMinimumWidth(minCanvasWidth);
-  setMinimumHeight(minCanvasHeight);
-  model->renderDot(scene);
-  scene->applyLayout();
-  //view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
-  ensureVisible(scene->itemsBoundingRect());
+  foreach ( QString fname, fnames ) {
+    QFile file(fname);
+    QFileInfo f(file);
+    qDebug() << "TextsViewer::adding tab for file" << fname;
+    TextViewer *viewer = new TextViewer(fname);
+    addTab(viewer, f.fileName());
+    }
+  setMovable(true);
+  setAttribute(::Qt::WA_DeleteOnClose);
+  setWindowTitle("SystemC code");
 }
 
-DotViewer::~DotViewer()
+TextsViewer::~TextsViewer()
 {
-  if ( scene ) delete scene;
+  qDebug() << "TextsViewer::delete";
 }

@@ -12,23 +12,15 @@
 
 #pragma once
 
-#include <QGraphicsView>
+#include <QTabWidget>
+#include "textViewer.h"
 
-class Model;
-class QGVScene;
-
-class DotViewer : public QGraphicsView
+class TextsViewer : public QTabWidget
 {
-  Q_OBJECT
-
-  const static int minCanvasWidth;
-  const static int minCanvasHeight;
-
 public:
-  DotViewer(Model *model, int width, int height, QWidget *parent);
-  ~DotViewer();
-
+  TextsViewer(QStringList fnames);
+  ~TextsViewer();
+protected:
 private:
-  QGVScene *scene;
 };
 

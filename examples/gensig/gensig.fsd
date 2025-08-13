@@ -1,35 +1,35 @@
 {
-  "automatons": [
+  "diagrams": [
     {
       "name": "A0",
       "states": [
         {
           "attr": "",
           "id": "_init",
-          "x": 196.0,
-          "y": 91.0
+          "x": 143.0,
+          "y": 40.0
         },
         {
           "attr": "s=1",
           "id": "E1",
-          "x": 230.0,
-          "y": 358.0
+          "x": 199.0,
+          "y": 351.0
         },
         {
           "attr": "s=0",
           "id": "E0",
-          "x": 232.0,
-          "y": 158.0
+          "x": 216.0,
+          "y": 126.0
         }
       ],
       "transitions": [
         {
           "actions": "",
           "dst_state": "E0",
-          "event": "",
-          "guard": "",
+          "event": "h",
+          "guard": "k=4",
           "location": 0,
-          "src_state": "_init"
+          "src_state": "E1"
         },
         {
           "actions": "k:=1",
@@ -42,10 +42,10 @@
         {
           "actions": "",
           "dst_state": "E0",
-          "event": "h",
-          "guard": "k=4",
+          "event": "",
+          "guard": "",
           "location": 0,
-          "src_state": "E1"
+          "src_state": "_init"
         },
         {
           "actions": "k:=k+1",
@@ -84,5 +84,5 @@
       "type": "bool"
     }
   ],
-  "name": "gensig"
+  "name": "main"
 }

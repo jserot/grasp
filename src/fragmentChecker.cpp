@@ -12,18 +12,19 @@
 
 #include "fragmentChecker.h"
 #include "model.h"
-#include "automaton.h"
+#include "diagram.h"
 #include "compiler.h"
 #include <QTemporaryFile>
 #include <QMessageBox>
 #include <QtDebug>
-#include "qt_compat.h"
 
-FragmentChecker::FragmentChecker(Compiler *compiler, Automaton *automaton, QWidget *parent)
+#define QT_ENDL Qt::endl
+
+FragmentChecker::FragmentChecker(Compiler *compiler, Diagram *diagram, QWidget *parent)
 {
   this->parent = parent;
   this->compiler = compiler;
-  this->automaton = automaton;
+  this->diagram = diagram;
 }
 
 bool FragmentChecker::check(QString kind, QString frag)
@@ -36,10 +37,10 @@ bool FragmentChecker::check(QString kind, QString frag)
   //qDebug() << "Temporary file name is" << fname;
   QTextStream os(&file);
   os << "-- context" << QT_ENDL;
-  foreach ( Iov* iov, automaton->enclosingModel()->getIos() ) {
+  foreach ( Iov* iov, diagram->enclosingModel()->getIos() ) {
     os << Iov::stringOfKind(iov->kind) << " " << iov->name << ": " << Iov::stringOfType(iov->type) << ";" << QT_ENDL;
   }
-  foreach ( Iov* iov, automaton->getVars() ) {
+  foreach ( Iov* iov, diagram->getVars() ) {
     os << Iov::stringOfKind(iov->kind) << " " << iov->name << ": " << Iov::stringOfType(iov->type) << ";" << QT_ENDL;
   }
   os << "-- fragment" << QT_ENDL;

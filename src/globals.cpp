@@ -15,6 +15,7 @@
 #include "compilerOptions.h"
 #include "compiler.h"
 #include "commandExec.h"
+#include "model.h"
 #include <QRegularExpression>
 
 const QString Globals::version = "2.0.0"; 
@@ -26,5 +27,5 @@ CommandExec *Globals::executor = NULL;
 Globals::Mode Globals::mode = SelectItem;
 QString Globals::initDir = ".";
 QWidget *Globals::mainWindow = NULL;
-//const QString Globals::defaultModelName = "main";
+QTabWidget* Globals::diagrams = NULL; 
 const QRegularExpression Globals::re_lid("[a-z][A-Za-z0-9_]*");

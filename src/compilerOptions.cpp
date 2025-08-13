@@ -18,8 +18,9 @@
 #include <QDialog>
 #include <QFileDialog>
 
-#include "qt_compat.h"
 #include "compilerOptions.h"
+
+#define QT_ENDL Qt::endl
 
 CompilerOptions::CompilerOptions(QString specFile, QWidget *parent)
 {

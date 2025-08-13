@@ -20,24 +20,18 @@
 #include <QTextStream>
 #include <QDebug>
 #include <QGuiApplication>
-#ifdef USE_QGV
-#include "QGVScene.h"
-#include "QGVNode.h"
-#include "QGVEdge.h"
-#endif
-#include "qt_compat.h"
 
-const QString Model::automatonPrefix = "A";
+const QString Model::defaultName = "main";
+const QString Model::diagramPrefix = "A";
 
-Model::Model(QString name, QWidget *parent)
+Model::Model()
 {
-    Q_UNUSED(parent); // Kept for future use ?
-    this->name = name;
+  name = Model::defaultName;
+  ios.clear();
 }
 
 Iov* Model::addIo(const QString name, const Iov::IoKind kind, const Iov::IoType type, const Stimulus stim)
 {
-  qDebug () << "Model::addIo" << name << kind << type << stim.toString() ;
   Iov *io = new Iov(name, kind, type, stim);
   ios.append(io);
   return io;
@@ -52,27 +46,27 @@ void Model::clear(void)
 {
   name = "";
   ios.clear();
-  for ( Automaton* a: automatons ) a->clear();
-  automatons.clear();
+  for ( Diagram* a: diagrams ) a->clear();
+  diagrams.clear();
 }
 
 void Model::update(void)
 {
-  for ( Automaton* a: automatons ) a->update();
+  for ( Diagram* a: diagrams ) a->update();
 }
 
-void Model::addAutomaton(Automaton *automaton)
+void Model::addDiagram(Diagram *diagram)
 {
-  if ( automaton->getName().isEmpty() )
-    automaton->setName(automatonPrefix + QString::number(automatons.length()));
-  qDebug () << "Model::addAutomaton" << automaton->getName();
-  automatons.append(automaton);
+  if ( diagram->getName().isEmpty() )
+    diagram->setName(diagramPrefix + QString::number(diagrams.length()));
+  qDebug () << "Model::addDiagram" << diagram->getName();
+  diagrams.append(diagram);
 }
 
-void Model::removeAutomaton(Automaton *automaton)
+void Model::removeDiagram(Diagram *diagram)
 {
-  qDebug () << "Model::removeAutomaton" << automaton->getName();
-  automatons.removeOne(automaton);
+  qDebug () << "Model::removeDiagram" << diagram->getName();
+  diagrams.removeOne(diagram);
 }
 
 QStringList Model::getInputs()
@@ -157,33 +151,32 @@ bool Model::check(bool withStimuli)
         }  
       }
     }
-  for ( Automaton* a: automatons )
+  for ( Diagram* a: diagrams )
     if ( ! a->check(ios) ) return false;
   return true;
 }
 
 // Reading and saving
 
-void Model::readFromFile(QString fname)
+Model* Model::readFromFile(QString fname)
 {
+  Model *model = new Model();
+  try {
     QFile file(fname);
     qDebug() << "Reading model from file" << file.fileName();
     file.open(QIODevice::ReadOnly);
     if ( file.error() != QFile::NoError ) {
       QMessageBox::warning(Globals::mainWindow, "","Cannot open file " + file.fileName());
-      return;
+      return NULL;
       }
     QTextStream is(&file);
     QString txt = is.readAll();
   
     auto json = nlohmann::json::parse(txt.toStdString()); 
 
-    // We cannot directly update the model, because an error can occur when reading the JSON file !
-    // Instead, we build lists of IOs, states and transitions by parsing the JSON  file ...
-
     QString name = QString::fromStdString(json.at("name"));
 
-    QList<Iov *> ios;
+    QList<Iov*>& ios = model->getIos();
     for ( const auto & json_io : json.at("ios") ) {
       std::string name = json_io.at("name");
       std::string kind = json_io.at("kind");
@@ -196,29 +189,24 @@ void Model::readFromFile(QString fname)
       ios.append(io);
       }
 
-    QList<Automaton*> sub_models;
-    for ( auto & json_automaton : json.at("automatons") ) {
-      Automaton *a = Automaton::fromJson(json_automaton, this, Globals::mainWindow);
-      qDebug() << "Read automaton from JSON";
+    QList<Diagram*>& diagrams = model->getDiagrams();
+    for ( auto & json_diagram : json.at("diagrams") ) {
+      Diagram *a = Diagram::fromJson(json_diagram, model, Globals::mainWindow);
+      qDebug() << "Read diagram from JSON";
       a->dump();
-      sub_models.append(a);
+      diagrams.append(a);
       }   
 
-    // ... and, if (and only if) parsing succeeds, we update the model.
+    model->setName(name);
 
-    clear();
-    this->name = name;
-
-    foreach ( Iov* io, ios) {
-      qDebug () << "Model::readFromFile: adding IO" << io->name << io->kind << io->type << io->stim.toString() ;
-      this->ios.append(io);
-      }
-    foreach ( Automaton *a, sub_models ) {
-      qDebug () << "Model::readFromFile: adding automaton" << a->getName();
-      addAutomaton(a);
-      }
-    //update();
     qDebug() << "Done";
+    return model;
+    }
+  catch(const std::exception& e) {
+    QMessageBox::warning(Globals::mainWindow, "Error", "Error when reading file " + fname + ": " + QString(e.what()));
+    delete model;
+    return NULL;
+  }
 }
 
 void Model::saveToFile(QString fname)
@@ -251,12 +239,12 @@ void Model::saveToFile(QString fname)
       cnt++;
       }
 
-    json_top["automatons"] = nlohmann::json::array();
-    for ( Automaton* a: automatons ) {
+    json_top["diagrams"] = nlohmann::json::array();
+    for ( Diagram* a: diagrams ) {
       nlohmann::json json;
       json["name"] = "main";
       a->toJson(json);
-      json_top["automatons"].push_back(json);
+      json_top["diagrams"].push_back(json);
       }
 
     QTextStream os(&file);
@@ -267,32 +255,11 @@ void Model::saveToFile(QString fname)
 
 // DOT export
 
-#ifdef USE_QGV
-// Direct DOT rendering using QGV library (since 1.3.0)
-
-void Model::renderDot(QGVScene *dotScene)
+QString Model::exportSingleDot(Diagram *diagram, QString basename, QStringList options)
 {
-  dotScene->setGraphAttribute("rankdir", "UD");
-  dotScene->setGraphAttribute("nodesep", "0.55");
-  dotScene->setGraphAttribute("ranksep", "0.95");
-  dotScene->setGraphAttribute("fontsize", "14");
-  dotScene->setGraphAttribute("mindist", "1.0");
-  dotScene->setNodeAttribute("shape", "circle");
-  dotScene->setNodeAttribute("style", "solid");
-
-  QMap<QString,QGVNode*> nodes;
-
-  for ( const auto a: automatons ) 
-    a->renderDot(dotScene, nodes);
-}
-#endif
-
-
-QString Model::exportSingleDot(Automaton *automaton, QString basename, QStringList options)
-{
-  //QString fname = basename + "_" + automaton->getName() + ".dot";
+  //QString fname = basename + "_" + diagram->getName() + ".dot";
   Q_UNUSED(basename);
-  QString fname = automaton->getName() + ".dot";
+  QString fname = diagram->getName() + ".dot";
   QFile file(fname);
   file.open(QIODevice::WriteOnly | QIODevice::Text);
   if ( file.error() != QFile::NoError ) {
@@ -300,7 +267,7 @@ QString Model::exportSingleDot(Automaton *automaton, QString basename, QStringLi
     return QString();
     }
   QTextStream os(&file);
-  os << "digraph " << automaton->getName() << " {\n";
+  os << "digraph " << diagram->getName() << " {\n";
   os << "layout = dot\n";
   os << "rankdir = UD\n";
   os << "size = \"8.5,11\"\n";
@@ -311,8 +278,8 @@ QString Model::exportSingleDot(Automaton *automaton, QString basename, QStringLi
   os << "mindist=1.0\n";
   bool withIoDesc = ! options.contains("-dot_no_captions");
   if ( ! ios.isEmpty() && withIoDesc ) 
-    os << "_ios [label=\"" << Iov::stringOfList(ios) << "\", shape=rect, style=solid]\n";
-  automaton->exportDot(os);
+    os << "_ios [label=\"" << Iov::stringOfList(ios,false) << "\", shape=rect, style=solid]\n";
+  diagram->exportDot(os);
   os << "}\n";
   file.close();
   return fname;
@@ -321,14 +288,13 @@ QString Model::exportSingleDot(Automaton *automaton, QString basename, QStringLi
 QStringList Model::exportDots(QString basename, QStringList options)
 {
   QStringList fnames;
-  for ( Automaton* automaton: automatons) {
-    QString fname = exportSingleDot(automaton,basename,options);
+  for ( Diagram* diagram: diagrams) {
+    QString fname = exportSingleDot(diagram,basename,options);
     if ( ! fname.isEmpty() ) fnames.append(fname);
     }
   return fnames;
 }
 
-#ifndef USE_QGV
 void Model::exportDot(QString fname, QStringList options)
 {
   QFile file(fname);
@@ -351,8 +317,8 @@ void Model::exportDot(QString fname, QStringList options)
   os << "mindist=1.0\n";
   bool withIoDesc = ! options.contains("-dot_no_captions");
   if ( withIoDesc ) 
-    os << "_ios [label=\"" << Iov::stringOfList(ios) << "\", shape=rect, style=solid]\n";
-  foreach ( Automaton *a, automatons) {
+    os << "_ios [label=\"" << Iov::stringOfList(ios,false) << "\", shape=rect, style=solid]\n";
+  foreach ( Diagram *a, diagrams) {
 	os << "subgraph cluster_" << a->getName() << " {\n";
     os << "label = " << a->getName() << "\n";
     a->exportDot(os);
@@ -361,7 +327,6 @@ void Model::exportDot(QString fname, QStringList options)
   os << "}\n";
   file.close();
 }
-#endif
 
 // RFSM export
 
@@ -439,20 +404,22 @@ void Model::exportRfsm(QString fname, bool withTestbench)
     return;
   }
   QTextStream os(&file);
-  // FSM models (automatons)
-  for ( const auto automaton : automatons ) {
-    automaton->exportRfsmModel(os,ios);
+  // FSM models (diagrams)
+  for ( const auto diagram : diagrams ) {
+    diagram->exportRfsmModel(os,ios);
     os << "\n";
     }
-  // IOs with stimuli
-  export_rfsm_ios(os);
-  os << "\n";
-  // FSM instances
   if ( withTestbench ) {
+    // IOs with stimuli
+    export_rfsm_ios(os);
+    os << "\n";
+    // FSM instances
+    if ( withTestbench ) {
       os << "\n\n";
-      for ( const auto automaton : automatons )
-        automaton->exportRfsmInstance(os,ios);
+      for ( const auto diagram : diagrams )
+        diagram->exportRfsmInstance(os,ios);
       }
+    }
   file.close();
 }
 
@@ -462,7 +429,16 @@ void Model::dump() // For debug only
   qDebug() << "  ios =";
   foreach ( Iov* io, ios )
     qDebug() << "    " <<  io->toString();
-  qDebug() << "  automatons =";
-  for ( const auto a: automatons ) 
+  qDebug() << "  diagrams =";
+  for ( const auto a: diagrams ) 
     a->dump();
 }
+
+Model::~Model()
+{
+  foreach ( Iov* io, ios )
+    delete io;
+  for ( const auto a: diagrams ) 
+    delete a;
+}
+  

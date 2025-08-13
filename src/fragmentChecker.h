@@ -15,13 +15,13 @@
 #include <QString>
 
 class Compiler;
-class Automaton;
+class Diagram;
 class QWidget;
 
 class FragmentChecker
 {
- public:
-  FragmentChecker(Compiler *compiler, Automaton *automaton, QWidget *parent);
+public:
+  FragmentChecker(Compiler *compiler, Diagram *diagram, QWidget *parent);
   bool check_state_valuation(QString valuation);
   bool check_guard(QString guard);
   bool check_action(QString action);
@@ -29,6 +29,6 @@ class FragmentChecker
 private:
   QWidget *parent;
   Compiler *compiler;
-  Automaton *automaton;
+  Diagram *diagram;
   bool check(QString kind, QString frag);
 };

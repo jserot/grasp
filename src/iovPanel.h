@@ -17,7 +17,7 @@
 #include "rowDesc.h"
 
 class Model;
-class Automaton;
+class Diagram;
 class QRegularExpressionValidator;
 
 class IovPanel : public DynamicPanel
@@ -26,15 +26,14 @@ class IovPanel : public DynamicPanel
 
 public:
 
-  enum ClientKind { IcModel, IcAutomaton };
-  typedef struct { // Iov panels are used both for models and model automatons
+  enum ClientKind { IcModel, IcDiagram };// Iov panels are used both for models and model diagrams
+  typedef struct {
     ClientKind icKind;
-    union { Model *model; Automaton *automaton; } icClient;
+    union { Model *model; Diagram *diagram; } icClient;
     } Client;
 
-  IovPanel(Iov::IoKind kind, QString title, QString rowPrefix, Client& client, QRegularExpressionValidator *name_validator);
+  IovPanel(Iov::IoKind kind, QString title, QString rowPrefix, Client client);
   ~IovPanel();
-
 
   QStringList retrieve(); // Not used here
 
@@ -44,12 +43,11 @@ signals:
 private:
   Iov::IoKind kind; // Input, output or variable
   Client client;
-  QRegularExpressionValidator *name_validator;
   QHash<QWidget*,RowDesc*> widgetToRow; 
   QString rowPrefix;
 
   void updateTypeChoices(RowDesc *row_desc);
-  void updateStimChoices(RowDesc *row_desc);  // For inputs only
+  void updateStimChoices(RowDesc *row_desc);  // For model inputs only
 
 protected slots:
   void addRowFields(QHBoxLayout *row_layout, void *data);
@@ -58,4 +56,7 @@ protected slots:
   void nameEdited();
   void typeEdited();
   void stimEdited();
+
+private:
+  static QRegularExpressionValidator *name_validator;
 };

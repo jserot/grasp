@@ -12,19 +12,31 @@
 
 #pragma once
 
-#include <QList>
-#include <QSet>
+#include <QDialog>
 
-#define QSET_FROM_LIST(type,qlist) (QSet<type> (qlist.constBegin(), qlist.constEnd()))
+class Diagram;
+class QLineEdit;
+class QTabWidget;
+class QComboBox;
+class IovPanel;
 
-template <typename T>
-QSet<T> QListToQSet(const QList<T>& qlist)
+class DiagramProperties : public QDialog
 {
-  return QSET_FROM_LIST(T,qlist);
-}
+  Q_OBJECT
+public:
+  DiagramProperties(Diagram *diagram, QWidget *parent);
+  ~DiagramProperties();
 
-template <typename T>
-QList<T> remove_duplicates(const QList<T>& l)
-{
-  return QListToQSet(l).values();
-}
+private:
+  QTabWidget *diagrams;
+  Diagram *diagram;
+  QLineEdit* name_field;
+  QComboBox *scaleCombo;
+  IovPanel *vars_panel;
+    
+protected slots:
+  void fill();
+  void changeScale(const QString& scale);
+  void accept();
+  void cancel();
+};

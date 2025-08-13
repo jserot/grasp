@@ -1,17 +1,19 @@
 * GENERAL
 
 * GUI
-- fix the `overlaping` and `spurious name editing` bugs  (see `KNOWN-BUGS`)
+- add an option to set the location of the log file when debug mode is set
+- enlarge the compiler path popup window
+- remove the "Dump model" action (only for debug)
+- add a "no check" option for by-passing the RFSM fragment checker
+- after adding or deleting an item, reset the tool to the pointer ("select") mode ?
+- automatically size the textviewer's popup according to the displayed text (see `textviewer.cpp`)
 - restrict the set of IOs of each automaton to those _actually occuring_ in the transitions (instead
   of using the full set of global IOs); for this we'll need an extension of the `fragment checker`
   mechanism returning all read/write variables occuring in a (set of) transition(s)
-- use in-bar editing (instead of dialog) to change automatons name (see:
-  `https://forum.qt.io/topic/108553/qml-editable-tab-title-within-tabview-on-double-click` for ex)
 - add sized ints
 - add type_coercions in accepted expressions
 - Allow attachement of priorities to transitions
 - VHDL and SystemC syntax highlighters
-- Allow resizing of state boxes ?
 - Export to SCXML ?
 
 * BUILD
@@ -20,8 +22,11 @@
 * TOOLS
 - implement a "server" mode for the `rfsmc` compiler, allowing it to be used for
   checking / extracting semantic informations from syntax fragments (thus generalizing the
-  `-check_fragment` option currently used by the `fragmentChecker` class 
-- replace `-dot_no_caption` option by `-dot_caption`  (reverse default behavior)
+  `-check_fragment` option currently used by the `fragmentChecker` class.
+  Use `QLocalSocket` (like in example `../socket/localfortune/client`) on the `Grasp` side.
+  Use `Caml` implementation of Unix socket on the server (`rfsmc`) side.
+  Q: The former will be automatically portable to Windows. How about the second ??
+- replace `-dot_no_caption` option by `-dot_caption`  (reverse default behavior) ?
 
 * DOC
 - uodate `README.md`

@@ -12,19 +12,31 @@
 
 #pragma once
 
-#include <QList>
-#include <QSet>
+#include <QDialog>
 
-#define QSET_FROM_LIST(type,qlist) (QSet<type> (qlist.constBegin(), qlist.constEnd()))
+class TextViewer;
+class QFontComboBox;
+class QComboBox;
 
-template <typename T>
-QSet<T> QListToQSet(const QList<T>& qlist)
+class TextProperties : public QDialog
 {
-  return QSET_FROM_LIST(T,qlist);
-}
+  Q_OBJECT
 
-template <typename T>
-QList<T> remove_duplicates(const QList<T>& l)
-{
-  return QListToQSet(l).values();
-}
+public:
+  TextProperties(TextViewer *viewer, QWidget *parent = NULL);
+  ~TextProperties();
+
+private:
+  TextViewer *viewer;
+  QFontComboBox *fontCombo;
+  QComboBox *fontSizeCombo;
+  QPushButton *close_button;
+  QFont font;
+  int fontSize;
+                           
+protected slots:
+  void fontChanged();
+  void close();
+  // void accept();
+  // void cancel();
+};

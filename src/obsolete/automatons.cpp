@@ -39,10 +39,9 @@ AutomatonPanel::AutomatonPanel(Automaton *automaton, QWidget* parent) : QFrame(p
     view->setMinimumHeight(400);
     layout->addWidget(view);
     
-    IovPanel::Client client;
-    client.icKind = IovPanel::IcAutomaton;
-    client.icClient.automaton = automaton;
-    vars_panel = new IovPanel(Iov::IoVar, "Local variables", "Local variable", client, var_name_validator);
+    // client.icKind = IovPanel::IcAutomaton;
+    // client.icClient.automaton = automaton;
+    vars_panel = new IovPanel(Iov::IoVar, "Local variables", "Local variable", IovPanel::IcAutomaton, var_name_validator);
     fillVarsPanel();
     layout->addWidget(vars_panel);
 

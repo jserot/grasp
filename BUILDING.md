@@ -1,7 +1,7 @@
 # Building from source
 
 Building from sources is currently supported for (at least) the following platforms :
-- Qt5 on MacOS 10.12 running on an Intel (x86) Mac (platform name: `qt5-macx86`)
+- Qt6 on MacOS 10.12 running on an Intel (x86) Mac (platform name: `qt5-macx86`)
 - Qt6 on Windows10 running MSYS2/ucrt64 development env (platform name: `qt6-ucrt64`)
 - Qt6 on MacOS 12.6 running on an M1 Mac (platform name: `qt6-macm1`)
 
@@ -10,7 +10,7 @@ Building from sources is currently supported for (at least) the following platfo
 * [ocaml](http://ocaml.org) (version>=5.0) with latest version of the following [opam](http://opam.ocaml.org) packages installed:
   - [dune](http://opam.ocaml.org/packages/dune) (version>=3.11)
   - [rfsm](http://opam.ocaml.org/packages/rfsm) (version>=2.1)
-* [Qt](http://www.qt.io) (version>=5.8)
+* [Qt](http://www.qt.io) (version>=6.9)
 
 The `graphviz` and `gtkwave` external tools are not required for building but, as for the binary
 packages, will be required to view results when running the application.

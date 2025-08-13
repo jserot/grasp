@@ -28,7 +28,7 @@
 #include "fragmentChecker.h"
 
 TransitionProperties::TransitionProperties(
-  Transition *transition, Automaton *automaton, bool isInitial, QWidget *parent)
+  Transition *transition, Diagram *diagram, bool isInitial, QWidget *parent)
   : QDialog(parent)
 {
   setWindowTitle("Transition");
@@ -83,7 +83,7 @@ TransitionProperties::TransitionProperties(
   start_state_field->clear();
   end_state_field->clear();
   if ( isInitial ) {
-    foreach ( State* state, automaton->states() ) {
+    foreach ( State* state, diagram->states() ) {
       if ( ! state->isPseudo() ) {
           QString id = state->getId();
           end_state_field->addItem(id, QVariant(id));
@@ -93,7 +93,7 @@ TransitionProperties::TransitionProperties(
         }
       }
   else {
-    foreach ( State* state, automaton->states() ) {
+    foreach ( State* state, diagram->states() ) {
       if ( ! state->isPseudo() ) {
         QString id = state->getId();
         start_state_field->addItem(id, QVariant(id));
@@ -106,8 +106,8 @@ TransitionProperties::TransitionProperties(
     }
   }
   event_field->clear();
-  QStringList inpEvents = automaton->enclosingModel()->getInpEvents();
-  QStringList sharedEvents = automaton->enclosingModel()->getSharedEvents();
+  QStringList inpEvents = diagram->enclosingModel()->getInpEvents();
+  QStringList sharedEvents = diagram->enclosingModel()->getSharedEvents();
   for ( auto ev: inpEvents + sharedEvents ) 
     event_field->addItem(ev, QVariant(ev));
   QString event = transition->getEvent();
@@ -127,8 +127,11 @@ TransitionProperties::TransitionProperties(
   connect(cancel_button, &QPushButton::clicked, this, &TransitionProperties::cancel);
   connect(accept_button, &QPushButton::clicked, this, &TransitionProperties::accept);
 
+  Q_ASSERT(Globals::mainWindow);
+  connect(this, SIGNAL(modelModified()), Globals::mainWindow, SLOT(modelModified()));
+
   this->transition = transition;
-  this->automaton = automaton;
+  this->diagram = diagram;
 }
 
 void TransitionProperties::accept()
@@ -141,17 +144,17 @@ void TransitionProperties::accept()
   bool isInitial = transition->isInitial();
   
   if ( ! isInitial ) {
-    srcState = automaton->getState(start_state_field->currentText());
+    srcState = diagram->getState(start_state_field->currentText());
     Q_ASSERT(srcState);
     }
 
-  dstState = automaton->getState(end_state_field->currentText());
+  dstState = diagram->getState(end_state_field->currentText());
   Q_ASSERT(dstState);
 
   if ( ! isInitial ) 
     event = event_field->currentText();
 
-  FragmentChecker checker(Globals::compiler,automaton,this);
+  FragmentChecker checker(Globals::compiler,diagram,this);
 
   bool guards_ok = true;
   if ( ! isInitial ) {
@@ -211,10 +214,15 @@ void TransitionProperties::accept()
       transition->setEvent(event);
       transition->setGuards(guards);
     }
+    qDebug() << "TransitionProperties::accept(ok)";
+    update();
+    emit modelModified(); // To main window
     QDialog::done(Accepted);
     }
   else {
+    qDebug() << "TransitionProperties::accept(nok)";
     // Do not accept and leave dialog opened
+    // TODO: check this ! 
   }
 }
 
