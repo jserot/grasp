@@ -4,6 +4,7 @@
 _inputs_, _outputs_ and (shared) _variables_. I/Os and variables are typed. _Stimuli_ can be
 attached to global inputs to perform simulations of the model. 
 
+
 ### Creating a model
 
 After launching the application, invoke the `New model` action from the `File` menu. This creates a

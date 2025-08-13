@@ -8,11 +8,11 @@
   _event_ and a set of boolean _guards_ and triggering a sequence of _actions_. **Grasp** can also
   generate an implementation of the model (including a _testbench_ for testing it) in
 
-    - `CTask` (a C dialect with primitives for describing event-based synchronisation)
+- `CTask` (a C dialect with primitives for describing event-based synchronisation)
 
-    - `SystemC`
+- `SystemC`
 
-    - `VHDL` 
+- `VHDL`
 
 
 **Grasp** is a descendant of [Rfsm-Light](https://github.com/jserot/rfsm-light), which was limited

@@ -55,6 +55,7 @@ src/qrc_resources.*
 src/grasp.app/
 src/gui/options_spec.txt
 src/BROWSE
+src/obsolete/
 doc/figs/*.pdf
 doc/etc/
 videos/
