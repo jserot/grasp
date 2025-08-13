@@ -23,7 +23,7 @@ simulator and compiler.
 ## DOCUMENTATION
 
 A minimalistic "Howto" is available
-[here](https://github.com/jserot/grasp/blob/master/doc/using.md)
+[here](https://github.com/jserot/grasp/blob/master/doc/Using.md)
 
 ## INSTALLATION
 

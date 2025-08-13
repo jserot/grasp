@@ -11,7 +11,7 @@ After launching the application, invoke the `New model` action from the `File` m
 new model, with a single diagram, and add two panels in the main window : one for editing this diagram
 and another for editing the globals I/Os and variables of the model.
 
-![](./newmodel.png)
+![](./snaps/newmodel.png)
 
 ## Adding I/Os
 
@@ -22,7 +22,7 @@ menu).
 When adding an input, output or global (shared) variable, give its name and type. For inputs, it's possible
 to also attach stimuli (but this is only required for simulating the model).
 
-![](./newmodel.png)
+![](./snaps/add_io.png)
 
 ### Adding a state to a diagram 
 
@@ -63,7 +63,7 @@ outcoming transitions)
 
 Right-click on the background of the corresponding panel.
 
-![](./editdiagram.png)
+![](./snaps/editdiagram.png)
 
 ### Adding / removing a diagram from a model
 
