@@ -1,11 +1,11 @@
-### Basic concepts
+# Basic concepts
 
 **Grasp** manipulates _models_. A _model_ is a collection of _diagrams_ with a set of global
 _inputs_, _outputs_ and (shared) _variables_. I/Os and variables are typed. _Stimuli_ can be
 attached to global inputs to perform simulations of the model. 
 
 
-### Creating a model
+## Creating a model
 
 After launching the application, invoke the `New model` action from the `File` menu. This creates a
 new model, with a single diagram, and add two panels in the main window : one for editing this diagram
@@ -24,13 +24,13 @@ to also attach stimuli (but this is only required for simulating the model).
 
 ![](./snaps/add_io.png)
 
-### Adding a state to a diagram 
+## Adding a state to a diagram 
 
 Select the ![](./imgs/state.png) button in the toolbar and click on the
   diagram editing panel. A pop-up dialog gives the opportunity to set the name of the added state and,
   possibly, to attach output valuations. Click `Done` when finished.
 
-### Adding a transition to a diagram 
+## Adding a transition to a diagram 
 
 Select the ![](./imgs/transition.png) button, click on
   the start state and, keeping the mouse button pressed, go the end state and release mouse button.
@@ -49,23 +49,23 @@ To add an **initial transition**, select the ![](./imgs/initstate.png) button, c
 
 To **move a state**, select the ![](./imgs/select.png) button and drag the state.
 
-### Editing a state or a transition
+## Editing a state or a transition
 
 Select the ![](./imgs/select.png) button, and right-click (or Ctl-Click on a Mac) on the corresponding item 
 
-### Deleting a state or a transition
+## Deleting a state or a transition
 
 select the ![](./imgs/delete.png) button
 and click on the state or transition (deleting a state will also delete all incoming and
 outcoming transitions)
 
-### Changing the name of the diagram or add local variables
+## Changing the name of the diagram or add local variables
 
 Right-click on the background of the corresponding panel.
 
 ![](./snaps/editdiagram.png)
 
-### Adding / removing a diagram from a model
+## Adding / removing a diagram from a model
 
 For adding a new diagram, invoke the `Add diagram` action from the `Model` menu. The name of 
 
@@ -73,12 +73,12 @@ Adding a diagram can also be performed by invoking the `Duplicate current diagra
 `Model` menu. In this case, the added diagram is a copy the current one. A popup window gives the
 opportunity the rename it accordingly. 
 
-### Saving and loading
+## Saving and loading
 
 * Models can be saved to (resp. read from) files by invoking the `Save` or `Save as` (resp. `Open`)
   actions from the `File` menu. 
   
-### Compiling
+## Compiling
 
 The `Compile` menu is used to generate various representations of the model and to simulate it. 
 
@@ -86,7 +86,7 @@ Compilation options can be adjusted, for each target representation, by invoking
 options` action from the `Configuration` menu.
 
 
-#### DOT
+### DOT
 
 The `Generate DOT representation` action is used to produce a `.dot` representation, to be viewed by
 the `Graphviz` set of tools. By default, this action generates a `.gif` image which is displayed in
@@ -104,7 +104,7 @@ The`Generate DOT representation` generates a single file, in which the diagrams 
 are displayed as sub-graphs ("clusters"). It is sometimes useful to generate separates `.dot` files for
 each diagram. For this, invoke the `Generate separate DOT representation` action. 
 
-#### CTask, SystemC and VHDL
+### CTask, SystemC and VHDL
 
 Invoke the corresponding action in the `Compile` menu. The generated code is produced in a separate
 window. When multiple files are produced, these files are displayed in separate tabs. 
@@ -112,13 +112,13 @@ window. When multiple files are produced, these files are displayed in separate 
 For `SystemC` and `VHDL`, the generated code may include or not a testbench for simulation.
 
 
-#### RFSM
+### RFSM
 
 The `Generate RFSM code` generates the representation of the model for the
 [rfsmc](https://github.com/jserot/rfsm) compiler. This representation is that used internally to
 compile the model to other formats. It normally won't be used by the casual user.
   
-### Simulating
+## Simulating
 
 Provided that stimuli have been attached to inputs in the `Model IOs` panel, 
 the model can be simulated by invoking the `Run simulator` action of the `Compile` menu.
@@ -127,7 +127,7 @@ The generated `.vcd` file is the passed to the corresponding viewer application 
 `Compiler paths` window accessible from the `Compiler and tools` action from the `Configuration`
 menu). 
 
-### Trouble-shooting, debugging
+# Trouble-shooting, debugging
 
 When the `debug` option (in the `General` tab of the `Compiler
 options` window accessible from the `Configuration` menu) is set, 
