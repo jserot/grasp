@@ -20,7 +20,7 @@
 #include <QComboBox>
 #include <QtDebug>
 
-#include "textviewer.h"
+#include "textViewer.h"
 
 TextProperties::TextProperties(TextViewer *viewer, QWidget *parent)
   : QDialog(parent)

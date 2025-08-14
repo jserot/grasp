@@ -337,7 +337,6 @@ void MainWindow::createMenus()
     configMenu = menuBar()->addMenu("&Configuration");
     configMenu->addAction(pathConfigAction);
     configMenu->addAction(compilerOptionsAction);
-    configMenu->addAction(fontConfigAction);
 }
 
 void MainWindow::createToolbar()

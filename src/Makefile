@@ -2552,7 +2552,7 @@ textProperties.o: textProperties.cpp textProperties.h \
 		../../../../Qt2/6.9.1/macos/lib/QtWidgets.framework/Headers/qcombobox.h \
 		../../../../Qt2/6.9.1/macos/lib/QtCore.framework/Headers/QtDebug \
 		../../../../Qt2/6.9.1/macos/lib/QtCore.framework/Headers/qdebug.h \
-		textviewer.h \
+		textViewer.h \
 		../../../../Qt2/6.9.1/macos/lib/QtWidgets.framework/Headers/QPlainTextEdit \
 		../../../../Qt2/6.9.1/macos/lib/QtWidgets.framework/Headers/qplaintextedit.h \
 		syntaxHighlighters.h \

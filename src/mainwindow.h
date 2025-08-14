@@ -140,7 +140,6 @@ private:
     QAction *closeResultsAction;
     QAction *pathConfigAction;
     QAction *compilerOptionsAction;
-    QAction *fontConfigAction;
     QActionGroup *modelActions;
     QAction* addDiagramAction;
     QAction* duplDiagramAction;

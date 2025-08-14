@@ -49,6 +49,7 @@ examples/*/vhdl/
 *.vcd
 src/debug/
 src/release/
+src/Makefile
 src/Makefile.*
 src/moc_*.*
 src/qrc_resources.*
