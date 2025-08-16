@@ -200,14 +200,15 @@ void CompilerOptions::unitValueChanged(const int s)
 void CompilerOptions::buttonClicked(QAbstractButton *button)
 {
   QString action = button->text();
-  if ( action == "&Save" ) {
+  if ( action.startsWith("&") ) action.remove(0,1);
+  if ( action == "Save" ) {
     QString fname;
     fname = QFileDialog::getSaveFileName(parent, "Save options to file", "", "OPTS file (*.opts)");
     if ( fname.isEmpty() ) return;
     qDebug() << "Saving to file " << fname;
     saveToFile(fname);
     }
-  else if ( action == "&Open" ) {
+  else if ( action == "Open" ) {
     QString fname;
     fname = QFileDialog::getOpenFileName(parent, "Open file", "", "OPTS file (*.opts)");
     if ( fname.isEmpty() ) return;
@@ -220,8 +221,8 @@ void CompilerOptions::buttonClicked(QAbstractButton *button)
     //    "modalSession has been exited prematurely - check for a reentrant call to endModalSession"
     // TO FIX ?
     }
-  else if ( action == "&OK" ) dialog->accept();
-  else if ( action == "&Cancel" ) dialog->reject();
+  else if ( action == "OK" ) dialog->accept();
+  else if ( action == "Cancel" ) dialog->reject();
 }
 
 void CompilerOptions::saveToFile(QString fname)

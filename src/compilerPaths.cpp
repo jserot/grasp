@@ -130,6 +130,7 @@ void CompilerPaths::valueChanged(const QString& txt)
 void CompilerPaths::buttonClicked(QAbstractButton *button)
 {
   QString action = button->text();
+  if ( action.startsWith("&") ) action.remove(0,1);
   qDebug() << "CompilerPaths::buttonClicked: " << action;
   if ( action == "Save" ) {
     QString fname;
@@ -138,8 +139,8 @@ void CompilerPaths::buttonClicked(QAbstractButton *button)
     saveToFile(fname);
     logMessage("Saved compiler paths to file " + fname);
     }
-  else if ( action == "&OK" ) dialog->accept();
-  else if ( action == "&Cancel" ) dialog->reject();
+  else if ( action == "OK" ) dialog->accept();
+  else if ( action == "Cancel" ) dialog->reject();
 }
 
 void CompilerPaths::saveToFile(QString fname)
