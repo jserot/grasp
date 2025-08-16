@@ -130,6 +130,7 @@ void CompilerPaths::valueChanged(const QString& txt)
 void CompilerPaths::buttonClicked(QAbstractButton *button)
 {
   QString action = button->text();
+  qDebug() << "CompilerPaths::buttonClicked: " << action;
   if ( action == "Save" ) {
     QString fname;
     fname = QFileDialog::getSaveFileName(parent, "Save configuration to file", "", "INI file (*.ini)");
@@ -137,8 +138,8 @@ void CompilerPaths::buttonClicked(QAbstractButton *button)
     saveToFile(fname);
     logMessage("Saved compiler paths to file " + fname);
     }
-  else if ( action == "OK" ) dialog->accept();
-  else if ( action == "Cancel" ) dialog->reject();
+  else if ( action == "&OK" ) dialog->accept();
+  else if ( action == "&Cancel" ) dialog->reject();
 }
 
 void CompilerPaths::saveToFile(QString fname)

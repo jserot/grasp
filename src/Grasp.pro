@@ -1,4 +1,4 @@
-!include(../config) { error("Cannot open config file. Run configure script in top directory") }
+#!include(../config) { error("Cannot open config file. Run configure script in top directory") }
 
 CONFIG   += debug
 QT       += widgets

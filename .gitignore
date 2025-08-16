@@ -53,6 +53,7 @@ src/Makefile
 src/Makefile.*
 src/moc_*.*
 src/qrc_resources.*
+src/Grasp
 src/grasp.app/
 src/gui/options_spec.txt
 src/BROWSE
