@@ -1,13 +1,13 @@
 #!/bin/bash
 
 configure_options="$*"
-platform=qt6-macm1
+platform=macos
 appname=Grasp
-dotprogram='dot'
-dotviewer='graphviz'
-vcdviewer='gtkwave'
+dotprogram="/usr/local/bin/dot"
+dotviewer="/usr/local/bin/graphviz"
+vcdviewer="/opt/bin/gtkwave"
 txtviewer='nano'
-rfsmc='~/Dev/ml/rfsm/_build/default/src/guests/std/bin/rfsmc.exe'
+rfsmc='rfsmc.exe'
 #rfsmlib='~/Dev/ml/rfsm/etc/lib'
 doc='yes'
 sysc_dir='/usr/local/systemc-2.3.0'
@@ -72,11 +72,8 @@ case "$platform" in
       echo "QMAKE=/Developer/Qt5.8/5.8/clang_64/bin/qmake" >> config;
       echo "QMAKE_SPEC=-spec macx-clang" >> config;
       echo "WINDEPLOYQT=unused_command" >> config;;
-  qt6-macm1)
-      echo "PLATFORM_TYPE=macos" >> config;
-      echo "PLATFORM=qt6-macm1" >> config;
-      echo "QMAKE=~/Qt/6.3.1/macos/bin/qmake" >> config;
-      echo "QMAKE_SPEC=-spec macx-clang CONFIG+=arm64" >> config;
+  macos)
+      echo "PLATFORM=macos" >> config;
       echo "WINDEPLOYQT=unused_command" >> config;;
   *) 
       echo "Unknown platform: $platform";
@@ -93,7 +90,7 @@ echo "BUILD_DOC=$doc" >> config
 echo "DOT=$dotprogram" >> config
 echo "DOTVIEWER=$dotviewer" >> config
 echo "VCDVIEWER=$vcdviewer" >> config
-echo "TXTVIEWER=$textviewer" >> config
+echo "TXTVIEWER=$txtviewer" >> config
 
 echo "** Wrote file ./config"
 
@@ -101,7 +98,7 @@ rm -f ./src/grasp.ini
 touch ./src/grasp.ini
 
 case "$platform" in
-  qt5-macx86|qt6-macm1)
+  macos)
       if [ -n "$draft" ]; then
           echo "COMPILER=$rfsmc" >> ./src/grasp.ini
       else
@@ -110,6 +107,7 @@ case "$platform" in
       echo "DOTPROGRAM=$dotprogram" >> ./src/grasp.ini;
       echo "DOTVIEWER=$dotviewer" >> ./src/grasp.ini;
       echo "VCDVIEWER=$vcdviewer" >> ./src/grasp.ini;
+      echo "TXTVIEWER=$txtviewer" >> ./src/grasp.ini;
       echo "INITDIR=~/Documents" >> ./src/grasp.ini;;
   qt6-ucrt64)
 # These are temporary, dev-only locations. The definitive ones will be specified when running the Installer wizard

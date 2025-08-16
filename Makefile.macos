@@ -1,0 +1,71 @@
+# Makefile to build the MacOS distribution
+
+include config
+
+# Default values for compiler paths (to be overriden by configure)
+DOTPROGRAM="/usr/local/bin/dot"
+DOTVIEWER="/usr/local/bin/graphviz"
+VCDVIEWER="/opt/bin/gtkwave"
+TXTVIEWER="open"
+
+.PHONY: build install installer
+
+build: build-gui
+
+INSTALL_DIR=/tmp/grasp
+
+build-gui:
+	@echo "** Building GUI"
+	(cd src; qmake; make)
+
+run:
+	(cd src; open Grasp.app)
+
+dist:
+	rm -rf ./dist/macos/Grasp.app
+	cp -r ./src/Grasp.app ./dist/macos
+	cp ./src/{grasp.ini,options_spec.txt} ./dist/macos/Grasp.app/Contents/MacOS
+	cp $(RFSMC) ./dist/macos/Grasp.app/Contents/MacOS
+
+install: dist
+	@echo "** Installing in $(INSTALL_DIR)"
+	rm -rf $(INSTALL_DIR)
+	mkdir $(INSTALL_DIR)
+	cp -r src/grasp.app $(INSTALL_DIR)/Grasp.app
+#	cp ./lib/etc/options_spec.txt $(INSTALL_DIR)/Grasp.app/Contents/MacOS
+#	cp ./dist/macos/grasp.ini $(INSTALL_DIR)/Grasp.app/Contents/MacOS
+	cp ./dist/macos/INSTALL $(INSTALL_DIR)/INSTALL
+	mkdir $(INSTALL_DIR)/doc
+	cp  doc/Using.md $(INSTALL_DIR)/doc
+	cp -r doc/imgs $(INSTALL_DIR)/doc
+	mkdir $(INSTALL_DIR)/examples
+	cp -r examples/* $(INSTALL_DIR)/examples
+	rm -f $(INSTALL_DIR)/examples/Makefile
+	cp {CHANGES.md,KNOWN-BUGS.md,LICENSE,README.md} $(INSTALL_DIR)
+
+RFSM_VOLUME=Grasp-$(VERSION)
+
+installer:
+	@echo "** Creating disk image"
+	rm -f /tmp/Grasp.dmg
+	hdiutil create -size 16m -fs HFS+ -volname "$(RFSM_VOLUME)" /tmp/Grasp.dmg
+	hdiutil attach /tmp/Grasp.dmg
+	cp -r $(INSTALL_DIR)/Grasp.app /Volumes/$(RFSM_VOLUME)
+	ln -s /Applications /Volumes/$(RFSM_VOLUME)/Applications
+	cp -r $(INSTALL_DIR)/examples /Volumes/$(RFSM_VOLUME)/Examples
+	cp -r $(INSTALL_DIR)/doc /Volumes/$(RFSM_VOLUME)/Documentation
+	cp $(INSTALL_DIR)/{CHANGES.md,KNOWN-BUGS.md,LICENSE,README.md,INSTALL} /Volumes/$(RFSM_VOLUME)
+	hdiutil detach /Volumes/$(RFSM_VOLUME)
+	hdiutil convert /tmp/Grasp.dmg -format UDZO -o /tmp/Grasp_ro.dmg
+	@echo "** Copying disk image into ./binaries"
+	mkdir -p ./binaries # May not exist on cloned repositories
+	mv /tmp/Grasp_ro.dmg ./binaries/Grasp-$(VERSION).dmg
+
+clean:
+	(cd src; qmake; make clean)
+
+clobber: clean
+	(cd src; qmake; make distclean)
+
+.PHONY:
+.PHONY: dist

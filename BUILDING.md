@@ -1,16 +1,14 @@
 # Building from source
 
 Building from sources is currently supported for (at least) the following platforms :
-- Qt6 on MacOS 10.12 running on an Intel (x86) Mac (platform name: `qt5-macx86`)
-- Qt6 on Windows10 running MSYS2/ucrt64 development env (platform name: `qt6-ucrt64`)
-- Qt6 on MacOS 12.6 running on an M1 Mac (platform name: `qt6-macm1`)
+- MacOS 12.6 with Qt6 (platform name: `macos`)
+- LinuxMint 6.8 with Qt6) (platform name: `linux`)
+- Windows10 running MSYS2/ucrt64 development env and Qt6 (platform name: `windows`)
 
 ## Pre-requisites
 
-* [ocaml](http://ocaml.org) (version>=5.0) with latest version of the following [opam](http://opam.ocaml.org) packages installed:
-  - [dune](http://opam.ocaml.org/packages/dune) (version>=3.11)
-  - [rfsm](http://opam.ocaml.org/packages/rfsm) (version>=2.1)
 * [Qt](http://www.qt.io) (version>=6.9)
+* [ocaml](http://ocaml.org) (version>=5.0) 
 
 The `graphviz` and `gtkwave` external tools are not required for building but, as for the binary
 packages, will be required to view results when running the application.
@@ -19,9 +17,9 @@ packages, will be required to view results when running the application.
 
 * Get the source code: `git clone https://github.com/jserot/grasp`
 * `cd grasp`
-* `./configure -platform <platform name> [other options]` (`./configure --help` for the list of options)
+* `./configure -platform <platform_name> [other options]` (`./configure --help` for the list of options)
 - `cd src`
-- `make qmake`
+- `qmake`
 - `make`
 - `make run` (for testing)
 - `make dist`  (this will build the clickable app in `../dist/<platform>`)
