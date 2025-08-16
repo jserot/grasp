@@ -586,6 +586,10 @@ bool Diagram::check(QList<Iov*>& global_ios)
     report_error("No name specified for diagram");
     return false;
     }
+  if ( ! initState() || ! initTransition() ) {
+    report_error("No initial state/transition");
+    return false;
+    }
   for ( Transition *t : transitions() ) 
     if ( ! check_transition(t, global_ios) ) return false;
   return true;
@@ -831,6 +835,7 @@ void Diagram::exportRfsmModel(QTextStream& os, QList<Iov*>& global_ios)
     QString indent = QString(2, ' ');
     bool first;
 
+    if ( check(global_ios) == false ) return;
     // TODO : compute actual_ios using an extension of the fragment checker mechanism
     // For now, let's assume local_ios = global_ios (i.e. all diagrams take all IOs
     //QList<Iov*> actual_ios;
@@ -877,8 +882,8 @@ void Diagram::exportRfsmModel(QTextStream& os, QList<Iov*>& global_ios)
 
     State* iState = initState();
     Transition* iTransition = initTransition();
-    if ( iState == NULL ) throw std::invalid_argument("Initial state undefined");
-    if ( iTransition == NULL ) throw std::invalid_argument("Initial transition undefined");
+    Q_ASSERT(iState);  // This has been checked by [check]
+    Q_ASSERT(iTransition);
     os << indent << "itrans: " << "\n";
     os << indent << "| -> " << iState->getId();
     qDebug() << "iacts=" << iTransition->getActions();
