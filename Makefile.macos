@@ -25,15 +25,13 @@ dist:
 	rm -rf ./dist/macos/Grasp.app
 	cp -r ./src/Grasp.app ./dist/macos
 	cp ./src/{grasp.ini,options_spec.txt} ./dist/macos/Grasp.app/Contents/MacOS
-	cp $(RFSMC) ./dist/macos/Grasp.app/Contents/MacOS
+	cp ./dist/macos/rfsmc.exe ./dist/macos/Grasp.app/Contents/MacOS
 
 install: dist
 	@echo "** Installing in $(INSTALL_DIR)"
 	rm -rf $(INSTALL_DIR)
 	mkdir $(INSTALL_DIR)
-	cp -r src/grasp.app $(INSTALL_DIR)/Grasp.app
-#	cp ./lib/etc/options_spec.txt $(INSTALL_DIR)/Grasp.app/Contents/MacOS
-#	cp ./dist/macos/grasp.ini $(INSTALL_DIR)/Grasp.app/Contents/MacOS
+	cp -r ./dist/macos/Grasp.app $(INSTALL_DIR)/Grasp.app
 	cp ./dist/macos/INSTALL $(INSTALL_DIR)/INSTALL
 	mkdir $(INSTALL_DIR)/doc
 	cp  doc/Using.md $(INSTALL_DIR)/doc
@@ -66,6 +64,7 @@ clean:
 
 clobber: clean
 	(cd src; qmake; make distclean)
+	rm -rf ./dist/macos/Grasp.app
 
 .PHONY:
 .PHONY: dist
