@@ -18,7 +18,6 @@ config
 config-stamp
 *.dvi
 *.pdf
-dist/
 !dist/windows/windows-install-guide.pdf
 !doc/using.pdf
 src/grasp.ini
