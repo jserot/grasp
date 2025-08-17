@@ -17,3 +17,5 @@ Known bugs and limitations
   Grasp app is launched by double-clicking, it seems unable to launch the gtkwave application. This does _not_ happen 
   when the app is launched from the terminal (by invoking
   `/Applications/Grasp.app/Contents/MacOS/Grasp` or `open /Applications/Grasp.app`).
+
+* Under Linux, the `-dot-external-viewer` relies on an working DOT viewer application. None seems to be working / supported currently for LinuxMint (`dotty`, `xdot`, ...) 

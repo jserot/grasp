@@ -21,7 +21,7 @@ config-stamp
 dist/
 !dist/windows/windows-install-guide.pdf
 !doc/using.pdf
-src/rfsm-light.ini
+src/grasp.ini
 *.aux
 *.log
 *.rel
