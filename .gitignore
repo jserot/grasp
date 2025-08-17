@@ -18,6 +18,10 @@ config
 config-stamp
 *.dvi
 *.pdf
+dist/
+!dist/macos/INSTALL
+!dist/macos/rfsmc.exe
+!dist/linux/rfsmc.exe
 !dist/windows/windows-install-guide.pdf
 !doc/using.pdf
 src/grasp.ini
