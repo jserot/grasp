@@ -101,7 +101,7 @@ case "$platform" in
       if [ -n "$draft" ]; then
           echo "COMPILER=../dist/macos/rfsmc.exe" >> ./src/grasp.ini
       else
-          echo "COMPILER=/Applications/Grasp.app/Contents/MacOS/rfsmc" >> ./src/grasp.ini
+          echo "COMPILER=/Applications/Grasp.app/Contents/MacOS/rfsmc.exe" >> ./src/grasp.ini
       fi;
       echo "DOTPROGRAM=$dotprogram" >> ./src/grasp.ini;
       echo "DOTVIEWER=$dotviewer" >> ./src/grasp.ini;
