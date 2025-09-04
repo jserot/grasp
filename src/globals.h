@@ -46,5 +46,6 @@ public:
     static QWidget *mainWindow;
     static QTabWidget* diagrams; 
     static const QRegularExpression re_lid;
+    static bool check_model;
 };
 

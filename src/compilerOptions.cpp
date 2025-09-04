@@ -28,6 +28,7 @@ CompilerOptions::CompilerOptions(QString specFile, QWidget *parent)
   readSpecFile(specFile);
   options.insert("-dot_no_captions", CompilerOption("dot","-dot_no_captions",true));
   // The above is a hack until the rfsmc option -dot_no_captions is replaced by -dot_captions
+  options.insert("-no_model_check", CompilerOption("general","-no_model_check",false));
   // dump();
   dialog = NULL;
   tabs = NULL;
@@ -46,9 +47,6 @@ void CompilerOptions::readSpecFile(QString fname)
     QString line = file.readLine();
     if ( line[0] == '#' ) continue;
     QStringList items = line.split(";");
-#ifdef USE_QGV
-    if ( items[2] == "-dot_external_viewer" ) continue;
-#endif
     // 0: IDE flag, 1: category, 2: name, 3: kind, 5: desc
     if ( items.length() < 6 || items[0] != "ide" ) continue;
     if ( items[3] == "Arg.Unit" ) {
@@ -238,7 +236,7 @@ void CompilerOptions::saveToFile(QString fname)
     CompilerOption opt = i.value();
     QString v = opt.val.toString();
     qDebug() << i.key() << v;
-    if ( ! v.isEmpty() ) 
+    if ( opt.name != "-no_model_check" && ! v.isEmpty() ) // "-no_model_check" is an internal option only
       os << i.key() << "=" << v << QT_ENDL;
     }
   os.flush();

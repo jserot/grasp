@@ -2,9 +2,9 @@
 
 * GUI
 - add an option to set the location of the log file when debug mode is set
+- use json format for options save file
 - enlarge the compiler path popup window
 - remove the "Dump model" action (only for debug)
-- add a "no check" option for by-passing the RFSM fragment checker
 - after adding or deleting an item, reset the tool to the pointer ("select") mode ?
 - automatically size the textviewer's popup according to the displayed text (see `textviewer.cpp`)
 - restrict the set of IOs of each automaton to those _actually occuring_ in the transitions (instead

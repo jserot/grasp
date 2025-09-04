@@ -79,29 +79,33 @@ void StateProperties::accept()
   state->setId(id);
   QStringList valuations = valuations_panel->retrieve();
   bool ok = true;
-  FragmentChecker checker(Globals::compiler,diagram,this);
-  // First, check each valuation separately
-  foreach ( QString valuation, valuations) {
-    if ( ! checker.check_state_valuation(valuation) ) {
-      QStringList errors = checker.getErrors();
-      QMessageBox::warning(this, "", "Illegal state valuation: \"" + valuation + "\"\n" + errors.join("\n"));
-      ok = false;
-      }
-    }
-  // Then check for multiple assignements of the same output (only if all previous tests succeeded) 
-  if ( ok ) {
-    QStringList lhss;
+  if ( Globals::check_model ) {
+    FragmentChecker checker(Globals::compiler,diagram,this);
+    // First, check each valuation separately
     foreach ( QString valuation, valuations) {
-      QString lhs = valuation.split("=").at(0);
-      if ( lhss.contains(lhs) ) {
-        QMessageBox::warning(this, "", "Duplicate state valuation: \"" + valuation);
+      if ( ! checker.check_state_valuation(valuation) ) {
+        QStringList errors = checker.getErrors();
+        QMessageBox::warning(this, "", "Illegal state valuation: \"" + valuation + "\"\n" + errors.join("\n"));
         ok = false;
-        break;
         }
-      else 
-        lhss << lhs;
+      }
+    // Then check for multiple assignements of the same output (only if all previous tests succeeded) 
+    if ( ok ) {
+       QStringList lhss;
+       foreach ( QString valuation, valuations) {
+         QString lhs = valuation.split("=").at(0);
+         if ( lhss.contains(lhs) ) {
+           QMessageBox::warning(this, "", "Duplicate state valuation: \"" + valuation);
+           ok = false;
+           break;
+         }
+         else 
+           lhss << lhs;
+         }
       }
     }
+  else // -no_model_check option
+    ok = true;
   if ( ok ) {
     state->setAttrs(valuations);
     qDebug() << "StateProperties::accept(ok)";

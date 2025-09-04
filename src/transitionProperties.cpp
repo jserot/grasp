@@ -154,37 +154,37 @@ void TransitionProperties::accept()
   if ( ! isInitial ) 
     event = event_field->currentText();
 
-  FragmentChecker checker(Globals::compiler,diagram,this);
-
   bool guards_ok = true;
-  if ( ! isInitial ) {
-    guards = guards_panel->retrieve();
-    foreach ( QString guard, guards) {
-      if ( ! checker.check_guard(guard) ) {
-        QStringList errors = checker.getErrors();
-        QMessageBox::warning(this, "", "Illegal guard: \"" + guard + "\"\n" + errors.join("\n"));
-        guards_ok = false;
-        }
-      }
-  // if ( guards.length() >= 2 ) {
-  //   for ( int i = 0; i<guards.length(); i++ ) {
-  //     QString guard = guards.at(i);
-  //     guards.replace(i, "(" + guard + ")");
-  //   }
-  // }
-    }
- 
   bool actions_ok = true;
-  actions = actions_panel->retrieve();
-  foreach ( QString action, actions) {
-    // First check action is well-formed and typed
-    if ( ! checker.check_action(action) ) {
-      QStringList errors = checker.getErrors();
-      QMessageBox::warning(this, "", "Illegal action: \"" + action + "\"\n" + errors.join("\n"));
-      actions_ok = false;
-      continue;
+
+  if ( Globals::check_model ) {
+    FragmentChecker checker(Globals::compiler,diagram,this);
+    if ( ! isInitial ) {
+      guards = guards_panel->retrieve();
+      foreach ( QString guard, guards) {
+        if ( ! checker.check_guard(guard) ) {
+          QStringList errors = checker.getErrors();
+          QMessageBox::warning(this, "", "Illegal guard: \"" + guard + "\"\n" + errors.join("\n"));
+          guards_ok = false;
+          }
+        }
+      // if ( guards.length() >= 2 ) {
+      //   for ( int i = 0; i<guards.length(); i++ ) {
+      //     QString guard = guards.at(i);
+      //     guards.replace(i, "(" + guard + ")");
+      //   }
+      // }
       }
-    // Then, if the above succeeded, test that an output modified by an action is not assigned in the target state 
+    actions = actions_panel->retrieve();
+    foreach ( QString action, actions) {
+      // First check action is well-formed and typed
+      if ( ! checker.check_action(action) ) {
+        QStringList errors = checker.getErrors();
+        QMessageBox::warning(this, "", "Illegal action: \"" + action + "\"\n" + errors.join("\n"));
+        actions_ok = false;
+        continue;
+        }
+      // Then, if the above succeeded, test that an output modified by an action is not assigned in the target state 
       QString lhs = action.split(":=").at(0);
       QStringList ovs = dstState->getAttrs();
       for ( int i = 0; i<ovs.length(); i++ ) { // It's a pity QList does not have a [map] operator ..
@@ -196,16 +196,22 @@ void TransitionProperties::accept()
         actions_ok = false;
         break;
         }
-    }
+      }
     // foreach ( QString v, r.lhs_vars ) {
     //   if ( lhss.contains(v) ) { // Assignation of an already assigned output/var 
-    //     QMessageBox::warning(this, "Error", "The output/variable " + v + " is assigned several times by the actions");
-    //     actions_ok = false;
-    //     }
-    //   else
-    //     lhss.insert(v);
-    //   }
-    // }
+      //     QMessageBox::warning(this, "Error", "The output/variable " + v + " is assigned several times by the actions");
+      //     actions_ok = false;
+      //     }
+      //   else
+      //     lhss.insert(v);
+      //   }
+      // }
+    }
+  else { // -no_model_check option
+    guards_ok = true;
+    actions_ok = true;
+    }
+
   if ( guards_ok && actions_ok ) {
     transition->setDstState(dstState);
     transition->setActions(actions);

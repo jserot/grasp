@@ -19,7 +19,7 @@
 #include <QRegularExpression>
 
 const QString Globals::version = "2.0.0"; 
-const QStringList Globals::guiOnlyOpts = { "-dot_external_viewer", "-sync_externals" };
+const QStringList Globals::guiOnlyOpts = { "-dot_external_viewer", "-no_model_check" };
 CompilerPaths *Globals::compilerPaths = NULL;
 CompilerOptions *Globals::compilerOptions = NULL;
 Compiler *Globals::compiler = NULL;
@@ -29,3 +29,4 @@ QString Globals::initDir = ".";
 QWidget *Globals::mainWindow = NULL;
 QTabWidget* Globals::diagrams = NULL; 
 const QRegularExpression Globals::re_lid("[a-z][A-Za-z0-9_]*");
+bool Globals::check_model = true; 

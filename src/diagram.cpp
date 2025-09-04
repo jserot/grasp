@@ -560,20 +560,22 @@ bool Diagram::check_transition(Transition *t, QList<Iov*>& global_ios)
       }
     }
   // TODO: following checks should be shared with those performed by the [transitionProperties] class
-  FragmentChecker checker(Globals::compiler,this,Globals::mainWindow);
-  if ( ! t->isInitial() ) {
-    foreach ( QString guard, t->getGuards()) {
-      if ( ! checker.check_guard(guard) ) {
-        QStringList errors = checker.getErrors();
-        report_error("Illegal guard: \"" + guard + "\"\n" + errors.join("\n"));
-        return false;
+  if ( Globals::check_model ) {
+    FragmentChecker checker(Globals::compiler,this,Globals::mainWindow);
+    if ( ! t->isInitial() ) {
+      foreach ( QString guard, t->getGuards()) {
+        if ( ! checker.check_guard(guard) ) {
+          QStringList errors = checker.getErrors();
+          report_error("Illegal guard: \"" + guard + "\"\n" + errors.join("\n"));
+          return false;
+          }
         }
-      }
-    foreach ( QString action, t->getActions()) {
-      if ( ! checker.check_action(action) ) {
-        QStringList errors = checker.getErrors();
-        report_error("Illegal action: \"" + action + "\"\n" + errors.join("\n"));
-        return false;
+      foreach ( QString action, t->getActions()) {
+        if ( ! checker.check_action(action) ) {
+          QStringList errors = checker.getErrors();
+          report_error("Illegal action: \"" + action + "\"\n" + errors.join("\n"));
+          return false;
+          }
         }
       }
     }

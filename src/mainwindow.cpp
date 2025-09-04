@@ -274,9 +274,9 @@ void MainWindow::updateActions()
     bool enabled = model;
     saveFileAction->setEnabled(enabled);
     saveFileAsAction->setEnabled(enabled);
-    checkDiagramAction->setEnabled(enabled);
-    checkModelAction->setEnabled(enabled);
-    checkModelWithStimuliAction->setEnabled(enabled);
+    checkDiagramAction->setEnabled(enabled && Globals::check_model);
+    checkModelAction->setEnabled(enabled && Globals::check_model);
+    checkModelWithStimuliAction->setEnabled(enabled && Globals::check_model);
     dumpModelAction->setEnabled(enabled);
     renderDotAction->setEnabled(enabled);
     renderDotsAction->setEnabled(enabled);
@@ -434,13 +434,13 @@ bool MainWindow::checkDiagram()
 bool MainWindow::checkModel()
 { 
   Q_ASSERT(model);
-  return model->check(false);
+  return Globals::check_model ? model->check(false) : true;
 }
 
 bool MainWindow::checkModelWithStimuli()
 { 
   Q_ASSERT(model); 
-  return model->check(true);
+  return Globals::check_model ? model->check(true) : true;
 }
 
 void MainWindow::newModel()
@@ -570,8 +570,10 @@ void MainWindow::renderDot()
 QString MainWindow::generateRfsm(bool withTestbench ) // TODO : factorize
 {
   Q_ASSERT(model); 
-  if ( withTestbench && ! checkModelWithStimuli() ) return "";
-  if ( ! withTestbench && ! checkModel() ) return "";
+  if ( Globals::check_model ) {
+    if ( withTestbench && ! checkModelWithStimuli() ) return "";
+    if ( ! withTestbench && ! checkModel() ) return "";
+    }
   QString sFname = getCurrentFileName();
   if ( sFname.isEmpty() ) return "";
   QString rFname = changeSuffix(sFname, ".fsm");
@@ -853,6 +855,8 @@ void MainWindow::setCompilerOptions()
   Globals::compilerOptions->edit(this);
   QStringList opts = Globals::compilerOptions->getOptions("general");
   traceMode = opts.contains("-debug");
+  Globals::check_model = ! opts.contains("-no_model_check");
+  updateActions(); 
   //if ( traceMode ) qDebug() << "Debug mode activated";
   //else qDebug() << "Debug mode desactivated";
 }
