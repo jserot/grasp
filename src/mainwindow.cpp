@@ -46,11 +46,18 @@ MainWindow::MainWindow()
     connect(Globals::compilerPaths, SIGNAL(compilerPathChanged(QString)), this, SLOT(compilerPathUpdated(QString)));
     Globals::compilerOptions = new CompilerOptions(appDir + "/options_spec.txt", this);
     Globals::initDir = Globals::compilerPaths->getPath("INITDIR");
+
+    // Start compiler server
     QString compilerPath = Globals::compilerPaths->getPath("COMPILER");
     if ( compilerPath.isNull() || compilerPath.isEmpty() ) compilerPath = "rfsmc"; // Last chance..
-    Globals::compiler = new Compiler(compilerPath);
-    Globals::executor = new CommandExec();
+    Globals::compiler = new Compiler();
+    connect(Globals::compiler, &Compiler::serverError, this, &MainWindow::serverError);
+    Globals::compiler->startServer(compilerPath,Globals::socketPath);
+    QTimer::singleShot(300, this, [this]() { checkCompilerVersion(); }); // Allow 300ms delay for server to start up
 
+    Globals::executor = new CommandExec(); // For other programs (graphviz, ...)
+
+    
     model = NULL;
 
     // GUI setup
@@ -102,6 +109,14 @@ MainWindow::MainWindow()
     unsaved_changes = false;
 }
 
+MainWindow::~MainWindow()
+{
+  if ( Globals::compiler ) {
+    Globals::compiler->close();
+    delete Globals::compiler; // This will shutdown the compiler server
+    }
+}
+
 Diagram *MainWindow::currentDiagram()
 {
   int index = diagrams->currentIndex();
@@ -121,7 +136,8 @@ void MainWindow::modelModified()
 void MainWindow::compilerPathUpdated(QString path)
 {
   qDebug() << "Compiler path updated to" << path;
-  Globals::compiler->setPath(path);
+  // Globals::compiler->setPath(path);
+  // TO FIX : close and relaunch server here !
 }
 
 void MainWindow::about()
@@ -737,13 +753,66 @@ bool MainWindow::isMainFile(QString fname) {
   return f.fileName() == mainName;
 }
 
+// void MainWindow::generate(QString target, bool withTestbench)
+// {
+  // Q_ASSERT(model);
+  // QString fname = generateRfsm(withTestbench);
+  // QFileInfo fi(fname);
+  // if ( fname.isEmpty() ) return;
+  // qDebug () << "generate.fname = " << fname;
+  // QString wDir = QFileInfo(fname).absolutePath();
+  // QStringList genOpts = Globals::compilerOptions->getOptions("general");
+  // QString targetDir = ".";
+  // if ( target != "sim" && genOpts.contains("-target_dirs") ) {
+  //   targetDir = target;
+  //   QString targetPath = wDir + "/" + target; // TO FIX : do not use raw, OS-dependent "/" in file path
+  //   genOpts.removeOne("-target_dirs");
+  //   QDir dir(targetPath);
+  //   if ( ! dir.exists() ) {
+  //     qDebug() << "Creating directory " << targetPath;
+  //     QDir().mkdir(targetPath);
+  //     }
+  //   }
+  // foreach ( QString opt, genOpts)
+  //   if ( genOpts.contains(opt) ) genOpts.removeOne(opt);
+  // QString mainName = model->getName();
+  // if ( mainName.isEmpty() ) mainName = "main";
+  // QStringList args =
+  //   QStringList()
+  //   << "-" + target
+  //   << "-main" << mainName
+  //   << "-target_dir" << targetDir
+  //   << genOpts
+  //   << Globals::compilerOptions->getOptions(target);
+  // //if ( target == "sim" ) args << "-main" <<  fi.baseName();
+  // if ( target == "ctask" || target == "systemc" ) args << "-show_models";
+  // if ( Globals::compiler->run(fi.fileName(), args, wDir) ) {
+  //   QStringList resFiles = Globals::compiler->getOutputFiles(target, wDir, mainName); 
+  //   logMessage("Generated file(s) : " + resFiles.join(", "));
+  //   if ( ! withTestbench && target == "systemc" ) 
+  //     resFiles.removeIf([this](QString fname) { return this->isMainFile(fname); });
+  //   switch ( resFiles.size() ) {
+  //     case 0: 
+  //       break;
+  //     case 1: 
+  //       openResultFile(resFiles.first());
+  //       break;
+  //     default:
+  //       openResultFiles(resFiles);
+  //     }
+  //   }
+  // else {
+  //   QStringList compileErrors = Globals::compiler->getErrors();
+  //   QMessageBox::warning(this, "", "Error when compiling model\n" + compileErrors.join("\n"));
+  //   }
+// }
+
 void MainWindow::generate(QString target, bool withTestbench)
 {
   Q_ASSERT(model);
   QString fname = generateRfsm(withTestbench);
   QFileInfo fi(fname);
   if ( fname.isEmpty() ) return;
-  qDebug () << "generate.fname = " << fname;
   QString wDir = QFileInfo(fname).absolutePath();
   QStringList genOpts = Globals::compilerOptions->getOptions("general");
   QString targetDir = ".";
@@ -770,24 +839,31 @@ void MainWindow::generate(QString target, bool withTestbench)
     << Globals::compilerOptions->getOptions(target);
   //if ( target == "sim" ) args << "-main" <<  fi.baseName();
   if ( target == "ctask" || target == "systemc" ) args << "-show_models";
-  if ( Globals::compiler->run(fi.fileName(), args, wDir) ) {
-    QStringList resFiles = Globals::compiler->getOutputFiles(target, wDir, mainName); 
-    logMessage("Generated file(s) : " + resFiles.join(", "));
-    if ( ! withTestbench && target == "systemc" ) 
-      resFiles.removeIf([this](QString fname) { return this->isMainFile(fname); });
-    switch ( resFiles.size() ) {
-      case 0: 
-        break;
-      case 1: 
-        openResultFile(resFiles.first());
-        break;
-      default:
-        openResultFiles(resFiles);
+  args << fi.fileName();
+  Response r = Globals::compiler->compile(args);
+  qDebug() << "compile result =" << r.toString();
+  if ( r.kind() == Response::Kind::Compiled ) {
+    if ( r.success() ) {
+      QStringList resFiles = r.files();
+      qDebug() << "Generated files=" << resFiles;
+      logMessage("Generated file(s) : " + resFiles.join(", "));
+      if ( ! withTestbench && target == "systemc" ) 
+        resFiles.removeIf([this](QString fname) { return this->isMainFile(fname); });
+      switch ( resFiles.size() ) {
+        case 0: break;
+        case 1: openResultFile(resFiles.first()); break;
+        default: openResultFiles(resFiles); break;
+        }
+      }
+    else { // Compilation failed
+      QString errMsg = r.message();
+      qDebug() << "Compilation failed: " << errMsg;
+      QMessageBox::warning(this, "", "Error when compiling model\n" + errMsg);
       }
     }
   else {
-    QStringList compileErrors = Globals::compiler->getErrors();
-    QMessageBox::warning(this, "", "Error when compiling model\n" + compileErrors.join("\n"));
+    qDebug() << "Wrong response to compile request: " << r.message();
+    QMessageBox::warning(this, "", "Compilation failed\n" + r.message());
     }
 }
 
@@ -872,6 +948,29 @@ void MainWindow::dumpModel(void) // For debug only
 {
   Q_ASSERT(model);
   model->dump(); 
+}
+
+void MainWindow::serverError(QString error)
+{
+  QMessageBox::critical(this, "Compiler", error); 
+  delete this;
+}
+
+void MainWindow::checkCompilerVersion()
+{
+  Response r = Globals::compiler->getVersion();
+  if ( r.kind() == Response::Kind::Version ) {
+    QString v = r.version();
+    qDebug() << "Compiler version=" << v;
+    if ( v < Compiler::minimalVersion ) {
+      QMessageBox::critical(this, "Compiler", "Invalid RFSM compiler version (" + v + ") (must be >= " + Compiler::minimalVersion + ")"); 
+      exit(1);
+      }
+    }
+  else {
+    QMessageBox::critical(this, "Compiler", "Cannot retrieve compiler version");
+    exit(1);
+  }
 }
 
 // Bye

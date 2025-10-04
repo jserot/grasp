@@ -24,8 +24,7 @@
 #include "state.h"
 #include "model.h"
 #include "stateValuations.h"
-//#include "compiler.h"
-#include "fragmentChecker.h"
+#include "compiler.h"
 
 const QRegularExpression StateProperties::re_uid("[A-Z][A-Za-z0-9_]*");
 
@@ -80,15 +79,14 @@ void StateProperties::accept()
   QStringList valuations = valuations_panel->retrieve();
   bool ok = true;
   if ( Globals::check_model ) {
-    FragmentChecker checker(Globals::compiler,diagram,this);
     // First, check each valuation separately
     foreach ( QString valuation, valuations) {
-      if ( ! checker.check_state_valuation(valuation) ) {
-        QStringList errors = checker.getErrors();
-        QMessageBox::warning(this, "", "Illegal state valuation: \"" + valuation + "\"\n" + errors.join("\n"));
-        ok = false;
+      // QString res = Globals::compiler->checkFragment(diagram,valuation ) // TO FIX !!
+        // QStringList errors = checker.getErrors();
+        // QMessageBox::warning(this, "", "Illegal state valuation: \"" + valuation + "\"\n" + errors.join("\n"));
+        // ok = false;
+        ok = true;
         }
-      }
     // Then check for multiple assignements of the same output (only if all previous tests succeeded) 
     if ( ok ) {
        QStringList lhss;

@@ -16,6 +16,7 @@
 #include "state.h"
 #include "modelProperties.h"
 #include "model.h"
+#include "compiler.h"
 
 #include <QMainWindow>
 #include <QFileInfo>
@@ -50,6 +51,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
    MainWindow();
+  ~MainWindow();
 
   Model *getModel() { return model; }
   QTabWidget *getDiagrams() { return diagrams; }
@@ -89,6 +91,7 @@ private slots:
     void resetCursor();
     void compilerPathUpdated(QString path); 
     void dumpModel(void); // for debug only
+    void serverError(QString err);
 
 private:
     void createActions();
@@ -109,6 +112,7 @@ private:
     void openResultFile(QString fname);
     void openResultFiles(QStringList fname);
     Diagram *currentDiagram();
+    void checkCompilerVersion();
     
     Model* model; // The model (ios + diagrams)
     ModelProperties *model_panel; // For editing model IOs

@@ -36,7 +36,7 @@ bool CommandExec::execute(QString wDir, QString cmd, QStringList args, bool deta
     qDebug() << "CommandExec: failed to start" << QT_ENDL;
     return false;
     }
-  // qDebug() << "CommandExec: sync process launched. Waiting for termination";
+  qDebug() << "CommandExec: sync process launched. Waiting for termination";
   if ( detach ) 
     return true;
   else {

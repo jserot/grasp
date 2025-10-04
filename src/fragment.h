@@ -10,25 +10,38 @@
 /*                                                                     */
 /***********************************************************************/
 
+// Model fragments (state valuations, guards, actions) sent to the compiler server for checking
+
 #pragma once
 
 #include <QString>
+#include <QPair>
+#include <QList>
+#include <QJsonObject>
+#include <QJsonArray>
 
-class Compiler;
-class Diagram;
-class QWidget;
-
-class FragmentChecker
+class Fragment
 {
-public:
-  FragmentChecker(Compiler *compiler, Diagram *diagram, QWidget *parent);
-  bool check_state_valuation(QString valuation);
-  bool check_guard(QString guard);
-  bool check_action(QString action);
-  QStringList getErrors();
 private:
-  QWidget *parent;
-  Compiler *compiler;
-  Diagram *diagram;
-  bool check(QString kind, QString frag);
+    QList<QPair<QString, QString>> inps;
+    QList<QPair<QString, QString>> outps;
+    QList<QPair<QString, QString>> vars;
+    QString obj;
+
+public:
+    Fragment() = default;
+
+    Fragment(const QList<QPair<QString, QString>> &inps,
+      const QList<QPair<QString, QString>> &outps,
+      const QList<QPair<QString, QString>> &vars,
+      const QString &obj)
+        : inps(inps), outps(outps), vars(vars), obj(obj) {}
+
+  QJsonObject toJson() const;
+
+  static Fragment fromJson(const QJsonObject &json);
+
+private:
+  static QJsonArray listToJsonArray(const QList<QPair<QString, QString>> &list);
+  static QList<QPair<QString, QString>> jsonArrayToList(const QJsonArray &arr);
 };

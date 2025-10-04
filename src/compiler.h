@@ -13,26 +13,54 @@
 
 #include <QString>
 #include <QProcess>
+#include <QLocalSocket>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include "diagram.h"
+#include "response.h"
 
-class CommandExec;
+// Interface to the RFSM compiler in server mode
 
-class Compiler : QObject
-{
-  Q_OBJECT
+class Compiler : public QObject {
+    Q_OBJECT
 
-  // static const QString name;
-  
 public:
-  Compiler(QString path);
-  ~Compiler();
+    explicit Compiler(QObject *parent = nullptr);
+    ~Compiler();
 
-  void setPath(QString path);
-  
-  bool run(QString srcFile, QStringList args, QString wDir);
-  QStringList getOutputs();
-  QStringList getErrors();
-  QStringList getOutputFiles(QString target, QString wDir, QString modelName);
+    static const QString minimalVersion;
+
+    void startServer(const QString &serverPath, const QString &socketPath);
+    void stopServer();
+
+    // Low-level requests
+    void sendRequest(const QString &text);
+    QString sendRequestAndReadResponse(const QString &text);
+
+    // High-level requests
+    Response getVersion(void);
+    Response compile(const QStringList &args);
+    void close(void);
+
+signals:
+    void serverError(const QString &error);
+    //void serverStarted(); // Not used
+    // void connected();
+    //void messageReceived(const QString &message); // Not used (synchronous mode)
+    // void disconnected();
+
+private slots:
+    void onConnected();
+    // void onReadyRead();  // For asynchronous reception of responses; not used here
+    void onDisconnected();
+    void onErrorOccurred(QLocalSocket::LocalSocketError socketError);
+
 private:
-  QString path;
-  CommandExec* executor;
+    static const int TimeOutMs = 2000;  // Timeout when waiting for a response after sending a request (synchronous mode)
+
+    QString readAnswer();
+    QProcess serverProcess;
+    QLocalSocket socket;
+    QString socketPath;
 };

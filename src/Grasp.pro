@@ -1,7 +1,7 @@
 #!include(../config) { error("Cannot open config file. Run configure script in top directory") }
 
 CONFIG   += debug
-QT       += widgets
+QT       += widgets network
 
 HEADERS += include/nlohmann_json.h \
            globals.h \
@@ -12,8 +12,10 @@ HEADERS += include/nlohmann_json.h \
            diagramProperties.h  \
            model.h  \
            commandExec.h \
+           fragment.h \
+           request.h \
+           response.h \
            compiler.h \
-           fragmentChecker.h \
            dynamicPanel.h \
            stateValuations.h \
            stateProperties.h \
@@ -43,8 +45,10 @@ SOURCES += transition.cpp \
            diagramProperties.cpp  \
            model.cpp \
            commandExec.cpp \
+           fragment.cpp \
+           request.cpp \
+           response.cpp \
            compiler.cpp \
-           fragmentChecker.cpp \
            dynamicPanel.cpp \
            stateValuations.cpp \
            stateProperties.cpp \
