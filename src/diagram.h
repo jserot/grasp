@@ -18,6 +18,7 @@
 
 #include "state.h"
 #include "iov.h"
+#include "response.h"
 #include "include/nlohmann_json.h"
 
 QT_BEGIN_NAMESPACE
@@ -52,6 +53,7 @@ public:
     void removeVar(Iov *io);
     QList<Iov*> getVars();
     QStringList getVarNames();
+    QList<QPair<QString,QString>> getLocalVars();
 
     QList<State*> states();
     QList<Transition*> transitions();
@@ -68,7 +70,7 @@ public:
 
     void edit();
 
-    bool check(QList<Iov*>& global_ios);
+    bool check();
 
     void dump(); // for debug only
 
@@ -99,8 +101,9 @@ protected:
     void editState(State *state);
     void editTransition(Transition *transition);
     void check_state(State* s);
-    bool check_transition(Transition *t, QList<Iov*>& global_ios);
-    void report_error(QString msg);
+    bool check_transition(Transition *t);
+  bool check_response(QString loc, Response r);
+  void report_error(QString loc, QString msg);
 
     void export_rfsm_model(QTextStream& os);
     void export_rfsm_testbench(QTextStream& os);

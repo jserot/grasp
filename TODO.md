@@ -1,6 +1,13 @@
 * GENERAL
 
 * GUI
+- remove `Globals::check_model` (what for ? )
+- remove socket file in the app dtor
+- `Diagram::check()` should also check state valuations
+- fix `Diagram::exportRfsmInstance()` and `Diagram::exportRfsmModel()` so that not all global IOs are used as instance parameters. 
+  Each instance model should be able to use a subset of the global IOs and this subset should be
+  computed from the rd/wr variable sets derived from the transition rules
+- share code for checking transitions btw `diagram.cpp` and `transitionProperties.cpp`
 - add an option to set the location of the log file when debug mode is set
 - use json format for options save file
 - enlarge the compiler path popup window
@@ -20,12 +27,6 @@
 - update icons for the Windows distro
 
 * TOOLS
-- implement a "server" mode for the `rfsmc` compiler, allowing it to be used for
-  checking / extracting semantic informations from syntax fragments (thus generalizing the
-  `-check_fragment` option currently used by the `fragmentChecker` class.
-  Use `QLocalSocket` (like in example `../socket/localfortune/client`) on the `Grasp` side.
-  Use `Caml` implementation of Unix socket on the server (`rfsmc`) side.
-  Q: The former will be automatically portable to Windows. How about the second ??
 - replace `-dot_no_caption` option by `-dot_caption`  (reverse default behavior) ?
 
 * DOC

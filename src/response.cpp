@@ -25,7 +25,7 @@ Response Response::None() { return Response(Kind::None); }
 Response::Response(Kind kind) : m_kind(kind) // None, CheckingOk
 {
   switch ( kind ) {
-  case Kind::Checked: m_success = true; break;
+  case Kind::Checked: m_result = true; break;
   default: break;
   }
 }
@@ -34,19 +34,19 @@ Response::Response(Kind kind, const QString &s) : m_kind(kind) // Version, Compi
 {
   switch ( kind ) {
   case Kind::Version: m_version = s; break;
-  case Kind::Compiled: m_success = false; m_message = s; break;
-  case Kind::Checked: m_success = false; m_message = s; break;
+  case Kind::Compiled: m_result = false; m_message = s; break;
+  case Kind::Checked: m_result = false; m_message = s; break;
   case Kind::Error: m_message = s; break;
   default: break; // Should not happen
   }
 }
 
 Response::Response(Kind kind, const QStringList &ss)
-  : m_kind(kind), m_success(true), m_files(ss) {} // CompilationOk
+  : m_kind(kind), m_result(true), m_files(ss) {} // CompilationOk
 
 Response::Kind Response::kind() const { return m_kind; }
 QString Response::version() const { return m_version; }
-bool Response::success() const { return m_success; }
+bool Response::result() const { return m_result; }
 QStringList Response::files() const { return m_files; }
 QString Response::message() const { return m_message; }
 QString Response::error() const { return m_error; }
@@ -60,23 +60,23 @@ QJsonObject Response::toJson() const {
         break;
     case Kind::Compiled: {
         obj["kind"] = "compiled";
-        obj["success"] = m_success;
+        obj["result"] = m_result;
         QJsonArray arr;
         for (const auto &f : m_files) arr.append(f);
         obj["files"] = arr;
         break;
     }
     case Kind::Checked:
-        obj["kind"] = "Checked";
-        obj["success"] = m_success;
+        obj["kind"] = "checked";
+        obj["result"] = m_result;
         obj["message"] = m_message;
         break;
     case Kind::Error:
-        obj["kind"] = "Error";
+        obj["kind"] = "error";
         obj["error"] = m_error;
         break;
     case Kind::None:
-        obj["kind"] = "None";
+        obj["kind"] = "none";
         break;
     }
     return obj;
@@ -87,8 +87,8 @@ Response Response::fromJson(const QJsonObject &obj) {
     if (kind == "version") {
         return Version(obj["version"].toString());
     } else if (kind == "compiled") {
-        bool success = obj["result"].toBool();
-        if ( success ) {
+        bool result = obj["result"].toBool();
+        if ( result ) {
           QStringList files;
           for (const auto &v : obj["files"].toArray()) files.append(v.toString());
           return CompilationOk(files);
@@ -98,8 +98,8 @@ Response Response::fromJson(const QJsonObject &obj) {
           return CompilationFailed(msg);
           }
     } else if (kind == "checked") {
-        bool success = obj["success"].toBool();
-        if ( success ) 
+        bool result = obj["result"].toBool();
+        if ( result ) 
           return CheckingOk();
         else {
           QString msg = obj["message"].toString();

@@ -19,6 +19,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>
+#include <QPair>
 #include <QGuiApplication>
 
 const QString Model::defaultName = "main";
@@ -69,61 +70,39 @@ void Model::removeDiagram(Diagram *diagram)
   diagrams.removeOne(diagram);
 }
 
-QStringList Model::getInputs()
+QList<QPair<QString,QString>> Model::getIovs(Iov::IoKind kind)
 {
-  QStringList r;
+  QList<QPair<QString,QString>> r;
   for ( const auto io : ios )
-    if ( io->kind == Iov::IoIn ) r.append(io->name);
+    if ( io->kind == kind ) r.append(qMakePair(io->name,Iov::stringOfType(io->type)));
   return r;
 }
 
-QStringList Model::getInpEvents()
+QStringList Model::getIovNames(Iov::IoKind kind)
 {
   QStringList r;
   for ( const auto io : ios )
-    if ( io->kind == Iov::IoIn && io->type == Iov::TyEvent ) r.append(io->name);
+    if ( io->kind == kind ) r.append(io->name);
   return r;
 }
 
-QStringList Model::getSharedEvents()
+QStringList Model::getEvents(Iov::IoKind kind)
 {
   QStringList r;
   for ( const auto io : ios )
-    if ( io->kind == Iov::IoVar && io->type == Iov::TyEvent ) r.append(io->name);
+    if ( io->kind == kind && io->type == Iov::TyEvent ) r.append(io->name);
   return r;
 }
 
-QStringList Model::getInpNonEvents()
-{
-  QStringList r;
-  for ( const auto io : ios )
-    if ( io->kind == Iov::IoIn && io->type != Iov::TyEvent ) r.append(io->name);
-  return r;
-}
-
-QStringList Model::getOutputs()
-{
-  QStringList r;
-  for ( const auto io : ios )
-    if ( io->kind == Iov::IoOut ) r.append(io->name);
-  return r;
-}
-
-QStringList Model::getOutpNonEvents()
-{
-  QStringList r;
-  for ( const auto io : ios )
-    if ( io->kind == Iov::IoOut && io->type != Iov::TyEvent ) r.append(io->name);
-  return r;
-}
-
-QStringList Model::getShared()
-{
-  QStringList r;
-  for ( const auto io : ios )
-    if ( io->kind == Iov::IoVar ) r.append(io->name);
-  return r;
-}
+QList<QPair<QString,QString>> Model::getInputs() { return getIovs(Iov::IoIn); }
+QList<QPair<QString,QString>> Model::getOutputs() { return getIovs(Iov::IoOut); }
+QList<QPair<QString,QString>> Model::getShared() { return getIovs(Iov::IoVar); }
+QStringList Model::getInputNames() { return getIovNames(Iov::IoIn); }
+QStringList Model::getOutputNames() { return getIovNames(Iov::IoOut); }
+QStringList Model::getSharedNames() { return getIovNames(Iov::IoVar); }
+QStringList Model::getInpEvents() { return getEvents(Iov::IoIn); }
+QStringList Model::getOutpEvents() { return getEvents(Iov::IoOut); }
+QStringList Model::getSharedEvents() { return getEvents(Iov::IoVar); }
 
 // Basic model checking
 
@@ -152,7 +131,7 @@ bool Model::check(bool withStimuli)
       }
     }
   for ( Diagram* a: diagrams )
-    if ( ! a->check(ios) ) return false;
+    if ( ! a->check() ) return false; 
   return true;
 }
 

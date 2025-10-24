@@ -49,13 +49,17 @@ public:
     void removeDiagram(Diagram *diagram);
 
     QList<Iov*>& getIos() { return ios; };
-    QStringList getInputs();
-    QStringList getOutputs();
-    QStringList getShared();
-    QStringList getSharedEvents();
+    QList<QPair<QString,QString>> getInputs();
+    QList<QPair<QString,QString>> getOutputs();
+    QList<QPair<QString,QString>> getShared();
+    QStringList getInputNames();
+    QStringList getOutputNames();
+    QStringList getSharedNames();
     QStringList getInpEvents();
-    QStringList getInpNonEvents();
-    QStringList getOutpNonEvents();
+    QStringList getOutpEvents();
+    QStringList getSharedEvents();
+    //QStringList getInpNonEvents();
+    //QStringList getOutpNonEvents();
     QList<Diagram*>& getDiagrams() { return diagrams; };
 
     static Model* readFromFile(QString fname);
@@ -71,6 +75,9 @@ public:
     void exportRfsm(QString fname, bool withTestbench = false);
 
 protected:
+    QList<QPair<QString,QString>> getIovs(Iov::IoKind kind);
+    QStringList getIovNames(Iov::IoKind kind);
+    QStringList getEvents(Iov::IoKind kind);
     void export_rfsm_ios(QTextStream& os);
     QString exportSingleDot(Diagram *diagram, QString basename, QStringList options);
 

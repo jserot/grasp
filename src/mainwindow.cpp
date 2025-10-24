@@ -443,20 +443,23 @@ bool MainWindow::checkDiagram()
   Diagram *diagram = currentDiagram();
   Q_ASSERT(diagram);
   qDebug() << "Checking diagram" << diagram->getName();
-  QList<Iov*> global_ios = model->getIos();
-  return diagram->check(global_ios);
+  return diagram->check();
 }
 
 bool MainWindow::checkModel()
 { 
   Q_ASSERT(model);
-  return Globals::check_model ? model->check(false) : true;
+  bool r = Globals::check_model ? model->check(false) : true;
+  qDebug() << "Checking model: " << r;
+  return r;
 }
 
 bool MainWindow::checkModelWithStimuli()
 { 
   Q_ASSERT(model); 
-  return Globals::check_model ? model->check(true) : true;
+  bool r = Globals::check_model ? model->check(true) : true;
+  qDebug() << "Checking model with stimuli: " << r;
+  return r;
 }
 
 void MainWindow::newModel()
@@ -843,7 +846,7 @@ void MainWindow::generate(QString target, bool withTestbench)
   Response r = Globals::compiler->compile(args);
   qDebug() << "compile result =" << r.toString();
   if ( r.kind() == Response::Kind::Compiled ) {
-    if ( r.success() ) {
+    if ( r.result() == true ) {
       QStringList resFiles = r.files();
       qDebug() << "Generated files=" << resFiles;
       logMessage("Generated file(s) : " + resFiles.join(", "));

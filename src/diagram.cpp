@@ -404,7 +404,6 @@ void Diagram::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
         } // Mode
       break;
     case Qt::RightButton: // if ( mode == SelectItem ) 
-        //qDebug() << "** RightSelectItem at" << mouseEvent->scenePos();
       item = itemAt(mouseEvent->scenePos(), QTransform());
       qDebug() << "** RightSelectItem got" << item;
       if ( item != NULL )
@@ -494,7 +493,6 @@ void Diagram::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 void Diagram::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
   Qt::MouseButton buttonPressed = mouseEvent->button();
-  // qDebug() << "Diagram::mouseReleaseEvent: " << buttonPressed;
   if ( buttonPressed != Qt::LeftButton ) return;
   if ( line != 0 && (Globals::mode == Globals::InsertTransition || Globals::mode == Globals::InsertPseudoState) ) {
     QList<QGraphicsItem *> srcStates = items(line->line().p1());
@@ -535,11 +533,28 @@ bool Diagram::isItemChange(int type)
     return false;
 }
 
-// Basic model checking
+// Checking
 
-void Diagram::report_error(QString msg)
+void Diagram::report_error(QString loc, QString msg)
 {
-  QMessageBox::warning(Globals::mainWindow, "", msg);
+  QMessageBox::warning(Globals::mainWindow, tr("Diagram checking"), loc + "\n\n" + msg);
+}
+
+bool Diagram::check_response(QString loc, Response r)
+{
+  if ( r.kind() == Response::Kind::Checked ) {
+    if ( r.result() == true )
+      return true;
+    else { // Fragment checking failed
+      report_error(loc, r.message());
+      return false;
+      }
+    }
+  else {
+    qDebug() << "Wrong response to check_fragment request: " << r.message();
+    QMessageBox::critical(Globals::mainWindow, tr("Diagram checking"), r.message());
+    return false;
+    }
 }
 
 void Diagram::check_state(State *s)
@@ -547,53 +562,62 @@ void Diagram::check_state(State *s)
   Q_ASSERT(states().contains(s)); 
 }
 
-bool Diagram::check_transition(Transition *t, QList<Iov*>& global_ios)
+QList<QPair<QString,QString>> Diagram::getLocalVars()
 {
-  Q_UNUSED(global_ios);
+  QList<QPair<QString,QString>> r;
+  for ( const auto v : vars )
+    r.append(qMakePair(v->name,Iov::stringOfType(v->type)));
+  return r;
+}
+
+bool Diagram::check_transition(Transition *t)
+{
+  qDebug() << "Checking transition: " << t->toString();
   check_state(t->getSrcState());
   check_state(t->getDstState());
   if ( ! t->isInitial() ) {
     QStringList modelEvents = enclosingModel()->getInpEvents() + enclosingModel()->getSharedEvents();
     if ( ! modelEvents.contains(t->getEvent()) ) {
-      report_error("The triggering event for transition " + t->toString() + " is not / no longer part of the enclosing model");
+      report_error("Transition " + t->toString(),  "the triggering event is not / no longer part of the enclosing model");
       return false;
       }
     }
   // TODO: following checks should be shared with those performed by the [transitionProperties] class
-  if ( Globals::check_model ) {
-    //FragmentChecker checker(Globals::compiler,this,Globals::mainWindow);
-    if ( ! t->isInitial() ) {
-      foreach ( QString guard, t->getGuards()) { // TO FIX !!
-        // if ( ! checker.check_guard(guard) ) {
-        //   QStringList errors = checker.getErrors();
-        //   report_error("Illegal guard: \"" + guard + "\"\n" + errors.join("\n"));
-        //   return false;
-        //   }
-        }
-      foreach ( QString action, t->getActions()) { // TO FIX !!
-        // if ( ! checker.check_action(action) ) {
-        //   QStringList errors = checker.getErrors();
-        //   report_error("Illegal action: \"" + action + "\"\n" + errors.join("\n"));
-        //   return false;
-        //   }
+  if ( Globals::check_model ) { // TO REMOVE ?? 
+    QList<QPair<QString,QString>> inps = model->getInputs();
+    QList<QPair<QString,QString>> outps = model->getOutputs();
+    QList<QPair<QString,QString>> vars = model->getShared() + getLocalVars(); 
+    if ( ! t->isInitial() ) { // Check guards if non-initial transition
+      foreach ( QString guard, t->getGuards()) {
+        qDebug() << "Checking guard: " << guard;
+        Fragment fragment(inps, outps, vars, "guard " + guard);
+        Response r = Globals::compiler->checkFragment(fragment);
+        qDebug() << "Got response: " << r.toString();
+        if ( ! check_response("Guard " + guard, r) ) return false;
         }
       }
+    foreach ( QString action, t->getActions()) { // Check actions 
+        Fragment fragment(inps, outps, vars, "action " + action);
+        Response r = Globals::compiler->checkFragment(fragment);
+        if ( ! check_response("Action " + action, r) ) return false;
+        }
+    // TODO: check state valuations
     }
   return true;
 }
 
-bool Diagram::check(QList<Iov*>& global_ios)
+bool Diagram::check()
 {
   if ( name.isEmpty() ) {
-    report_error("No name specified for diagram");
+    report_error("Current diagram", "No name specified for diagram");
     return false;
     }
   if ( ! initState() || ! initTransition() ) {
-    report_error("No initial state/transition");
+    report_error("Diagram " + name, "No initial state/transition");
     return false;
     }
   for ( Transition *t : transitions() ) 
-    if ( ! check_transition(t, global_ios) ) return false;
+    if ( ! check_transition(t) ) return false;
   return true;
 }
 
@@ -837,7 +861,7 @@ void Diagram::exportRfsmModel(QTextStream& os, QList<Iov*>& global_ios)
     QString indent = QString(2, ' ');
     bool first;
 
-    if ( check(global_ios) == false ) return;
+    if ( check() == false ) return;
     // TODO : compute actual_ios using an extension of the fragment checker mechanism
     // For now, let's assume local_ios = global_ios (i.e. all diagrams take all IOs
     //QList<Iov*> actual_ios;

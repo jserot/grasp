@@ -18,6 +18,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include "diagram.h"
+#include "fragment.h"
+#include "request.h"
 #include "response.h"
 
 // Interface to the RFSM compiler in server mode
@@ -35,12 +37,13 @@ public:
     void stopServer();
 
     // Low-level requests
-    void sendRequest(const QString &text);
-    QString sendRequestAndReadResponse(const QString &text);
+    void sendAsyncRequest(const QString &text);
+    QString sendRequest(const QString &text);
 
     // High-level requests
     Response getVersion(void);
     Response compile(const QStringList &args);
+    Response checkFragment(const Fragment &fragment);
     void close(void);
 
 signals:

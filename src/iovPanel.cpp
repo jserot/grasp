@@ -250,7 +250,7 @@ void IovPanel::nameEdited()
     case IcModel:
       model = client.icClient.model;
       Q_ASSERT(model);
-      defined = model->getInputs() + model->getOutputs() + model->getShared();
+      defined = model->getInputNames() + model->getOutputNames() + model->getSharedNames();
       break;
     case IcDiagram:
       diagram = client.icClient.diagram;

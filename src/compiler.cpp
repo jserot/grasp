@@ -44,7 +44,7 @@ void Compiler::startServer(const QString &serverPath, const QString &socketPath)
 {
     this->socketPath = socketPath;
     QStringList serverArgs;
-    serverArgs << "-server_mode" << "-socket_path" << socketPath;
+    serverArgs << "-server_mode" << "-socket_path" << socketPath << "-verbose";
     qDebug() << "compiler: launching:" << serverPath << serverArgs;
     serverProcess.start(serverPath, serverArgs);
     if ( serverProcess.waitForStarted(3000) ) {
@@ -58,7 +58,7 @@ void Compiler::startServer(const QString &serverPath, const QString &socketPath)
       }
 }
 
-void Compiler::sendRequest(const QString &text)
+void Compiler::sendAsyncRequest(const QString &text)
 {
     if (socket.state() == QLocalSocket::ConnectedState) {
         QByteArray data = text.trimmed().toUtf8() + '\n';
@@ -72,9 +72,9 @@ void Compiler::sendRequest(const QString &text)
         }
 }
 
-QString Compiler::sendRequestAndReadRespnse(const QString &text)
+QString Compiler::sendRequest(const QString &text)
 {
-  sendRequest(text);
+  sendAsyncRequest(text);
   QString response = readAnswer();
   return response;
 }
@@ -136,9 +136,15 @@ Response Compiler::compile(const QStringList &args)
   Request q = Request::Compile(args);
   QString r = sendRequest(q.toString());
   Response s = Response::fromString(r);
-  return s.kind() == Response::Kind::Compiled ?
-    s
-    : Response::Error("Invalid response from compiler");
+  return s.kind() == Response::Kind::Compiled ? s : Response::Error("Invalid response from compiler");
+}
+
+Response Compiler::checkFragment(const Fragment &fragment)
+{
+  Request q = Request::CheckFragment(fragment);
+  QString r = sendRequest(q.toString());
+  Response s = Response::fromString(r);
+  return s.kind() == Response::Kind::Checked ? s : Response::Error("Invalid response from compiler");
 }
 
 void Compiler::close(void)

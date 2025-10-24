@@ -40,7 +40,7 @@ public:
     // Accessors
     Kind kind() const;
     QString version() const;
-    bool success() const;
+    bool result() const;
     QStringList files() const;
     QString message() const;
     QString error() const;
@@ -53,7 +53,7 @@ public:
 private:
     Kind m_kind;
     QString m_version;
-    bool m_success = false;
+    bool m_result = false;
     QStringList m_files;
     QString m_message;
     QString m_error;
