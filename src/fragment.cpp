@@ -21,9 +21,9 @@
 QJsonObject Fragment::toJson() const
 {
         QJsonObject json;
-        json["inps"] = listToJsonArray(inps);
-        json["outps"] = listToJsonArray(outps);
-        json["vars"] = listToJsonArray(vars);
+        json["inps"] = listToJsonArray(ctx.inps);
+        json["outps"] = listToJsonArray(ctx.outps);
+        json["vars"] = listToJsonArray(ctx.vars);
         json["obj"] = obj;
         return json;
 }

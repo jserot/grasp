@@ -172,6 +172,21 @@ bool Compiler::handle_response(QString ctx, QString loc, Response r)
     }
 }
 
+// bool Compiler::check_state_valuation(QList<QPair<QString,QString>>& outps)
+// {
+//   qDebug() << "Checking state valuation: " << getId();
+//   QList<QPair<QString,QString>> inps; // Empty here
+//   QList<QPair<QString,QString>> vars; // Empty here
+//   foreach ( QString valuation, getAttrs()) { // Note: state attributes are here supposed to be limited to (output) valuations. TO FIX ? 
+//         qDebug() << "Checking valuation: " << valuation;
+//         Fragment fragment(inps, outps, vars, "sval " + valuation);
+//         Response r = Globals::compiler->checkFragment(fragment);
+//         qDebug() << "Got response: " << r.toString();
+//         //if ( ! check_response("Valuation " + valuation, r) ) return false;
+//         }
+//   return true;
+// }
+
 void Compiler::close(void)
 {
   Request q = Request::Close();

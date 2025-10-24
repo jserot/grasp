@@ -87,8 +87,8 @@ Diagram *Diagram::duplicate()
     for ( State *state : this->states() ) {
       State *copied_state = 
         state->isPseudo() ?
-          new State(state->pos())
-        : new State(state->getId(), state->getAttrs(), state->pos());
+        new State(this, state->pos())
+        : new State(this, state->getId(), state->getAttrs(), state->pos());
       copied_states.insert(state,copied_state);
       }   
     QList<Transition *> copied_transitions;
@@ -155,7 +155,7 @@ void Diagram::addState(State *state)
 
 State* Diagram::addState(QPointF pos, QString id, QStringList attrs)
 {
-  State* state = new State(id, attrs);
+  State* state = new State(this, id, attrs);
   state->setPos(pos);
   addState(state);
   return state;
@@ -163,7 +163,7 @@ State* Diagram::addState(QPointF pos, QString id, QStringList attrs)
 
 State* Diagram::addPseudoState(QPointF pos)
 {
-  State* state = new State(); // Pseudo-state
+  State* state = new State(this); // Pseudo-state
   state->setPos(pos);
   addState(state);
   return state;
@@ -533,7 +533,17 @@ bool Diagram::isItemChange(int type)
     return false;
 }
 
-// Checking
+QList<QPair<QString,QString>> Diagram::getInps()
+{
+  // TO BE FIXED : restrict to IOs actually refered to in transitions (guards and action RHSs)
+  return enclosingModel()->getInputs() + enclosingModel()->getShared(); 
+}
+
+QList<QPair<QString,QString>> Diagram::getOutps()
+{
+  // TO BE FIXED : restrict to IOs actually refered to in transitions (action LHSs) and state valuations
+  return enclosingModel()->getOutputs() + enclosingModel()->getShared(); 
+}
 
 QList<QPair<QString,QString>> Diagram::getLocalVars()
 {
@@ -542,6 +552,9 @@ QList<QPair<QString,QString>> Diagram::getLocalVars()
     r.append(qMakePair(v->name,Iov::stringOfType(v->type)));
   return r;
 }
+
+
+// Checking
 
 bool Diagram::check_transition(Transition *t)
 {
@@ -580,22 +593,6 @@ bool Diagram::check_transition(Transition *t)
   return true;
 }
 
-bool Diagram::check_state_valuations(State *s)
-{
-  qDebug() << "Checking state valuations: " << s->getId();
-  QList<QPair<QString,QString>> inps; // Empty here
-  QList<QPair<QString,QString>> outps = model->getOutputs();
-  QList<QPair<QString,QString>> vars; // Empty here
-  foreach ( QString valuation, s->getAttrs()) { // Note: state attributes are here supposed to be limited to (output) valuations. TO FIX ? 
-        qDebug() << "Checking valuation: " << valuation;
-        Fragment fragment(inps, outps, vars, "sval " + valuation);
-        Response r = Globals::compiler->checkFragment(fragment);
-        qDebug() << "Got response: " << r.toString();
-        if ( ! Globals::compiler->handle_response("Diagram state checking", "Valuation " + valuation, r) ) return false;
-        }
-  return true;
-}
-
 bool Diagram::check()
 {
   if ( name.isEmpty() ) {
@@ -609,7 +606,7 @@ bool Diagram::check()
   for ( Transition *t : transitions() ) 
     if ( ! check_transition(t) ) return false;
   for ( State *s : states() ) 
-    if ( ! check_state_valuations(s) ) return false;
+    if ( ! s->check() ) return false;
   return true;
 }
 
@@ -629,11 +626,13 @@ Diagram* Diagram::fromJson(nlohmann::json& json, Model *model, QWidget *parent)
       qreal y =  json_state.at("y");
       State* state;
       if ( id == State::initPseudoId.toStdString() )
-        state = new State(QPointF(x,y));
+        state = new State(NULL, QPointF(x,y));
+      // Note: the enclosing diagram is set to NULL here since it does not exists yet. It will be updated later
       else 
-        state = new State(QString::fromStdString(id),
+        state = new State(NULL, QString::fromStdString(id),
                           QString::fromStdString(attrs).split(",",SKIP_EMPTY_PARTS),
                           QPointF(x,y));
+      // Note: the enclosing diagram is set to NULL here since it does not exists yet. It will be updated later
       states.insert(id, state);
       }   
 
@@ -677,7 +676,10 @@ Diagram* Diagram::fromJson(nlohmann::json& json, Model *model, QWidget *parent)
       }
 
     // ... and, if (and only if) parsing succeeds, we update the model.
-    return new Diagram(model, name, vars, states.values(), transitions, parent);
+    Diagram *diagram = new Diagram(model, name, vars, states.values(), transitions, parent);
+    for ( State *s : states.values() ) // Note: updating the enclosing diagram  of the read states 
+      s->setDiagram(diagram);
+    return diagram;
 }
 
 void Diagram::toJson(nlohmann::json& json_top)

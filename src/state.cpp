@@ -21,6 +21,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QtDebug>
+#include <QMessageBox>
 
 QSize State::dskSize = QSize(15,15);
 QSize State::boxSize = QSize(100,70);
@@ -45,34 +46,38 @@ void State::init(QString id, QStringList attrs, QSize sz)
     this->attrs = attrs;
 }
 
-State::State(QString id, QStringList attrs, QGraphicsItem *parent)
+State::State(Diagram *d, QString id, QStringList attrs, QGraphicsItem *parent)
     : QGraphicsPolygonItem(parent)
 {
   init(id, attrs, boxSize);
   isPseudoState = false;
+  this->diagram = d;
 }
 
-State::State(QString id, QStringList attrs, QPointF pos, QGraphicsItem *parent)
+State::State(Diagram *d, QString id, QStringList attrs, QPointF pos, QGraphicsItem *parent)
     : QGraphicsPolygonItem(parent)
 {
   init(id, attrs, boxSize);
   isPseudoState = false;
   setPos(pos);
+  this->diagram = d;
 }
   
-State::State(QGraphicsItem *parent)
+State::State(Diagram *d, QGraphicsItem *parent)
     : QGraphicsPolygonItem(parent)
 {
   init(initPseudoId, attrs, dskSize);
   isPseudoState = true;
+  this->diagram = d;
 }
 
-State::State(QPointF pos, QGraphicsItem *parent)
+State::State(Diagram *d, QPointF pos, QGraphicsItem *parent)
     : QGraphicsPolygonItem(parent)
 {
   init(initPseudoId, attrs, dskSize);
   isPseudoState = true;
   setPos(pos);
+  this->diagram = d;
 }
 
 void State::removeTransition(Transition *transition)
@@ -190,17 +195,42 @@ QDebug operator<<(QDebug d, const State& s)
   return d;
 }
 
-bool State::check_valuations(QList<QPair<QString,QString>>& outps)
+bool State::check_valuation(QString valuation)
 {
-  qDebug() << "Checking state valuations: " << getId();
-  QList<QPair<QString,QString>> inps; // Empty here
-  QList<QPair<QString,QString>> vars; // Empty here
-  foreach ( QString valuation, getAttrs()) { // Note: state attributes are here supposed to be limited to (output) valuations. TO FIX ? 
-        qDebug() << "Checking valuation: " << valuation;
-        Fragment fragment(inps, outps, vars, "sval " + valuation);
-        Response r = Globals::compiler->checkFragment(fragment);
-        qDebug() << "Got response: " << r.toString();
-        //if ( ! check_response("Valuation " + valuation, r) ) return false;
-        }
+    qDebug() << "Checking valuation: " << valuation;
+    Fragment::Context ctx = {
+      QList<QPair<QString,QString>>(),
+      diagram->getOutps(), // including shared variables
+      QList<QPair<QString,QString>>()
+      };
+    Fragment fragment(ctx, "sval " + valuation);
+    Response r = Globals::compiler->checkFragment(fragment);
+    qDebug() << "Got response: " << r.toString();
+    return Globals::compiler->handle_response("State checking", "Valuation " + valuation, r);
+}
+
+bool State::check_valuations(QStringList valuations)
+{
+  qDebug() << "Checking state valuations: " << valuations;
+  // First, check each valuation separately
+  foreach ( QString valuation, valuations ) 
+    if ( ! check_valuation(valuation) ) return false;
+  // Then, if this succeeds, check for multiple assignements of the same output
+  QStringList lhss;
+  foreach ( QString valuation, valuations) {
+    QString lhs = valuation.split("=").at(0);
+    if ( lhss.contains(lhs) ) {
+      QMessageBox::warning(Globals::mainWindow, "", "Duplicate state valuation: \"" + valuation);
+      return false;
+      }
+    else 
+      lhss << lhs;
+    }
   return true;
 }
+
+bool State::check()
+{
+  return check_valuations(getAttrs()); // Attributes are (for now) limited to state valuations
+}
+

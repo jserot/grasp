@@ -22,20 +22,25 @@
 
 class Fragment
 {
-private:
+public:
+  struct Context {
     QList<QPair<QString, QString>> inps;
     QList<QPair<QString, QString>> outps;
     QList<QPair<QString, QString>> vars;
+    };
+
+private:
+    Context ctx;
     QString obj;
 
 public:
     Fragment() = default;
 
-    Fragment(const QList<QPair<QString, QString>> &inps,
+    Fragment(const Context& ctx, const QString &obj) : ctx(ctx), obj(obj) {}
+    Fragment(const QList<QPair<QString, QString>> &inps, // TO BE REMOVED ?
       const QList<QPair<QString, QString>> &outps,
       const QList<QPair<QString, QString>> &vars,
-      const QString &obj)
-        : inps(inps), outps(outps), vars(vars), obj(obj) {}
+      const QString &obj) : obj(obj) { ctx.inps = inps; ctx.outps = outps; ctx.vars = vars; }
 
   QJsonObject toJson() const;
 

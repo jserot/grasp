@@ -53,6 +53,8 @@ public:
     void removeVar(Iov *io);
     QList<Iov*> getVars();
     QStringList getVarNames();
+    QList<QPair<QString,QString>> getInps();  //  Including global variables (?)
+    QList<QPair<QString,QString>> getOutps(); //  Including global variables (?)
     QList<QPair<QString,QString>> getLocalVars();
 
     QList<State*> states();
@@ -101,7 +103,6 @@ protected:
     void editState(State *state);
     void editTransition(Transition *transition);
     bool check_transition(Transition *t);
-    bool check_state_valuations(State *s);
 
     void export_rfsm_model(QTextStream& os);
     void export_rfsm_testbench(QTextStream& os);

@@ -77,33 +77,7 @@ void StateProperties::accept()
   QString id = state_name_field->text();
   state->setId(id);
   QStringList valuations = valuations_panel->retrieve();
-  bool ok = true;
-  if ( Globals::check_model ) {
-    // First, check each valuation separately
-    foreach ( QString valuation, valuations) {
-      // QString res = Globals::compiler->checkFragment(diagram,valuation ) // TO FIX !!
-        // QStringList errors = checker.getErrors();
-        // QMessageBox::warning(this, "", "Illegal state valuation: \"" + valuation + "\"\n" + errors.join("\n"));
-        // ok = false;
-        ok = true;
-        }
-    // Then check for multiple assignements of the same output (only if all previous tests succeeded) 
-    if ( ok ) {
-       QStringList lhss;
-       foreach ( QString valuation, valuations) {
-         QString lhs = valuation.split("=").at(0);
-         if ( lhss.contains(lhs) ) {
-           QMessageBox::warning(this, "", "Duplicate state valuation: \"" + valuation);
-           ok = false;
-           break;
-         }
-         else 
-           lhss << lhs;
-         }
-      }
-    }
-  else // -no_model_check option
-    ok = true;
+  bool ok = Globals::check_model ? state->check_valuations(valuations) : true;
   if ( ok ) {
     state->setAttrs(valuations);
     qDebug() << "StateProperties::accept(ok)";

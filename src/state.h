@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "fragment.h"
+
 #include <QGraphicsPixmapItem>
 #include <QList>
 
@@ -25,6 +27,7 @@ class QPainter;
 class QStyleOptionGraphicsItem;
 class QWidget;
 class QPolygonF;
+class Diagram;
 QT_END_NAMESPACE
 
 class Transition;
@@ -35,10 +38,10 @@ public:
     enum { Type = UserType + 15 };
     enum Location { None=0, North=1, South=2, East=3, West=4 }; // for looping transitions;
 
-    State(QString id, QStringList attrs, QGraphicsItem *parent = 0);
-    State(QString id, QStringList attrs, QPointF pos, QGraphicsItem *parent = 0);
-    State(QGraphicsItem *parent = 0); // For initial pseudo-states
-    State(QPointF pos, QGraphicsItem *parent = 0); 
+    State(Diagram *d, QString id, QStringList attrs, QGraphicsItem *parent = 0);
+    State(Diagram *d, QString id, QStringList attrs, QPointF pos, QGraphicsItem *parent = 0);
+    State(Diagram *d, QGraphicsItem *parent = 0); // For initial pseudo-states
+    State(Diagram *d, QPointF pos, QGraphicsItem *parent = 0); 
 
     void removeTransition(Transition *transition);
     void removeTransitions();
@@ -49,6 +52,7 @@ public:
     void setId(QString id) { this->id = id; }
     QStringList getAttrs() const { return attrs; }
     void setAttrs(QStringList attrs) { this->attrs = attrs; }
+    void setDiagram(Diagram *diagram) { this->diagram = diagram; }
     QList<Transition *> getTransitionsTo(State *dstState);
     QList<Transition *> getTransitionsFrom(State *srcState);
     QList<Transition *> getTransitionsOut();
@@ -62,7 +66,9 @@ public:
 
     friend QDebug operator<<(QDebug d, const State& s);
 
-    bool check_valuations(QList<QPair<QString,QString>>& outps);
+  bool check_valuation(QString valuation);
+  bool check_valuations(QStringList valuations);
+  bool check();
 
 protected:
     void init(QString id, QStringList attrs, QSize sz);
@@ -75,6 +81,7 @@ protected:
     static QColor unSelectedColor;
 
 private:
+    Diagram *diagram;
     QString id;
     QStringList attrs;
     QPolygonF myPolygon;
