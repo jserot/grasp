@@ -62,6 +62,8 @@ public:
 
     friend QDebug operator<<(QDebug d, const State& s);
 
+    bool check_valuations(QList<QPair<QString,QString>>& outps);
+
 protected:
     void init(QString id, QStringList attrs, QSize sz);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0) override;

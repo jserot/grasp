@@ -11,6 +11,7 @@
 /***********************************************************************/
 
 #include "compiler.h"
+#include "globals.h"
 
 #include <QString>
 #include <QStringList>
@@ -20,6 +21,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDebug>
+#include <QMessageBox>
 #include "request.h"
 #include "response.h"
 
@@ -145,6 +147,29 @@ Response Compiler::checkFragment(const Fragment &fragment)
   QString r = sendRequest(q.toString());
   Response s = Response::fromString(r);
   return s.kind() == Response::Kind::Checked ? s : Response::Error("Invalid response from compiler");
+}
+
+void Compiler::report_error(QString ctx, QString loc, QString msg)
+{
+  QMessageBox::warning(Globals::mainWindow, ctx, loc + "\n\n" + msg);
+}
+
+
+bool Compiler::handle_response(QString ctx, QString loc, Response r)
+{
+  if ( r.kind() == Response::Kind::Checked ) {
+    if ( r.result() == true )
+      return true;
+    else { 
+      report_error(ctx, loc, r.message());
+      return false;
+      }
+    }
+  else {
+    qDebug() << "Wrong response to check_fragment request: " << r.message();
+    QMessageBox::critical(Globals::mainWindow, tr("Diagram checking"), r.message());
+    return false;
+    }
 }
 
 void Compiler::close(void)

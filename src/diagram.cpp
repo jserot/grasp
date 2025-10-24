@@ -535,33 +535,6 @@ bool Diagram::isItemChange(int type)
 
 // Checking
 
-void Diagram::report_error(QString loc, QString msg)
-{
-  QMessageBox::warning(Globals::mainWindow, tr("Diagram checking"), loc + "\n\n" + msg);
-}
-
-bool Diagram::check_response(QString loc, Response r)
-{
-  if ( r.kind() == Response::Kind::Checked ) {
-    if ( r.result() == true )
-      return true;
-    else { // Fragment checking failed
-      report_error(loc, r.message());
-      return false;
-      }
-    }
-  else {
-    qDebug() << "Wrong response to check_fragment request: " << r.message();
-    QMessageBox::critical(Globals::mainWindow, tr("Diagram checking"), r.message());
-    return false;
-    }
-}
-
-void Diagram::check_state(State *s)
-{
-  Q_ASSERT(states().contains(s)); 
-}
-
 QList<QPair<QString,QString>> Diagram::getLocalVars()
 {
   QList<QPair<QString,QString>> r;
@@ -573,12 +546,14 @@ QList<QPair<QString,QString>> Diagram::getLocalVars()
 bool Diagram::check_transition(Transition *t)
 {
   qDebug() << "Checking transition: " << t->toString();
-  check_state(t->getSrcState());
-  check_state(t->getDstState());
+  Q_ASSERT(states().contains(t->getSrcState())); 
+  Q_ASSERT(states().contains(t->getDstState())); 
   if ( ! t->isInitial() ) {
     QStringList modelEvents = enclosingModel()->getInpEvents() + enclosingModel()->getSharedEvents();
     if ( ! modelEvents.contains(t->getEvent()) ) {
-      report_error("Transition " + t->toString(),  "the triggering event is not / no longer part of the enclosing model");
+      Globals::compiler->report_error("Diagram checking",
+                                      "Transition " + t->toString(),
+                                      "the triggering event is not / no longer part of the enclosing model");
       return false;
       }
     }
@@ -593,13 +568,13 @@ bool Diagram::check_transition(Transition *t)
         Fragment fragment(inps, outps, vars, "guard " + guard);
         Response r = Globals::compiler->checkFragment(fragment);
         qDebug() << "Got response: " << r.toString();
-        if ( ! check_response("Guard " + guard, r) ) return false;
+        if ( ! Globals::compiler->handle_response("Diagram transition checking", "Guard " + guard, r) ) return false;
         }
       }
     foreach ( QString action, t->getActions()) { // Check actions 
         Fragment fragment(inps, outps, vars, "action " + action);
         Response r = Globals::compiler->checkFragment(fragment);
-        if ( ! check_response("Action " + action, r) ) return false;
+        if ( ! Globals::compiler->handle_response("Diagram transition checking", "Action " + action, r) ) return false;
         }
     }
   return true;
@@ -616,7 +591,7 @@ bool Diagram::check_state_valuations(State *s)
         Fragment fragment(inps, outps, vars, "sval " + valuation);
         Response r = Globals::compiler->checkFragment(fragment);
         qDebug() << "Got response: " << r.toString();
-        if ( ! check_response("Valuation " + valuation, r) ) return false;
+        if ( ! Globals::compiler->handle_response("Diagram state checking", "Valuation " + valuation, r) ) return false;
         }
   return true;
 }
@@ -624,11 +599,11 @@ bool Diagram::check_state_valuations(State *s)
 bool Diagram::check()
 {
   if ( name.isEmpty() ) {
-    report_error("Current diagram", "No name specified for diagram");
+    Globals::compiler->report_error("Diagram checking", "Current diagram", "No name specified for diagram");
     return false;
     }
   if ( ! initState() || ! initTransition() ) {
-    report_error("Diagram " + name, "No initial state/transition");
+    Globals::compiler->report_error("Diagram checking", "Diagram " + name, "No initial state/transition");
     return false;
     }
   for ( Transition *t : transitions() ) 

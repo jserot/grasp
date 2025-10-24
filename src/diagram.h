@@ -100,11 +100,8 @@ protected:
     void addTransition(Transition *transition);
     void editState(State *state);
     void editTransition(Transition *transition);
-    void check_state(State* s);
     bool check_transition(Transition *t);
     bool check_state_valuations(State *s);
-  bool check_response(QString loc, Response r);
-  void report_error(QString loc, QString msg);
 
     void export_rfsm_model(QTextStream& os);
     void export_rfsm_testbench(QTextStream& os);

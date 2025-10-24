@@ -12,6 +12,10 @@
 
 #include "state.h"
 #include "transition.h"
+#include "globals.h"
+#include "fragment.h"
+#include "response.h"
+#include "compiler.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
@@ -184,4 +188,19 @@ QDebug operator<<(QDebug d, const State& s)
 {
   d << s.id << ", " << s.attrs;
   return d;
+}
+
+bool State::check_valuations(QList<QPair<QString,QString>>& outps)
+{
+  qDebug() << "Checking state valuations: " << getId();
+  QList<QPair<QString,QString>> inps; // Empty here
+  QList<QPair<QString,QString>> vars; // Empty here
+  foreach ( QString valuation, getAttrs()) { // Note: state attributes are here supposed to be limited to (output) valuations. TO FIX ? 
+        qDebug() << "Checking valuation: " << valuation;
+        Fragment fragment(inps, outps, vars, "sval " + valuation);
+        Response r = Globals::compiler->checkFragment(fragment);
+        qDebug() << "Got response: " << r.toString();
+        //if ( ! check_response("Valuation " + valuation, r) ) return false;
+        }
+  return true;
 }

@@ -36,6 +36,9 @@ public:
     void startServer(const QString &serverPath, const QString &socketPath);
     void stopServer();
 
+    bool handle_response(QString ctx, QString loc, Response r);
+    void report_error(QString ctx, QString loc, QString msg);
+
     // Low-level requests
     void sendAsyncRequest(const QString &text);
     QString sendRequest(const QString &text);
