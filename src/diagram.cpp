@@ -601,8 +601,23 @@ bool Diagram::check_transition(Transition *t)
         Response r = Globals::compiler->checkFragment(fragment);
         if ( ! check_response("Action " + action, r) ) return false;
         }
-    // TODO: check state valuations
     }
+  return true;
+}
+
+bool Diagram::check_state_valuations(State *s)
+{
+  qDebug() << "Checking state valuations: " << s->getId();
+  QList<QPair<QString,QString>> inps; // Empty here
+  QList<QPair<QString,QString>> outps = model->getOutputs();
+  QList<QPair<QString,QString>> vars; // Empty here
+  foreach ( QString valuation, s->getAttrs()) { // Note: state attributes are here supposed to be limited to (output) valuations. TO FIX ? 
+        qDebug() << "Checking valuation: " << valuation;
+        Fragment fragment(inps, outps, vars, "sval " + valuation);
+        Response r = Globals::compiler->checkFragment(fragment);
+        qDebug() << "Got response: " << r.toString();
+        if ( ! check_response("Valuation " + valuation, r) ) return false;
+        }
   return true;
 }
 
@@ -618,6 +633,8 @@ bool Diagram::check()
     }
   for ( Transition *t : transitions() ) 
     if ( ! check_transition(t) ) return false;
+  for ( State *s : states() ) 
+    if ( ! check_state_valuations(s) ) return false;
   return true;
 }
 

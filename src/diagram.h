@@ -102,6 +102,7 @@ protected:
     void editTransition(Transition *transition);
     void check_state(State* s);
     bool check_transition(Transition *t);
+    bool check_state_valuations(State *s);
   bool check_response(QString loc, Response r);
   void report_error(QString loc, QString msg);
 
