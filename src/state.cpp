@@ -51,7 +51,7 @@ State::State(Diagram *d, QString id, QStringList attrs, QGraphicsItem *parent)
 {
   init(id, attrs, boxSize);
   isPseudoState = false;
-  this->diagram = d;
+  enclosingDiagram = d;
 }
 
 State::State(Diagram *d, QString id, QStringList attrs, QPointF pos, QGraphicsItem *parent)
@@ -60,7 +60,7 @@ State::State(Diagram *d, QString id, QStringList attrs, QPointF pos, QGraphicsIt
   init(id, attrs, boxSize);
   isPseudoState = false;
   setPos(pos);
-  this->diagram = d;
+  enclosingDiagram = d;
 }
   
 State::State(Diagram *d, QGraphicsItem *parent)
@@ -68,7 +68,7 @@ State::State(Diagram *d, QGraphicsItem *parent)
 {
   init(initPseudoId, attrs, dskSize);
   isPseudoState = true;
-  this->diagram = d;
+  enclosingDiagram = d;
 }
 
 State::State(Diagram *d, QPointF pos, QGraphicsItem *parent)
@@ -77,7 +77,7 @@ State::State(Diagram *d, QPointF pos, QGraphicsItem *parent)
   init(initPseudoId, attrs, dskSize);
   isPseudoState = true;
   setPos(pos);
-  this->diagram = d;
+  enclosingDiagram = d;
 }
 
 void State::removeTransition(Transition *transition)
@@ -200,7 +200,7 @@ bool State::check_valuation(QString valuation)
     qDebug() << "Checking valuation: " << valuation;
     Fragment::Context ctx = {
       QList<QPair<QString,QString>>(),
-      diagram->getOutps(), // including shared variables
+      enclosingDiagram->getOutps(), // including shared variables
       QList<QPair<QString,QString>>()
       };
     Fragment fragment(ctx, "sval " + valuation);
@@ -231,6 +231,7 @@ bool State::check_valuations(QStringList valuations)
 
 bool State::check()
 {
+  qDebug() << "Checking state " << id;
   return check_valuations(getAttrs()); // Attributes are (for now) limited to state valuations
 }
 

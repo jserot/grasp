@@ -137,9 +137,6 @@ void TransitionProperties::accept()
 {
   State *srcState, *dstState;
   QString event;
-  QStringList guards;
-  QStringList actions;
-  
   bool isInitial = transition->isInitial();
   
   if ( ! isInitial ) {
@@ -153,69 +150,18 @@ void TransitionProperties::accept()
   if ( ! isInitial ) 
     event = event_field->currentText();
 
-  bool guards_ok = true;
-  bool actions_ok = true;
+  QStringList guards = guards_panel->retrieve();
+  QStringList actions = actions_panel->retrieve();
 
+  bool ok;
   if ( Globals::check_model ) {
-    //FragmentChecker checker(Globals::compiler,diagram,this);
-    if ( ! isInitial ) {
-      guards = guards_panel->retrieve();
-      foreach ( QString guard, guards) { 
-        // QString res = Globals::compiler->checkFragment(diagram,guard ) // TO FIX !!
-        // if ( ! checker.check_guard(guard) ) {
-        //   QStringList errors = checker.getErrors();
-        //   QMessageBox::warning(this, "", "Illegal guard: \"" + guard + "\"\n" + errors.join("\n"));
-        //   guards_ok = false;
-        guards_ok = true;
-        //   }
-        }
-      // if ( guards.length() >= 2 ) {
-      //   for ( int i = 0; i<guards.length(); i++ ) {
-      //     QString guard = guards.at(i);
-      //     guards.replace(i, "(" + guard + ")");
-      //   }
-      // }
-      }
-    actions = actions_panel->retrieve();
-    foreach ( QString action, actions) {
-      // First check action is well-formed and typed
-        // QString res = Globals::compiler->checkFragment(diagram,action ) // TO FIX !!
-      // if ( ! checker.check_action(action) ) {
-      //   QStringList errors = checker.getErrors();
-      //   QMessageBox::warning(this, "", "Illegal action: \"" + action + "\"\n" + errors.join("\n"));
-      //   actions_ok = false;
-      //   continue;
-        actions_ok = true;
-      //   }
-      // Then, if the above succeeded, test that an output modified by an action is not assigned in the target state 
-      QString lhs = action.split(":=").at(0);
-      QStringList ovs = dstState->getAttrs();
-      for ( int i = 0; i<ovs.length(); i++ ) { // It's a pity QList does not have a [map] operator ..
-        QString lhs = ovs.at(i).split("=").at(0);
-        ovs.replace(i, lhs);
-        }
-      if ( ovs.contains(lhs) ) {
-        QMessageBox::warning(this, "", "Action \"" + action + "\" sets output \"" + lhs + "\", which is already assigned in the target state"); 
-        actions_ok = false;
-        break;
-        }
-      }
-    // foreach ( QString v, r.lhs_vars ) {
-    //   if ( lhss.contains(v) ) { // Assignation of an already assigned output/var 
-      //     QMessageBox::warning(this, "Error", "The output/variable " + v + " is assigned several times by the actions");
-      //     actions_ok = false;
-      //     }
-      //   else
-      //     lhss.insert(v);
-      //   }
-      // }
+    ok = isInitial ? true : transition->check_guards(guards);
+    ok = ok && transition->check_actions(actions);
     }
-  else { // -no_model_check option
-    guards_ok = true;
-    actions_ok = true;
-    }
+  else
+    ok = true;
 
-  if ( guards_ok && actions_ok ) {
+  if ( ok  ) {
     transition->setDstState(dstState);
     transition->setActions(actions);
     if ( ! isInitial ) {

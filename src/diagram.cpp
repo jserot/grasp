@@ -95,7 +95,7 @@ Diagram *Diagram::duplicate()
     for ( Transition *transition : this->transitions() ) {
       State *srcState = copied_states.value(transition->getSrcState());
       State *dstState = copied_states.value(transition->getDstState());
-      Transition *copied_transition = new Transition(srcState,
+      Transition *copied_transition = new Transition(this, srcState,
                                               dstState,
                                               transition->getEvent(),
                                               transition->getGuards(),
@@ -303,7 +303,7 @@ Transition* Diagram::addTransition(State* srcState,
                                QStringList actions,
                                State::Location location)
 {
-  Transition *transition = new Transition(srcState, dstState, event, guards, actions, location);
+  Transition *transition = new Transition(this, srcState, dstState, event, guards, actions, location);
   addTransition(transition);
   return transition;
 }
@@ -556,43 +556,6 @@ QList<QPair<QString,QString>> Diagram::getLocalVars()
 
 // Checking
 
-bool Diagram::check_transition(Transition *t)
-{
-  qDebug() << "Checking transition: " << t->toString();
-  Q_ASSERT(states().contains(t->getSrcState())); 
-  Q_ASSERT(states().contains(t->getDstState())); 
-  if ( ! t->isInitial() ) {
-    QStringList modelEvents = enclosingModel()->getInpEvents() + enclosingModel()->getSharedEvents();
-    if ( ! modelEvents.contains(t->getEvent()) ) {
-      Globals::compiler->report_error("Diagram checking",
-                                      "Transition " + t->toString(),
-                                      "the triggering event is not / no longer part of the enclosing model");
-      return false;
-      }
-    }
-  // TODO: following checks should be shared with those performed by the [transitionProperties] class
-  if ( Globals::check_model ) { // TO REMOVE ?? 
-    QList<QPair<QString,QString>> inps = model->getInputs();
-    QList<QPair<QString,QString>> outps = model->getOutputs();
-    QList<QPair<QString,QString>> vars = model->getShared() + getLocalVars(); 
-    if ( ! t->isInitial() ) { // Check guards if non-initial transition
-      foreach ( QString guard, t->getGuards()) {
-        qDebug() << "Checking guard: " << guard;
-        Fragment fragment(inps, outps, vars, "guard " + guard);
-        Response r = Globals::compiler->checkFragment(fragment);
-        qDebug() << "Got response: " << r.toString();
-        if ( ! Globals::compiler->handle_response("Diagram transition checking", "Guard " + guard, r) ) return false;
-        }
-      }
-    foreach ( QString action, t->getActions()) { // Check actions 
-        Fragment fragment(inps, outps, vars, "action " + action);
-        Response r = Globals::compiler->checkFragment(fragment);
-        if ( ! Globals::compiler->handle_response("Diagram transition checking", "Action " + action, r) ) return false;
-        }
-    }
-  return true;
-}
-
 bool Diagram::check()
 {
   if ( name.isEmpty() ) {
@@ -604,7 +567,7 @@ bool Diagram::check()
     return false;
     }
   for ( Transition *t : transitions() ) 
-    if ( ! check_transition(t) ) return false;
+    if ( ! t->check() ) return false;
   for ( State *s : states() ) 
     if ( ! s->check() ) return false;
   return true;
@@ -655,8 +618,9 @@ Diagram* Diagram::fromJson(nlohmann::json& json, Model *model, QWidget *parent)
         throw std::invalid_argument("Diagram::fromString: invalid state id");
       State *srcState = states.value(src_state);
       State *dstState = states.value(dst_state);
-      Transition *transition = new Transition(srcState,
-                                              dstState,
+      Transition *transition = new Transition(NULL, 
+      // Note: the enclosing diagram is set to NULL here since it does not exists yet. It will be updated later
+                                              srcState, dstState,
                                               QString::fromStdString(event),
                                               QString::fromStdString(guards).split(",",SKIP_EMPTY_PARTS),
                                               QString::fromStdString(actions).split(",",SKIP_EMPTY_PARTS),
@@ -677,8 +641,10 @@ Diagram* Diagram::fromJson(nlohmann::json& json, Model *model, QWidget *parent)
 
     // ... and, if (and only if) parsing succeeds, we update the model.
     Diagram *diagram = new Diagram(model, name, vars, states.values(), transitions, parent);
-    for ( State *s : states.values() ) // Note: updating the enclosing diagram  of the read states 
+    for ( State *s : states.values() ) // We now can update the enclosing diagram of the read states 
       s->setDiagram(diagram);
+    for ( Transition *t : transitions) // We now can update the enclosing diagram of the read transition 
+      t->setDiagram(diagram);
     return diagram;
 }
 

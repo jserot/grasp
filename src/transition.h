@@ -23,6 +23,7 @@ class QGraphicsScene;
 class QRectF;
 class QGraphicsSceneMouseEvent;
 class QPainterPath;
+class Diagram;
 QT_END_NAMESPACE
 
 class Transition : public QGraphicsPolygonItem
@@ -30,7 +31,7 @@ class Transition : public QGraphicsPolygonItem
 public:
     enum { Type = UserType + 4 };
 
-    Transition(State *srcState, State *dstState,
+  Transition(Diagram *diagram, State *srcState, State *dstState,
                QString event, QStringList guards, QStringList actions,
                State::Location location, QGraphicsItem *parent=0);
     ~Transition();
@@ -49,6 +50,7 @@ public:
     void setEvent(QString s) { event = s; }
     void setGuards(QStringList ss) { guards = ss; }
     void setActions(QStringList ss) { actions = ss; }
+    void setDiagram(Diagram *diagram) { this->enclosingDiagram = diagram; }
     State::Location getLocation() const { return location; }
     bool isInitial();
 
@@ -56,6 +58,12 @@ public:
 
     QString toString();
     
+    bool check_actions(QStringList actions);
+    bool check_guards(QStringList guards);
+    bool check_action(Fragment::Context ctx, QString action);
+    bool check_guard(Fragment::Context ctx, QString guard);
+    bool check();
+
     static QColor selectedColor;
     static QColor unSelectedColor;
     static double arrowSize;
@@ -66,6 +74,7 @@ protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0) override;
 
 private:
+    Diagram *enclosingDiagram;
     State *srcState;
     State *dstState;
     QString event;

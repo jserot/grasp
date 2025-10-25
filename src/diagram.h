@@ -53,8 +53,8 @@ public:
     void removeVar(Iov *io);
     QList<Iov*> getVars();
     QStringList getVarNames();
-    QList<QPair<QString,QString>> getInps();  //  Including global variables (?)
-    QList<QPair<QString,QString>> getOutps(); //  Including global variables (?)
+    QList<QPair<QString,QString>> getInps();  //  Including global variables
+    QList<QPair<QString,QString>> getOutps(); //  Including global variables
     QList<QPair<QString,QString>> getLocalVars();
 
     QList<State*> states();

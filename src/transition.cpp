@@ -12,11 +12,17 @@
 
 #include "transition.h"
 #include "misc.h"
+#include "compiler.h"
+#include "response.h"
+#include "globals.h"
+#include "diagram.h"
+#include "model.h"
 #include <math.h>
 #include <QPen>
 #include <QPainter>
 #include <QSet>
 #include <QtDebug>
+#include <QMessageBox>
 
 #define POLYLINE_INTERSECT polyLine.intersects
 
@@ -26,7 +32,8 @@ QColor Transition::selectedColor = Qt::darkCyan;
 QColor Transition::unSelectedColor = Qt::black;
 double Transition::arrowSize = 20.0;
 
-Transition::Transition(State *_srcState,
+Transition::Transition(Diagram *d,
+                       State *_srcState,
                        State *_dstState,
                        QString _event,
                        QStringList _guards,
@@ -35,6 +42,7 @@ Transition::Transition(State *_srcState,
                        QGraphicsItem *parent)
     : QGraphicsPolygonItem(parent)
 {
+    enclosingDiagram = d;
     srcState = _srcState;
     dstState = _dstState;
     location = _location;
@@ -255,3 +263,78 @@ QDebug operator<<(QDebug d, Transition& t)
   d << t.srcState->getId() << "->" + t.dstState->getId() << "[" << t.guards << "/" << t.actions << "]";
   return d;
 }
+
+bool Transition::check_guard(Fragment::Context ctx, QString guard)
+{
+  Fragment fragment(ctx, "guard " + guard);
+  Response r = Globals::compiler->checkFragment(fragment);
+  if ( ! Globals::compiler->handle_response("Transition checking", "Guard " + guard, r) ) return false;
+  return true;
+}
+
+bool Transition::check_action(Fragment::Context ctx, QString action)
+{
+  Fragment fragment(ctx, "action " + action);
+  Response r = Globals::compiler->checkFragment(fragment);
+  if ( ! Globals::compiler->handle_response("Transition checking", "Action " + action, r) ) return false;
+  // Check that an output modified by an action is not assigned in the target state 
+  QString lhs = action.split(":=").at(0);
+  QStringList svals = dstState->getAttrs();
+  for ( int i = 0; i<svals.length(); i++ ) { // It's a pity QList does not have a [map] operator ..
+    QString lhs = svals.at(i).split("=").at(0);
+    svals.replace(i, lhs);
+    }
+  if ( svals.contains(lhs) ) {
+    QMessageBox::warning(Globals::mainWindow, "", "Action \"" + action + "\" sets output \"" + lhs + "\", which is already assigned in the target state"); 
+        return false;
+        }
+  // TODO : check that an output/variable is not assigned more than once by the action (?)
+  return true;
+}
+
+bool Transition::check_guards(QStringList guards)
+{
+  Fragment::Context ctx = {
+    enclosingDiagram->getInps(),// Inputs, including global variables
+    enclosingDiagram->getOutps(), // Outputs, including global variables
+    enclosingDiagram->getLocalVars() // Local variables
+    };
+  foreach ( QString guard, guards )
+    if ( ! check_guard(ctx, guard) ) return false;
+  return true;
+}
+
+bool Transition::check_actions(QStringList actions)
+{
+  Fragment::Context ctx = {
+    enclosingDiagram->getInps(),// Inputs, including global variables
+    enclosingDiagram->getOutps(), // Outputs, including global variables
+    enclosingDiagram->getLocalVars() // Local variables
+    };
+  foreach ( QString action, actions )
+    if ( ! check_action(ctx, action) ) return false;
+  return true;
+}
+
+bool Transition::check()
+{
+  qDebug() << "Checking transition: " << toString();
+  Q_ASSERT(enclosingDiagram->states().contains(getSrcState())); 
+  Q_ASSERT(enclosingDiagram->states().contains(getDstState())); 
+  if ( ! isInitial() ) {
+    QStringList modelEvents =
+        enclosingDiagram->enclosingModel()->getInpEvents()
+      + enclosingDiagram->enclosingModel()->getSharedEvents();
+    if ( ! modelEvents.contains(getEvent()) ) {
+      Globals::compiler->report_error("Diagram checking",
+                                      "Transition " + toString(),
+                                      "the triggering event is not part of the enclosing model");
+      return false;
+      }
+    }
+  if ( ! isInitial() )
+    if ( ! check_guards(getGuards()) ) return false;
+  if ( ! check_actions(getActions()) ) return false;
+  return true;
+}
+

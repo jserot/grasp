@@ -52,7 +52,7 @@ public:
     void setId(QString id) { this->id = id; }
     QStringList getAttrs() const { return attrs; }
     void setAttrs(QStringList attrs) { this->attrs = attrs; }
-    void setDiagram(Diagram *diagram) { this->diagram = diagram; }
+    void setDiagram(Diagram *diagram) { this->enclosingDiagram = diagram; }
     QList<Transition *> getTransitionsTo(State *dstState);
     QList<Transition *> getTransitionsFrom(State *srcState);
     QList<Transition *> getTransitionsOut();
@@ -81,7 +81,7 @@ protected:
     static QColor unSelectedColor;
 
 private:
-    Diagram *diagram;
+    Diagram *enclosingDiagram;
     QString id;
     QStringList attrs;
     QPolygonF myPolygon;
