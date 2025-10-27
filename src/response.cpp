@@ -18,11 +18,11 @@ Response Response::Error(const QString &msg) { return Response(Kind::Error, msg)
 Response Response::CompilationFailed(const QString &msg) { return Response(Kind::Compiled, msg); }
 Response Response::CheckingFailed(const QString &msg) { return Response(Kind::Checked, msg); }
 Response Response::CompilationOk(const QStringList &files) { return Response(Kind::Compiled, files); }
-Response Response::CheckingOk() { return Response(Kind::Checked); }
+Response Response::CheckingOk(const QStringList& rds, const QStringList& wrs) { return Response(Kind::Checked,rds,wrs); }
 Response Response::None() { return Response(Kind::None); }
 
 // Private ctors
-Response::Response(Kind kind) : m_kind(kind) // None, CheckingOk
+Response::Response(Kind kind) : m_kind(kind) // None
 {
   switch ( kind ) {
   case Kind::Checked: m_result = true; break;
@@ -41,13 +41,18 @@ Response::Response(Kind kind, const QString &s) : m_kind(kind) // Version, Compi
   }
 }
 
-Response::Response(Kind kind, const QStringList &ss)
-  : m_kind(kind), m_result(true), m_files(ss) {} // CompilationOk
+Response::Response(Kind kind, const QStringList &ss) // CompilationOk
+  : m_kind(kind), m_result(true), m_files(ss) {}
+
+Response::Response(Kind kind, const QStringList &rds, const QStringList &wrs) // CheckingOk
+  : m_kind(kind), m_result(true), m_rds(rds), m_wrs(wrs) {}
 
 Response::Kind Response::kind() const { return m_kind; }
 QString Response::version() const { return m_version; }
 bool Response::result() const { return m_result; }
 QStringList Response::files() const { return m_files; }
+QStringList Response::rds() const { return m_rds; }
+QStringList Response::wrs() const { return m_wrs; }
 QString Response::message() const { return m_message; }
 QString Response::error() const { return m_error; }
 
@@ -99,8 +104,12 @@ Response Response::fromJson(const QJsonObject &obj) {
           }
     } else if (kind == "checked") {
         bool result = obj["result"].toBool();
-        if ( result ) 
-          return CheckingOk();
+        if ( result ) {
+          QStringList rds, wrs;
+          for (const auto &v : obj["rds"].toArray()) rds.append(v.toString());
+          for (const auto &v : obj["wrs"].toArray()) wrs.append(v.toString());
+          return CheckingOk(rds,wrs);
+          }
         else {
           QString msg = obj["message"].toString();
           return CheckingFailed(msg);

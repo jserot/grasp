@@ -264,18 +264,30 @@ QDebug operator<<(QDebug d, Transition& t)
   return d;
 }
 
-bool Transition::check_guard(Fragment::Context ctx, QString guard)
+Response Transition::scan_guard(Fragment::Context ctx, QString guard)
 {
   Fragment fragment(ctx, "guard " + guard);
   Response r = Globals::compiler->checkFragment(fragment);
+  return r;
+}
+
+bool Transition::check_guard(Fragment::Context ctx, QString guard)
+{
+  Response r = scan_guard(ctx,guard);
   if ( ! Globals::compiler->handle_response("Transition checking", "Guard " + guard, r) ) return false;
   return true;
 }
 
-bool Transition::check_action(Fragment::Context ctx, QString action)
+Response Transition::scan_action(Fragment::Context ctx, QString action)
 {
   Fragment fragment(ctx, "action " + action);
   Response r = Globals::compiler->checkFragment(fragment);
+  return r;
+}
+
+bool Transition::check_action(Fragment::Context ctx, QString action)
+{
+  Response r = scan_action(ctx,action);
   if ( ! Globals::compiler->handle_response("Transition checking", "Action " + action, r) ) return false;
   // Check that an output modified by an action is not assigned in the target state 
   QString lhs = action.split(":=").at(0);
@@ -295,9 +307,9 @@ bool Transition::check_action(Fragment::Context ctx, QString action)
 bool Transition::check_guards(QStringList guards)
 {
   Fragment::Context ctx = {
-    enclosingDiagram->getInps(),// Inputs, including global variables
-    enclosingDiagram->getOutps(), // Outputs, including global variables
-    enclosingDiagram->getLocalVars() // Local variables
+    enclosingDiagram->potentialInputs(),// Inputs, including global variables
+    enclosingDiagram->potentialOutputs(), // Outputs, including global variables
+    enclosingDiagram->localVars() // Local variables
     };
   foreach ( QString guard, guards )
     if ( ! check_guard(ctx, guard) ) return false;
@@ -307,9 +319,9 @@ bool Transition::check_guards(QStringList guards)
 bool Transition::check_actions(QStringList actions)
 {
   Fragment::Context ctx = {
-    enclosingDiagram->getInps(),// Inputs, including global variables
-    enclosingDiagram->getOutps(), // Outputs, including global variables
-    enclosingDiagram->getLocalVars() // Local variables
+    enclosingDiagram->potentialInputs(),
+    enclosingDiagram->potentialOutputs(),
+    enclosingDiagram->localVars()
     };
   foreach ( QString action, actions )
     if ( ! check_action(ctx, action) ) return false;
@@ -338,3 +350,32 @@ bool Transition::check()
   return true;
 }
 
+QPair<QMap<QString,QString>,QMap<QString,QString>> Transition::varsOf()
+{
+  qDebug() << "Getting vars of transition " << toString();
+  //Fragment::Context ctx = enclosingDiagram->build_context(); 
+  Fragment::Context ctx = {
+    enclosingDiagram->potentialInputs(),
+    enclosingDiagram->potentialOutputs(),
+    enclosingDiagram->localVars()
+    };
+  QMap<QString,QString> rds, wrs;
+  if ( ! isInitial() ) rds.insert(event,"event");
+  foreach ( QString guard, guards ) {
+    Response r = scan_guard(ctx, guard);
+    if ( Globals::compiler->handle_response("Transition scanning", "Guard " + guard, r) ) {
+      foreach ( QString s, r.rds() )
+        if ( ! ctx.vars.contains(s) ) rds.insert(s, ctx.inps.value(s)); // Do not add local variables
+      }  
+    }
+  foreach ( QString action, actions ) {
+    Response r = scan_action(ctx, action);
+    if ( Globals::compiler->handle_response("Transition scanning", "Action " + action, r) ) {
+      foreach ( QString s, r.rds() )
+        if ( ! ctx.vars.contains(s) ) rds.insert(s, ctx.inps.value(s));  
+      foreach ( QString s, r.wrs() ) 
+        if ( ! ctx.vars.contains(s) ) wrs.insert(s, ctx.outps.value(s)); 
+      }  
+    }
+  return qMakePair(rds,wrs);
+}

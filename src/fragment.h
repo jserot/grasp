@@ -24,9 +24,9 @@ class Fragment
 {
 public:
   struct Context {
-    QList<QPair<QString, QString>> inps;
-    QList<QPair<QString, QString>> outps;
-    QList<QPair<QString, QString>> vars;
+    QMap<QString, QString> inps;
+    QMap<QString, QString> outps;
+    QMap<QString, QString> vars;
     };
 
 private:
@@ -37,16 +37,16 @@ public:
     Fragment() = default;
 
     Fragment(const Context& ctx, const QString &obj) : ctx(ctx), obj(obj) {}
-    Fragment(const QList<QPair<QString, QString>> &inps, // TO BE REMOVED ?
-      const QList<QPair<QString, QString>> &outps,
-      const QList<QPair<QString, QString>> &vars,
-      const QString &obj) : obj(obj) { ctx.inps = inps; ctx.outps = outps; ctx.vars = vars; }
+    Fragment(const QMap<QString, QString> &inps, // TO BE REMOVED ?
+             const QMap<QString, QString> &outps,
+             const QMap<QString, QString> &vars,
+             const QString &obj) : obj(obj) { ctx.inps = inps; ctx.outps = outps; ctx.vars = vars; }
 
   QJsonObject toJson() const;
 
   static Fragment fromJson(const QJsonObject &json);
 
 private:
-  static QJsonArray listToJsonArray(const QList<QPair<QString, QString>> &list);
-  static QList<QPair<QString, QString>> jsonArrayToList(const QJsonArray &arr);
+  static QJsonArray mapToJsonArray(const QMap<QString,QString> &list);
+  static QMap<QString,QString> jsonArrayToMap(const QJsonArray &arr);
 };

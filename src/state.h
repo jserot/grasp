@@ -13,6 +13,7 @@
 #pragma once
 
 #include "fragment.h"
+#include "response.h"
 
 #include <QGraphicsPixmapItem>
 #include <QList>
@@ -66,9 +67,11 @@ public:
 
     friend QDebug operator<<(QDebug d, const State& s);
 
-  bool check_valuation(QString valuation);
+  bool check_valuation(Fragment::Context ctx, QString valuation);
   bool check_valuations(QStringList valuations);
   bool check();
+
+  QPair<QMap<QString,QString>,QMap<QString,QString>> varsOf(); // Symbols (with type) read (resp. written) by the attached state valuations
 
 protected:
     void init(QString id, QStringList attrs, QSize sz);
@@ -80,6 +83,7 @@ protected:
     static QColor selectedColor;
     static QColor unSelectedColor;
 
+    Response scan_valuation(Fragment::Context ctx, QString valuation);
 private:
     Diagram *enclosingDiagram;
     QString id;

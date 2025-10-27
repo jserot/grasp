@@ -1,12 +1,7 @@
 * GENERAL
 
 * GUI
-- fix `Diagram::exportRfsmInstance()` and `Diagram::exportRfsmModel()` so that not all global IOs
-  are used as instance parameters; each instance model should be able to use a subset of the global
-  IOs and this subset should be computed from the rd/wr variable sets derived from the transition rules
-- fix `Diagram::get{Inps,Outs}` so that the returned set only contains the IOs _actually occuring_
-  in the transitions (instead of using the full set of global IOs); for this we'll need an extension
-  of the `fragment checker` mechanism returning all read/write variables occuring in a (set of) transition(s)
+- add a clickable region in the diagram panel to access local variables (more intuitive than right-click) ?
 - add an option to set the location of the log file when debug mode is set
 - use json format for options save file
 - enlarge the compiler path popup window

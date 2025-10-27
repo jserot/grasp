@@ -53,9 +53,11 @@ public:
     void removeVar(Iov *io);
     QList<Iov*> getVars();
     QStringList getVarNames();
-    QList<QPair<QString,QString>> getInps();  //  Including global variables
-    QList<QPair<QString,QString>> getOutps(); //  Including global variables
-    QList<QPair<QString,QString>> getLocalVars();
+    QMap<QString,QString> potentialInputs();   // All potential inputs (excluding local variables)
+    QMap<QString,QString> potentialOutputs();  // All potential outputs (excluding local variables)
+    QMap<QString,QString> localVars();
+    QMap<QString,QString> actualInputs(); // Inputs actually refered to in transitions (guards and action RHSs)
+    QMap<QString,QString> actualOutputs(); // Outputs actually refered to in transitions (action LHSs) and state valuations
 
     QList<State*> states();
     QList<Transition*> transitions();
@@ -73,12 +75,13 @@ public:
     void edit();
 
     bool check();
+  //Fragment::Context build_context();
 
     void dump(); // for debug only
 
     void exportDot(QTextStream &os);
-    void exportRfsmModel(QTextStream& os, QList<Iov*>& global_ios);
-    void exportRfsmInstance(QTextStream& os, QList<Iov*>& global_ios);
+    void exportRfsmModel(QTextStream& os);
+    void exportRfsmInstance(QTextStream& os);
 
     static Diagram* fromJson(nlohmann::json& json, Model *model, QWidget *parent);
     // This function is declared as static because it will be called a non-instance context in Model::readFromFile
@@ -103,6 +106,8 @@ protected:
     void editState(State *state);
     void editTransition(Transition *transition);
     bool check_transition(Transition *t);
+
+    QPair<QMap<QString,QString>,QMap<QString,QString>> actualIos();
 
     void export_rfsm_model(QTextStream& os);
     void export_rfsm_testbench(QTextStream& os);

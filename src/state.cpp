@@ -16,6 +16,7 @@
 #include "fragment.h"
 #include "response.h"
 #include "compiler.h"
+#include "misc.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
@@ -195,26 +196,33 @@ QDebug operator<<(QDebug d, const State& s)
   return d;
 }
 
-bool State::check_valuation(QString valuation)
+Response State::scan_valuation(Fragment::Context ctx, QString valuation)
 {
     qDebug() << "Checking valuation: " << valuation;
-    Fragment::Context ctx = {
-      QList<QPair<QString,QString>>(),
-      enclosingDiagram->getOutps(), // including shared variables
-      QList<QPair<QString,QString>>()
-      };
     Fragment fragment(ctx, "sval " + valuation);
     Response r = Globals::compiler->checkFragment(fragment);
     qDebug() << "Got response: " << r.toString();
-    return Globals::compiler->handle_response("State checking", "Valuation " + valuation, r);
+    return r;
+}
+
+bool State::check_valuation(Fragment::Context ctx, QString valuation)
+{
+  Response r = scan_valuation(ctx, valuation);
+  return Globals::compiler->handle_response("State checking", "Valuation " + valuation, r); // Ignore [rds] and [wrs] results here
 }
 
 bool State::check_valuations(QStringList valuations)
 {
   qDebug() << "Checking state valuations: " << valuations;
+  Fragment::Context ctx = {
+    enclosingDiagram->potentialInputs(),
+    enclosingDiagram->potentialOutputs(),
+    enclosingDiagram->localVars()
+    };
+  //Fragment::Context ctx = enclosingDiagram->build_context(); 
   // First, check each valuation separately
   foreach ( QString valuation, valuations ) 
-    if ( ! check_valuation(valuation) ) return false;
+    if ( ! check_valuation(ctx, valuation) ) return false;
   // Then, if this succeeds, check for multiple assignements of the same output
   QStringList lhss;
   foreach ( QString valuation, valuations) {
@@ -235,3 +243,22 @@ bool State::check()
   return check_valuations(getAttrs()); // Attributes are (for now) limited to state valuations
 }
 
+QPair<QMap<QString,QString>,QMap<QString,QString>> State::varsOf()
+{
+  qDebug() << "Getting vars of state " << id;
+  //Fragment::Context ctx = enclosingDiagram->build_context(); 
+  Fragment::Context ctx = {
+    enclosingDiagram->potentialInputs(),
+    enclosingDiagram->potentialOutputs(),
+    enclosingDiagram->localVars()
+    };
+  QMap<QString,QString> rds, wrs;
+  foreach ( QString valuation, getAttrs() ) {
+    Response r = scan_valuation(ctx, valuation);
+    if ( Globals::compiler->handle_response("State scanning", "Valuation " + valuation, r) ) {
+      foreach ( QString s, r.rds() ) rds.insert(s, ctx.inps.value(s));  // Find type of found symbols in [ctx]
+      foreach ( QString s, r.wrs() ) wrs.insert(s, ctx.outps.value(s)); 
+      }
+    }
+  return qMakePair(rds,wrs);
+}

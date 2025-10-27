@@ -21,9 +21,9 @@
 QJsonObject Fragment::toJson() const
 {
         QJsonObject json;
-        json["inps"] = listToJsonArray(ctx.inps);
-        json["outps"] = listToJsonArray(ctx.outps);
-        json["vars"] = listToJsonArray(ctx.vars);
+        json["inps"] = mapToJsonArray(ctx.inps);
+        json["outps"] = mapToJsonArray(ctx.outps);
+        json["vars"] = mapToJsonArray(ctx.vars);
         json["obj"] = obj;
         return json;
 }
@@ -31,31 +31,53 @@ QJsonObject Fragment::toJson() const
 Fragment Fragment::fromJson(const QJsonObject &json)
 {
         return Fragment(
-            jsonArrayToList(json["inps"].toArray()),
-            jsonArrayToList(json["outps"].toArray()),
-            jsonArrayToList(json["vars"].toArray()),
+            jsonArrayToMap(json["inps"].toArray()),
+            jsonArrayToMap(json["outps"].toArray()),
+            jsonArrayToMap(json["vars"].toArray()),
             json["obj"].toString()
         );
 }
 
-QJsonArray Fragment::listToJsonArray(const QList<QPair<QString, QString>> &list)
+// QJsonArray Fragment::listToJsonArray(const QList<QPair<QString, QString>> &list)
+// {
+//         QJsonArray arr;
+//         for (const auto &p : list) {
+//             QJsonObject o;
+//             o["id"] = p.first;
+//             o["type"] = p.second;
+//             arr.append(o);
+//         }
+//         return arr;
+// }
+
+// QList<QPair<QString, QString>> Fragment::jsonArrayToList(const QJsonArray &arr)
+// {
+//         QList<QPair<QString, QString>> list;
+//         for (const auto &val : arr) {
+//             QJsonObject o = val.toObject();
+//             list.append(qMakePair(o["id"].toString(), o["type"].toString()));
+//         }
+//         return list;
+// }
+
+QJsonArray Fragment::mapToJsonArray(const QMap<QString, QString> &map)
 {
         QJsonArray arr;
-        for (const auto &p : list) {
+        for (auto i = map.cbegin(), end = map.cend(); i != end; ++i) {
             QJsonObject o;
-            o["id"] = p.first;
-            o["type"] = p.second;
+            o["id"] = i.key();
+            o["type"] = i.value();
             arr.append(o);
         }
         return arr;
 }
 
-QList<QPair<QString, QString>> Fragment::jsonArrayToList(const QJsonArray &arr)
+QMap<QString,QString> Fragment::jsonArrayToMap(const QJsonArray &arr)
 {
-        QList<QPair<QString, QString>> list;
+        QMap<QString,QString> r;
         for (const auto &val : arr) {
             QJsonObject o = val.toObject();
-            list.append(qMakePair(o["id"].toString(), o["type"].toString()));
+            r.insert(o["id"].toString(), o["type"].toString());
         }
-        return list;
+        return r;
 }

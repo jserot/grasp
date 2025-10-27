@@ -13,6 +13,7 @@
 #include "compiler.h"
 #include "globals.h"
 
+#include <QFile>
 #include <QString>
 #include <QStringList>
 #include <QLocalSocket>
@@ -45,8 +46,11 @@ Compiler::~Compiler() {
 void Compiler::startServer(const QString &serverPath, const QString &socketPath)
 {
     this->socketPath = socketPath;
+    QFile socketFile(socketPath);
+    if ( socketFile.exists() ) socketFile.remove();
     QStringList serverArgs;
-    serverArgs << "-server_mode" << "-socket_path" << socketPath << "-verbose";
+    serverArgs << "-server_mode" << "-socket_path" << socketPath;
+    // serverArgs << "-verbose"; 
     qDebug() << "compiler: launching:" << serverPath << serverArgs;
     serverProcess.start(serverPath, serverArgs);
     if ( serverProcess.waitForStarted(3000) ) {
@@ -64,10 +68,10 @@ void Compiler::sendAsyncRequest(const QString &text)
 {
     if (socket.state() == QLocalSocket::ConnectedState) {
         QByteArray data = text.trimmed().toUtf8() + '\n';
-        qDebug() << "compiler: sending: " << data;
+        //qDebug() << "compiler: sending: " << data;
         socket.write(data);
         socket.flush();
-        qDebug() << "compiler: sent";
+        //qDebug() << "compiler: sent";
         }
     else {
         qDebug() << "compiler: server error: no active connexion";
@@ -171,21 +175,6 @@ bool Compiler::handle_response(QString ctx, QString loc, Response r)
     return false;
     }
 }
-
-// bool Compiler::check_state_valuation(QList<QPair<QString,QString>>& outps)
-// {
-//   qDebug() << "Checking state valuation: " << getId();
-//   QList<QPair<QString,QString>> inps; // Empty here
-//   QList<QPair<QString,QString>> vars; // Empty here
-//   foreach ( QString valuation, getAttrs()) { // Note: state attributes are here supposed to be limited to (output) valuations. TO FIX ? 
-//         qDebug() << "Checking valuation: " << valuation;
-//         Fragment fragment(inps, outps, vars, "sval " + valuation);
-//         Response r = Globals::compiler->checkFragment(fragment);
-//         qDebug() << "Got response: " << r.toString();
-//         //if ( ! check_response("Valuation " + valuation, r) ) return false;
-//         }
-//   return true;
-// }
 
 void Compiler::close(void)
 {

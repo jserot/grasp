@@ -28,3 +28,17 @@ QList<T> remove_duplicates(const QList<T>& l)
 {
   return QListToQSet(l).values();
 }
+
+template <typename K, typename V>
+QMap<K,V> map_union(QMap<K,V> m1, QMap<K,V> m2)
+{
+  QMap<K,V> r = m1;
+  r.insert(m2);
+  return r;
+}
+
+template <typename K, typename V>
+QMap<K,V> operator+(QMap<K,V> m1, QMap<K,V> m2)
+{
+  return map_union(m1,m2);
+}

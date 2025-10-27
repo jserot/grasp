@@ -10,6 +10,7 @@
 /*                                                                     */
 /***********************************************************************/
 
+#include "misc.h"
 #include "globals.h"
 #include "model.h"
 #include "diagram.h"
@@ -533,28 +534,67 @@ bool Diagram::isItemChange(int type)
     return false;
 }
 
-QList<QPair<QString,QString>> Diagram::getInps()
+QMap<QString,QString> Diagram::potentialInputs()
 {
-  // TO BE FIXED : restrict to IOs actually refered to in transitions (guards and action RHSs)
   return enclosingModel()->getInputs() + enclosingModel()->getShared(); 
 }
 
-QList<QPair<QString,QString>> Diagram::getOutps()
+QMap<QString,QString> Diagram::potentialOutputs()
 {
-  // TO BE FIXED : restrict to IOs actually refered to in transitions (action LHSs) and state valuations
   return enclosingModel()->getOutputs() + enclosingModel()->getShared(); 
 }
 
-QList<QPair<QString,QString>> Diagram::getLocalVars()
+QMap<QString,QString> Diagram::actualInputs()
 {
-  QList<QPair<QString,QString>> r;
+  return actualIos().first;
+}
+
+QMap<QString,QString> Diagram::actualOutputs()
+{
+  return actualIos().second;
+}
+
+QPair<QMap<QString,QString>,QMap<QString,QString>> Diagram::actualIos()
+{
+  qDebug () << "** Computing actual IOs for diagram " << name;
+  QMap<QString,QString> inps, outps;
+  for ( Transition *t : transitions() ) {  
+    QPair<QMap<QString,QString>,QMap<QString,QString>> vars = t->varsOf();
+    qDebug() << "Adding inputs from transition " << t->toString() << " : " << vars.first;
+    qDebug() << "Adding outputs from transition " << t->toString() << " : " << vars.second;
+    inps.insert(vars.first); 
+    outps.insert(vars.second); 
+    }
+  for ( State *s : states() ) {
+    QPair<QMap<QString,QString>,QMap<QString,QString>> vars = s->varsOf();
+    qDebug() << "Adding IOs from state " << s->getId() << " : " << vars.second;
+    outps.insert(vars.second);   
+    }
+  qDebug () << "Actual inputs are " << inps;
+  qDebug () << "Actual outputs are " << outps;
+  return qMakePair(inps,outps);
+}
+
+QMap<QString,QString> Diagram::localVars()
+{
+  QMap<QString,QString> r;
   for ( const auto v : vars )
-    r.append(qMakePair(v->name,Iov::stringOfType(v->type)));
+    r.insert(v->name,Iov::stringOfType(v->type));
   return r;
 }
 
-
 // Checking
+
+// Fragment::Context Diagram::build_context()
+// {
+//   Fragment::Context ctx = {
+//     /* inps */ inputs() + localVars(), // including shared variables
+//     /* outps */ outputs() + localVars(), // including shared variables
+//     /* local vars */ QMap<QString,QString>() // empty here, since local vars have been included in inps and outps
+//     };
+//   return ctx;
+// }
+
 
 bool Diagram::check()
 {
@@ -801,38 +841,41 @@ QString stringOfIoKind(Iov::IoKind k)
 //   }
 // }
 
-void Diagram::exportRfsmInstance(QTextStream& os, QList<Iov*>& global_ios)
+void Diagram::exportRfsmInstance(QTextStream& os)
 {
-    // TO FIX : not all global IOs should be used as instance parameters
-    // Each instance model should be able to use a subset of the global IOs
-    // This subset could be be computed from the rd/wr variable set derived from the transition rules
-    os << "fsm " << name << " = " << name << "(";
-    bool first = true;
-    for(const auto io : global_ios) {
-      if ( !first ) os << ", ";
-      os << io->name;
-      first = false;
-      }
-    os << ")\n";
+  QMap<QString,QString> ios = actualInputs() + actualOutputs();
+  os << "fsm " << name << " = " << name << "(";
+  bool first = true;
+  for (auto i = ios.cbegin(), end = ios.cend(); i != end; ++i) {
+    if ( !first ) os << ", ";
+    os << i.key(); // name
+    first = false;
+  }
+  os << ")\n";
 }
 
-void Diagram::exportRfsmModel(QTextStream& os, QList<Iov*>& global_ios)
+void Diagram::exportRfsmModel(QTextStream& os)
 {
     QString indent = QString(2, ' ');
     bool first;
 
     if ( check() == false ) return;
-    // TODO : compute actual_ios using an extension of the fragment checker mechanism
-    // For now, let's assume local_ios = global_ios (i.e. all diagrams take all IOs
-    //QList<Iov*> actual_ios;
+    QMap<QString,QString> inps = actualInputs();
+    QMap<QString,QString> outps = actualOutputs();
     os << "fsm model " << name << "(";
-    if ( global_ios.length() > 0 ) {
+    if ( inps.size() + outps.size() > 0 ) {
       os << "\n";
       first = true;
-      for(const auto io : global_ios) {
+      for (auto i = inps.cbegin(), end = inps.cend(); i != end; ++i) {
             if(!first) os << "," << "\n";
             os << indent;
-            os << stringOfIoKind(io->kind) << " " << io->name << ": " << Iov::stringOfType(io->type);
+            os << "in  " << i.key() << ": " << i.value();
+            first = false;
+        }
+      for (auto i = outps.cbegin(), end = outps.cend(); i != end; ++i) {
+            if(!first) os << "," << "\n";
+            os << indent;
+            os << "out " << i.key() << ": " << i.value();
             first = false;
         }
       os << "\n" << indent <<  ")" << "\n";

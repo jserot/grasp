@@ -32,7 +32,7 @@ public:
     static Response Version(const QString &v);
     static Response CompilationOk(const QStringList &files);
     static Response CompilationFailed(const QString &msg);
-    static Response CheckingOk();
+    static Response CheckingOk(const QStringList& rds, const QStringList& wrs);
     static Response CheckingFailed(const QString &msg);
     static Response Error(const QString &err);
     static Response None();
@@ -42,6 +42,8 @@ public:
     QString version() const;
     bool result() const;
     QStringList files() const;
+    QStringList rds() const;
+    QStringList wrs() const;
     QString message() const;
     QString error() const;
 
@@ -55,6 +57,8 @@ private:
     QString m_version;
     bool m_result = false;
     QStringList m_files;
+    QStringList m_rds;
+    QStringList m_wrs;
     QString m_message;
     QString m_error;
 
@@ -62,4 +66,5 @@ private:
     explicit Response(Kind kind);
     Response(Kind kind, const QString &err);
     Response(Kind kind, const QStringList &files);
+    Response(Kind kind, const QStringList &rds, const QStringList &wrs);
 };

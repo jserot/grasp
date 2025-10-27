@@ -49,9 +49,9 @@ public:
     void removeDiagram(Diagram *diagram);
 
     QList<Iov*>& getIos() { return ios; };
-    QList<QPair<QString,QString>> getInputs();
-    QList<QPair<QString,QString>> getOutputs();
-    QList<QPair<QString,QString>> getShared();
+    QMap<QString,QString> getInputs();
+    QMap<QString,QString> getOutputs();
+    QMap<QString,QString> getShared();
     QStringList getInputNames();
     QStringList getOutputNames();
     QStringList getSharedNames();
@@ -75,7 +75,7 @@ public:
     void exportRfsm(QString fname, bool withTestbench = false);
 
 protected:
-    QList<QPair<QString,QString>> getIovs(Iov::IoKind kind);
+    QMap<QString,QString> getIovs(Iov::IoKind kind);
     QStringList getIovNames(Iov::IoKind kind);
     QStringList getEvents(Iov::IoKind kind);
     void export_rfsm_ios(QTextStream& os);

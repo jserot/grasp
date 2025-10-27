@@ -70,11 +70,11 @@ void Model::removeDiagram(Diagram *diagram)
   diagrams.removeOne(diagram);
 }
 
-QList<QPair<QString,QString>> Model::getIovs(Iov::IoKind kind)
+QMap<QString,QString> Model::getIovs(Iov::IoKind kind)
 {
-  QList<QPair<QString,QString>> r;
+  QMap<QString,QString> r;
   for ( const auto io : ios )
-    if ( io->kind == kind ) r.append(qMakePair(io->name,Iov::stringOfType(io->type)));
+    if ( io->kind == kind ) r.insert(io->name,Iov::stringOfType(io->type));
   return r;
 }
 
@@ -94,9 +94,9 @@ QStringList Model::getEvents(Iov::IoKind kind)
   return r;
 }
 
-QList<QPair<QString,QString>> Model::getInputs() { return getIovs(Iov::IoIn); }
-QList<QPair<QString,QString>> Model::getOutputs() { return getIovs(Iov::IoOut); }
-QList<QPair<QString,QString>> Model::getShared() { return getIovs(Iov::IoVar); }
+QMap<QString,QString> Model::getInputs() { return getIovs(Iov::IoIn); }
+QMap<QString,QString> Model::getOutputs() { return getIovs(Iov::IoOut); }
+QMap<QString,QString> Model::getShared() { return getIovs(Iov::IoVar); }
 QStringList Model::getInputNames() { return getIovNames(Iov::IoIn); }
 QStringList Model::getOutputNames() { return getIovNames(Iov::IoOut); }
 QStringList Model::getSharedNames() { return getIovNames(Iov::IoVar); }
@@ -385,7 +385,7 @@ void Model::exportRfsm(QString fname, bool withTestbench)
   QTextStream os(&file);
   // FSM models (diagrams)
   for ( const auto diagram : diagrams ) {
-    diagram->exportRfsmModel(os,ios);
+    diagram->exportRfsmModel(os);
     os << "\n";
     }
   if ( withTestbench ) {
@@ -396,7 +396,7 @@ void Model::exportRfsm(QString fname, bool withTestbench)
     if ( withTestbench ) {
       os << "\n\n";
       for ( const auto diagram : diagrams )
-        diagram->exportRfsmInstance(os,ios);
+        diagram->exportRfsmInstance(os);
       }
     }
   file.close();

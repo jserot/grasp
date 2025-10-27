@@ -64,6 +64,8 @@ public:
     bool check_guard(Fragment::Context ctx, QString guard);
     bool check();
 
+    QPair<QMap<QString,QString>,QMap<QString,QString>> varsOf();
+      // Returns vars/inps (resp. vars/outps) read (resp. written) by the transition
     static QColor selectedColor;
     static QColor unSelectedColor;
     static double arrowSize;
@@ -72,6 +74,9 @@ public:
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0) override;
+
+    Response scan_guard(Fragment::Context ctx, QString guard);
+    Response scan_action(Fragment::Context ctx, QString action);
 
 private:
     Diagram *enclosingDiagram;
