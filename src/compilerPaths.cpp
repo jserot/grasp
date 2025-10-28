@@ -16,6 +16,7 @@
 #include <QLineEdit>
 #include <QDialog>
 #include <QFileDialog>
+#include <QPushButton>
 
 #include "compilerPaths.h"
 
@@ -23,6 +24,7 @@ static const QString defaultCompiler = "rfsmc";  // Fall-back, default values
 static const QString defaultDotProgram = "dot";
 static const QString defaultDotViewer = "graphviz";
 static const QString defaultVcdViewer = "gtkwave";
+static const int defaultPathLength = 60;
 
 CompilerPaths::CompilerPaths(QString iniFile, QWidget *parent) : parent(parent)
 {
@@ -74,48 +76,54 @@ void CompilerPaths::readFromFile(QString fname)
 
 void CompilerPaths::edit(QWidget *parent)
 {
-  dialog = new QDialog(parent);
+    QDialog *dialog = new QDialog(parent);
+    dialog->setWindowTitle("Compiler paths");
 
-  QWidget *form = new QWidget(parent);
-  QFormLayout *layout = new QFormLayout(form);
-  layout->setSizeConstraint(QLayout::SetFixedSize);
+    QFormLayout *layout = new QFormLayout(dialog);
+    layout->setSizeConstraint(QLayout::SetFixedSize);
 
-  QMapIterator<QString, QString> i(paths);
-  while (i.hasNext()) {
-    i.next();
-    QLabel *name = new QLabel(i.key());
-    QLineEdit *path = new QLineEdit();
-    // QSignalMapper *signalMapper = new QSignalMapper(this);
-    // signalMapper->setMapping(path, QString(i.key()));
-    // connect(path, SIGNAL(textEdited(const QString&)), signalMapper, SLOT(map()));
-    // connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(valueChanged(QString)));
-    // Note : the signalMapper technique does _not_ work if the called slot requires _both_ new text and sender :(
-    path->setObjectName(i.key()); // Sender identification
-    connect(path, SIGNAL(textEdited(const QString&)), this, SLOT(valueChanged(const QString&)));
-    path->setText(i.value());
-    layout->addRow(name, path);
-    }
-
-  QVBoxLayout *mainLayout = new QVBoxLayout();
-  mainLayout->addWidget(form);
-  QDialogButtonBox *buttonBox =
-    new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Save);
-  // dialog->connect(buttonBox, SIGNAL(accepted()), dialog, SLOT(accept()));
-  // dialog->connect(buttonBox, SIGNAL(rejected()), dialog, SLOT(reject()));
-  dialog->connect(buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(buttonClicked(QAbstractButton*)));
-  mainLayout->addWidget(buttonBox);
-  dialog->setLayout(mainLayout);
-  dialog->setWindowTitle("Compiler paths");
-  editedPaths.clear();
-  if ( dialog->exec() == QDialog::Accepted ) {
-    QMapIterator<QString, QString> i(editedPaths);
+    QMapIterator<QString, QString> i(paths);
     while (i.hasNext()) {
-    i.next();
-    qDebug() << i.key() << "<-" << i.value();
-    paths.insert(i.key(), i.value());
+        i.next();
+        QLabel *name = new QLabel(i.key());
+        QLineEdit *path = new QLineEdit();
+        path->setObjectName(i.key()); // Sender identification
+        path->setMinimumWidth(path->fontMetrics().averageCharWidth()*defaultPathLength);
+        connect(path, SIGNAL(textEdited(const QString&)), this, SLOT(valueChanged(const QString&)));
+        path->setText(i.value());
+        layout->addRow(name, path);
     }
-  }
-  delete dialog;
+
+    QDialogButtonBox *buttonBox =
+        new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+    QPushButton *saveButton = new QPushButton("Save", dialog);
+    buttonBox->addButton(saveButton, QDialogButtonBox::ActionRole);
+
+    QHBoxLayout *buttonLayout = new QHBoxLayout; // To center buttons
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(buttonBox);
+    buttonLayout->addStretch();
+
+    layout->addRow(buttonLayout);
+
+    dialog->adjustSize();
+
+    QObject::connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
+    QObject::connect(buttonBox, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
+    QObject::connect(saveButton, &QPushButton::clicked, this, &CompilerPaths::saveToFile);
+
+    if (dialog->exec() == QDialog::Accepted) {
+        qDebug() << "Dialog accepted !";
+        QMapIterator<QString, QString> i(editedPaths);
+        while (i.hasNext()) {
+            i.next();
+            qDebug() << i.key() << "<-" << i.value();
+            paths.insert(i.key(), i.value());
+        }
+    }
+
+    delete dialog;
 }
 
 void CompilerPaths::valueChanged(const QString& txt)
@@ -127,24 +135,11 @@ void CompilerPaths::valueChanged(const QString& txt)
     emit(compilerPathChanged(value));
 }
 
-void CompilerPaths::buttonClicked(QAbstractButton *button)
+void CompilerPaths::saveToFile()
 {
-  QString action = button->text();
-  if ( action.startsWith("&") ) action.remove(0,1);
-  qDebug() << "CompilerPaths::buttonClicked: " << action;
-  if ( action == "Save" ) {
-    QString fname;
-    fname = QFileDialog::getSaveFileName(parent, "Save configuration to file", "", "INI file (*.ini)");
-    if ( fname.isEmpty() ) return;
-    saveToFile(fname);
-    logMessage("Saved compiler paths to file " + fname);
-    }
-  else if ( action == "OK" ) dialog->accept();
-  else if ( action == "Cancel" ) dialog->reject();
-}
-
-void CompilerPaths::saveToFile(QString fname)
-{
+  QString fname;
+  fname = QFileDialog::getSaveFileName(parent, "Save configuration to file", "", "INI file (*.ini)");
+  if ( fname.isEmpty() ) return;
   QFileInfo fi(fname);
   QFile f(fname);
   if ( ! f.open(QFile::WriteOnly | QFile::Text) ) 
@@ -157,6 +152,7 @@ void CompilerPaths::saveToFile(QString fname)
     }
   os.flush();
   f.close();
+  logMessage("Saved compiler paths to file " + fname);
 }
 
 QString CompilerPaths::getPath(QString name)

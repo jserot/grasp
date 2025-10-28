@@ -34,7 +34,8 @@ public:
 
 private slots:
   void valueChanged(const QString&);
-  void buttonClicked(QAbstractButton*);
+  //void buttonClicked(QAbstractButton*);
+  void saveToFile();
 
 signals:
     void compilerPathChanged(QString newPath);
@@ -46,7 +47,6 @@ private:
     QMap<QString,QString> editedPaths;
     void setDefaults();
     void readFromFile(QString fname);
-    void saveToFile(QString fname);
     void logMessage(QString msg);
 };
 
