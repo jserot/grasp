@@ -249,8 +249,8 @@ void MainWindow::createActions()
     duplDiagramAction = new QAction(QIcon(":/images/page.png")," Duplicate current diagram", modelActions);
     connect(duplDiagramAction, SIGNAL(triggered()), this, SLOT(duplicateDiagram()));
 
-    dumpModelAction = new QAction("Dump", modelActions); // For debug only
-    connect(dumpModelAction, SIGNAL(triggered()), this, SLOT(dumpModel())); // For debug only
+    // dumpModelAction = new QAction("Dump", modelActions); // For debug only
+    // connect(dumpModelAction, SIGNAL(triggered()), this, SLOT(dumpModel())); // For debug only
 
     diagramActions = new QActionGroup(this);
 
@@ -293,7 +293,7 @@ void MainWindow::updateActions()
     checkDiagramAction->setEnabled(enabled && Globals::check_model);
     checkModelAction->setEnabled(enabled && Globals::check_model);
     checkModelWithStimuliAction->setEnabled(enabled && Globals::check_model);
-    dumpModelAction->setEnabled(enabled);
+    // dumpModelAction->setEnabled(enabled);
     renderDotAction->setEnabled(enabled);
     renderDotsAction->setEnabled(enabled);
     generateRfsmModelAction->setEnabled(enabled);
@@ -332,7 +332,7 @@ void MainWindow::createMenus()
     modelMenu->addAction(checkDiagramAction);
     modelMenu->addAction(checkModelAction);
     modelMenu->addAction(checkModelWithStimuliAction);
-    modelMenu->addAction(dumpModelAction); // For debug only
+    // modelMenu->addAction(dumpModelAction); // For debug only
 
     compileMenu = menuBar()->addMenu(tr("&Compile"));
     compileMenu->addAction(renderDotAction);
