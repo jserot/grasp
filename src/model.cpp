@@ -255,7 +255,7 @@ QString Model::exportSingleDot(Diagram *diagram, QString basename, QStringList o
   os << "ranksep = \"0.400000\"\n";
   os << "fontsize = 14\n";
   os << "mindist=1.0\n";
-  bool withIoDesc = ! options.contains("-dot_no_captions");
+  bool withIoDesc = options.contains("-dot_captions");
   if ( ! ios.isEmpty() && withIoDesc ) 
     os << "_ios [label=\"" << Iov::stringOfList(ios,false) << "\", shape=rect, style=solid]\n";
   diagram->exportDot(os);
@@ -294,7 +294,7 @@ void Model::exportDot(QString fname, QStringList options)
   os << "ranksep = \"0.400000\"\n";
   os << "fontsize = 14\n";
   os << "mindist=1.0\n";
-  bool withIoDesc = ! options.contains("-dot_no_captions");
+  bool withIoDesc = options.contains("-dot_captions");
   if ( withIoDesc ) 
     os << "_ios [label=\"" << Iov::stringOfList(ios,false) << "\", shape=rect, style=solid]\n";
   foreach ( Diagram *a, diagrams) {

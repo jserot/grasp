@@ -18,7 +18,6 @@
 - update icons for the Windows distro
 
 * TOOLS
-- replace `-dot_no_caption` option by `-dot_caption`  (reverse default behavior) ?
 
 * DOC
 - uodate `README.md`
