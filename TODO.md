@@ -1,7 +1,6 @@
 * GENERAL
 
 * GUI
-- automatically size the textviewer's popup according to the displayed text (see `textviewer.cpp`)
 - add an option to set the location of the log file when debug mode is set
 - add a clickable region in the diagram panel to access local variables (more intuitive than right-click) ?
 - use json format for options save file

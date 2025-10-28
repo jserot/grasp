@@ -33,23 +33,62 @@ SyntaxHighlighter* makeSyntaxHighlighter(QString suffix, QTextDocument* doc)
     return NULL;
 }
 
+// TextViewer::TextViewer(QString fname) : QPlainTextEdit()
+// {
+//   QFile file(fname);
+//   Q_ASSERT(file.open(QIODevice::ReadOnly | QIODevice::Text)); // This is supposed to have been checked by the caller
+//   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+//   // setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//   // setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//   setFont(defaultFont);
+//   QFileInfo fi(file);
+//   setWindowTitle(fi.fileName());
+//   setPlainText(QString::fromUtf8(file.readAll()));
+//   setReadOnly(true);
+//   highlighter = makeSyntaxHighlighter(fi.suffix(), document());
+//   setProperty("attachedSyntaxHighlighter", QVariant::fromValue(static_cast<void*>(highlighter)));
+//   setAttribute(::Qt::WA_DeleteOnClose);
+//   setContextMenuPolicy(Qt::CustomContextMenu);
+//   connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenu()));
+// }
+
 TextViewer::TextViewer(QString fname) : QPlainTextEdit()
 {
-  QFile file(fname);
-  Q_ASSERT(file.open(QIODevice::ReadOnly | QIODevice::Text)); // This is supposed to have been checked by the caller
-  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  // setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  // setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  setFont(defaultFont);
-  QFileInfo fi(file);
-  setWindowTitle(fi.fileName());
-  setPlainText(QString::fromUtf8(file.readAll()));
-  setReadOnly(true);
-  highlighter = makeSyntaxHighlighter(fi.suffix(), document());
-  setProperty("attachedSyntaxHighlighter", QVariant::fromValue(static_cast<void*>(highlighter)));
-  setAttribute(::Qt::WA_DeleteOnClose);
-  setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenu()));
+    QFile file(fname);
+    Q_ASSERT(file.open(QIODevice::ReadOnly | QIODevice::Text));
+    
+    setFont(defaultFont);
+    QFileInfo fi(file);
+    setWindowTitle(fi.fileName());
+    setPlainText(QString::fromUtf8(file.readAll()));
+    setReadOnly(true);
+
+    highlighter = makeSyntaxHighlighter(fi.suffix(), document());
+    setProperty("attachedSyntaxHighlighter", QVariant::fromValue(static_cast<void*>(highlighter)));
+
+    setAttribute(::Qt::WA_DeleteOnClose);
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenu()));
+
+    // Adjust width to content
+    QFontMetrics fm(font());
+    QStringList lines = toPlainText().split('\n');
+    int maxWidth = 0;
+    for (const QString &line : lines) {
+        int w = fm.horizontalAdvance(line);
+        if (w > maxWidth)
+            maxWidth = w;
+    }
+    maxWidth += 20; // margin
+
+    int docHeight = fm.lineSpacing() * lines.size() + 20;
+
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setMinimumWidth(maxWidth);
+    setMinimumHeight(docHeight);
+    setMaximumWidth(800);
+    setMaximumHeight(600);
+    resize(minimumWidth(), minimumHeight());
 }
 
 void TextViewer::contextMenu()
@@ -70,18 +109,6 @@ void TextViewer::setFont(QFont font)
   currentFont = font;
   QPlainTextEdit::setFont(currentFont);
 }
-
-QSize TextViewer::sizeHint () const
-{
-  // TODO: compute size from the document contents
-  // QSize s(this->document()->size().toSize());
-  // qDebug() << "TextViewer::sizeHint:" << s;
-  // s.rwidth() = std::max(100, s.width());
-  // s.rheight() = std::max(100, s.height());
-  QSize s(400, 600);
-  return s;
-}
-
 
 TextViewer::~TextViewer()
 {

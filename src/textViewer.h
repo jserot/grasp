@@ -27,7 +27,7 @@ public:
   QFont getFont();
 
 protected:
-  virtual QSize sizeHint () const override;
+  // virtual QSize sizeHint () const override;
 
 protected slots:
   void contextMenu();
