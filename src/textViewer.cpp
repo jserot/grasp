@@ -92,13 +92,14 @@ SyntaxHighlighter* makeSyntaxHighlighter(QString suffix, QTextDocument* doc)
 //     resize(minimumWidth(), minimumHeight());
 // }
 
-TextViewer::TextViewer(QString fname) : QPlainTextEdit()
+TextViewer::TextViewer(QString fname, QWidget *parent) : QPlainTextEdit(parent)
 {
     QFile file(fname);
     Q_ASSERT(file.open(QIODevice::ReadOnly | QIODevice::Text));
 
     setFont(defaultFont);
     QFileInfo fi(file);
+    setWindowFlag(Qt::Window, true);  // Required to make the window toplevel
     setWindowTitle(fi.fileName());
     setPlainText(QString::fromUtf8(file.readAll()));
     setReadOnly(true);
@@ -106,7 +107,7 @@ TextViewer::TextViewer(QString fname) : QPlainTextEdit()
     highlighter = makeSyntaxHighlighter(fi.suffix(), document());
     setProperty("attachedSyntaxHighlighter", QVariant::fromValue(static_cast<void*>(highlighter)));
 
-    setAttribute(::Qt::WA_DeleteOnClose);
+    setAttribute(Qt::WA_DeleteOnClose);
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenu()));
 

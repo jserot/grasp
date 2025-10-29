@@ -22,7 +22,7 @@ const double ImageViewer::zoomOutFactor = 0.8;
 const double ImageViewer::minScaleFactor = 0.2;
 const double ImageViewer::maxScaleFactor = 2.0;
 
-ImageViewer::ImageViewer(QString fname) : QScrollArea()
+ImageViewer::ImageViewer(QString fname, QWidget *parent) : QScrollArea(parent)
 {
   image = new QLabel;
   image->setBackgroundRole(QPalette::Base);
@@ -32,6 +32,7 @@ ImageViewer::ImageViewer(QString fname) : QScrollArea()
   image->setScaledContents(true);
   setBackgroundRole(QPalette::Dark);
   setWidget(image);
+  setWindowFlag(Qt::Window, true);  // Required to make the window toplevel
   setAttribute(::Qt::WA_DeleteOnClose);
   setContextMenuPolicy(Qt::CustomContextMenu);
   QFileInfo f(fname);

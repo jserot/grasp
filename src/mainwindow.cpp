@@ -111,10 +111,6 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-  // Close floating viewers // TO FIX 
-  // foreach ( TextViewer *viewer, textViewers) delete viewer;
-  // foreach ( ImageViewer *viewer, imageViewers) delete viewer;
-  // Bye to compiler
   if ( Globals::compiler ) {
     Globals::compiler->close();
     delete Globals::compiler; // This will shutdown the compiler server
@@ -682,7 +678,7 @@ void MainWindow::openTextFiles(QStringList fnames)
       return;
       }
     }
-  TextsViewer *viewer = new TextsViewer(fnames);
+  TextsViewer *viewer = new TextsViewer(fnames,this);
   viewer->show();
 }
 
@@ -693,7 +689,7 @@ void MainWindow::openTextFile(QString fname)
     QMessageBox::warning(this,"Error:","cannot open file:\n"+fname);
     return;
     }
-  TextViewer *viewer = new TextViewer(fname);
+  TextViewer *viewer = new TextViewer(fname, this);
   viewer->show();
 }
 
@@ -704,7 +700,7 @@ void MainWindow::openImageFile(QString fname)
     QMessageBox::warning(this,"Error:","cannot open file:\n"+fname);
     return;
     }
-  ImageViewer *viewer = new ImageViewer(fname);
+  ImageViewer *viewer = new ImageViewer(fname, this);
   viewer->show();
 }
 

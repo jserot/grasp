@@ -19,7 +19,7 @@ class TextViewer : public QPlainTextEdit
 {
   Q_OBJECT
 public:
-  TextViewer(QString fname);
+  TextViewer(QString fname, QWidget *parent = nullptr);
   ~TextViewer();
 
   static QFont defaultFont;

@@ -25,7 +25,7 @@ class ImageViewer : public QScrollArea
   Q_OBJECT
 
 public:
-  ImageViewer(QString fname);
+  ImageViewer(QString fname, QWidget *parent);
   ~ImageViewer();
 
   void scaleImage(double scaleFactor);

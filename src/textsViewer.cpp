@@ -15,7 +15,7 @@
 #include <QTabWidget>
 #include "textsViewer.h"
 
-TextsViewer::TextsViewer(QStringList fnames) : QTabWidget()
+TextsViewer::TextsViewer(QStringList fnames, QWidget *parent) : QTabWidget(parent)
 {
   foreach ( QString fname, fnames ) {
     QFile file(fname);
@@ -27,6 +27,7 @@ TextsViewer::TextsViewer(QStringList fnames) : QTabWidget()
   setMovable(true);
   setAttribute(::Qt::WA_DeleteOnClose);
   setWindowTitle("SystemC code");
+  setWindowFlag(Qt::Window, true);  // Required to make the window toplevel
 }
 
 TextsViewer::~TextsViewer()
