@@ -58,6 +58,7 @@ public:
     QMap<QString,QString> localVars();
     QMap<QString,QString> actualInputs(); // Inputs actually refered to in transitions (guards and action RHSs)
     QMap<QString,QString> actualOutputs(); // Outputs actually refered to in transitions (action LHSs) and state valuations
+    QMap<QString,QString> actualInOuts(); // Inputs being also outputs (typically, global shared variables)
 
     QList<State*> states();
     QList<Transition*> transitions();

@@ -546,12 +546,28 @@ QMap<QString,QString> Diagram::potentialOutputs()
 
 QMap<QString,QString> Diagram::actualInputs()
 {
+  QPair<QMap<QString,QString>,QMap<QString,QString>> ios = actualIos();
+  for (const auto &key : ios.second.keys()) // Remove all outputs from the inputs (these will be listed as inouts)
+    ios.first.remove(key);
   return actualIos().first;
 }
 
 QMap<QString,QString> Diagram::actualOutputs()
 {
+  QPair<QMap<QString,QString>,QMap<QString,QString>> ios = actualIos();
+  for (const auto &key : ios.first.keys()) // Remove all inputs from the outputs (these will be listed as inouts)
+    ios.second.remove(key);
   return actualIos().second;
+}
+
+QMap<QString,QString> Diagram::actualInOuts()
+{
+  QPair<QMap<QString,QString>,QMap<QString,QString>> ios = actualIos();
+  QMap<QString,QString> r;
+  for (const auto &key : ios.first.keys()) // Find all inputs also listed as outputs
+    if ( ios.second.contains(key) ) 
+      r.insert(key,ios.first.value(key));
+  return r;
 }
 
 QPair<QMap<QString,QString>,QMap<QString,QString>> Diagram::actualIos()
@@ -570,8 +586,6 @@ QPair<QMap<QString,QString>,QMap<QString,QString>> Diagram::actualIos()
     qDebug() << "Adding IOs from state " << s->getId() << " : " << vars.second;
     outps.insert(vars.second);   
     }
-  // TODO: sort [inps] and [outps] (lexicographically ?)
-  // TODO: detect inouts 
   qDebug () << "Actual inputs are " << inps;
   qDebug () << "Actual outputs are " << outps;
   return qMakePair(inps,outps);
@@ -843,45 +857,53 @@ QString stringOfIoKind(Iov::IoKind k)
 //   }
 // }
 
-void Diagram::exportRfsmInstance(QTextStream& os)
+void exportRfsmInstanceIo(QMap<QString,QString>& ios, bool& first, QTextStream& os)
 {
-  QMap<QString,QString> ios = actualInputs() + actualOutputs();
-  // TODO: add inouts
-  os << "fsm " << name << " = " << name << "(";
-  bool first = true;
   for (auto i = ios.cbegin(), end = ios.cend(); i != end; ++i) {
     if ( !first ) os << ", ";
     os << i.key(); // name
     first = false;
   }
+}
+
+void Diagram::exportRfsmInstance(QTextStream& os)
+{
+  QMap<QString,QString> inps = actualInputs();
+  QMap<QString,QString> outps = actualOutputs();
+  QMap<QString,QString> inouts = actualInOuts();
+  os << "fsm " << name << " = " << name << "(";
+  bool first = true;
+  exportRfsmInstanceIo(inps, first, os); // Note: fixed order: inputs, then outputs, then inouts (all by QMap ascending order)
+  exportRfsmInstanceIo(outps, first, os); 
+  exportRfsmInstanceIo(inouts, first, os); 
   os << ")\n";
+}
+
+void exportRfsmModelIo(QMap<QString,QString>& ios, bool& first, QTextStream& os, QString cat, QString indent)
+{
+      for (auto i = ios.cbegin(), end = ios.cend(); i != end; ++i) {
+            if(!first) os << "," << "\n";
+            os << indent;
+            os << cat << i.key() << ": " << i.value();
+            first = false;
+        }
 }
 
 void Diagram::exportRfsmModel(QTextStream& os)
 {
     QString indent = QString(2, ' ');
     bool first;
-
     if ( check() == false ) return;
     QMap<QString,QString> inps = actualInputs();
     QMap<QString,QString> outps = actualOutputs();
-  // TODO: add inouts
+    QMap<QString,QString> inouts = actualInOuts();
     os << "fsm model " << name << "(";
     if ( inps.size() + outps.size() > 0 ) {
       os << "\n";
       first = true;
-      for (auto i = inps.cbegin(), end = inps.cend(); i != end; ++i) {
-            if(!first) os << "," << "\n";
-            os << indent;
-            os << "in  " << i.key() << ": " << i.value();
-            first = false;
-        }
-      for (auto i = outps.cbegin(), end = outps.cend(); i != end; ++i) {
-            if(!first) os << "," << "\n";
-            os << indent;
-            os << "out " << i.key() << ": " << i.value();
-            first = false;
-        }
+      exportRfsmModelIo(inps, first, os, "in  ", indent); // Note: fixed order: inputs, then outputs, then inouts (all by QMap ascending order)
+      exportRfsmModelIo(outps, first, os, "out ", indent);
+      exportRfsmModelIo(inouts, first, os, "inout ", indent);
       os << "\n" << indent <<  ")" << "\n";
       }
     else

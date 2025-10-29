@@ -1,7 +1,6 @@
 * GENERAL
 
 * GUI
-- fix IO order bug btw model and instances
 - kill floating textviewers when quiting
 - add an option to set the location of the log file when debug mode is set
 - add a clickable region in the diagram panel to access local variables (more intuitive than right-click) ?
