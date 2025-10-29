@@ -52,11 +52,51 @@ SyntaxHighlighter* makeSyntaxHighlighter(QString suffix, QTextDocument* doc)
 //   connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenu()));
 // }
 
+// TextViewer::TextViewer(QString fname) : QPlainTextEdit()
+// {
+//     QFile file(fname);
+//     Q_ASSERT(file.open(QIODevice::ReadOnly | QIODevice::Text));
+    
+//     setFont(defaultFont);
+//     QFileInfo fi(file);
+//     setWindowTitle(fi.fileName());
+//     setPlainText(QString::fromUtf8(file.readAll()));
+//     setReadOnly(true);
+
+//     highlighter = makeSyntaxHighlighter(fi.suffix(), document());
+//     setProperty("attachedSyntaxHighlighter", QVariant::fromValue(static_cast<void*>(highlighter)));
+
+//     setAttribute(::Qt::WA_DeleteOnClose);
+//     setContextMenuPolicy(Qt::CustomContextMenu);
+//     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenu()));
+
+//     // Adjust width to content
+//     QFontMetrics fm(font());
+//     QStringList lines = toPlainText().split('\n');
+//     int maxWidth = 0;
+//     for (const QString &line : lines) {
+//         int w = fm.horizontalAdvance(line);
+//         if (w > maxWidth)
+//             maxWidth = w;
+//     }
+//     maxWidth += 20; // margin
+
+//     int docHeight = fm.lineSpacing() * lines.size() + 20;
+
+//     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded); // TO FIX: this does not work
+//     setMinimumWidth(maxWidth);
+//     setMinimumHeight(docHeight);
+//     setMaximumWidth(800);
+//     setMaximumHeight(400);
+//     resize(minimumWidth(), minimumHeight());
+// }
+
 TextViewer::TextViewer(QString fname) : QPlainTextEdit()
 {
     QFile file(fname);
     Q_ASSERT(file.open(QIODevice::ReadOnly | QIODevice::Text));
-    
+
     setFont(defaultFont);
     QFileInfo fi(file);
     setWindowTitle(fi.fileName());
@@ -70,25 +110,21 @@ TextViewer::TextViewer(QString fname) : QPlainTextEdit()
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenu()));
 
-    // Adjust width to content
+    // Ajuste la largeur au contenu
     QFontMetrics fm(font());
     QStringList lines = toPlainText().split('\n');
     int maxWidth = 0;
     for (const QString &line : lines) {
-        int w = fm.horizontalAdvance(line);
-        if (w > maxWidth)
-            maxWidth = w;
+        maxWidth = std::max(maxWidth, fm.horizontalAdvance(line));
     }
-    maxWidth += 20; // margin
+    maxWidth += 20;
 
-    int docHeight = fm.lineSpacing() * lines.size() + 20;
+    // Largeur auto, hauteur variable (scroll activé si nécessaire)
+    setMinimumWidth(maxWidth);
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setMinimumWidth(maxWidth);
-    setMinimumHeight(docHeight);
-    setMaximumWidth(800);
-    setMaximumHeight(600);
-    resize(minimumWidth(), minimumHeight());
+    setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 }
 
 void TextViewer::contextMenu()

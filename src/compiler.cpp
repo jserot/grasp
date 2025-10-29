@@ -47,10 +47,13 @@ void Compiler::startServer(const QString &serverPath, const QString &socketPath)
 {
     this->socketPath = socketPath;
     QFile socketFile(socketPath);
-    if ( socketFile.exists() ) socketFile.remove();
+    if ( socketFile.exists() ) {
+      qDebug() << "Socket" << socketPath << "exists. Deleting";
+      socketFile.remove();
+      }
     QStringList serverArgs;
     serverArgs << "-server_mode" << "-socket_path" << socketPath;
-    // serverArgs << "-verbose"; 
+    serverArgs << "-verbose"; 
     qDebug() << "compiler: launching:" << serverPath << serverArgs;
     serverProcess.start(serverPath, serverArgs);
     if ( serverProcess.waitForStarted(3000) ) {
