@@ -54,7 +54,7 @@ QStringList Response::files() const { return m_files; }
 QStringList Response::rds() const { return m_rds; }
 QStringList Response::wrs() const { return m_wrs; }
 QString Response::message() const { return m_message; }
-QString Response::error() const { return m_error; }
+//QString Response::error() const { return m_error; }
 
 QJsonObject Response::toJson() const {
     QJsonObject obj;
@@ -78,7 +78,7 @@ QJsonObject Response::toJson() const {
         break;
     case Kind::Error:
         obj["kind"] = "error";
-        obj["error"] = m_error;
+        obj["message"] = m_message;
         break;
     case Kind::None:
         obj["kind"] = "none";
@@ -115,7 +115,7 @@ Response Response::fromJson(const QJsonObject &obj) {
           return CheckingFailed(msg);
           }
     } else if (kind == "error") {
-        return Error(obj["error"].toString());
+        return Error(obj["message"].toString());
     } else {
         return None();
     }

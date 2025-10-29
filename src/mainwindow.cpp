@@ -111,6 +111,10 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
+  // Close floating viewers // TO FIX 
+  // foreach ( TextViewer *viewer, textViewers) delete viewer;
+  // foreach ( ImageViewer *viewer, imageViewers) delete viewer;
+  // Bye to compiler
   if ( Globals::compiler ) {
     Globals::compiler->close();
     delete Globals::compiler; // This will shutdown the compiler server

@@ -34,7 +34,7 @@ public:
     static Response CompilationFailed(const QString &msg);
     static Response CheckingOk(const QStringList& rds, const QStringList& wrs);
     static Response CheckingFailed(const QString &msg);
-    static Response Error(const QString &err);
+    static Response Error(const QString &msg);
     static Response None();
 
     // Accessors
@@ -45,7 +45,7 @@ public:
     QStringList rds() const;
     QStringList wrs() const;
     QString message() const;
-    QString error() const;
+  //QString error() const;
 
     QJsonObject toJson() const;
     QString toString() const;
@@ -60,7 +60,7 @@ private:
     QStringList m_rds;
     QStringList m_wrs;
     QString m_message;
-    QString m_error;
+    //QString m_error;
 
     // Private constructors
     explicit Response(Kind kind);

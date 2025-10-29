@@ -135,9 +135,7 @@ Response Compiler::getVersion(void)
   Request q = Request::GetVersion();
   QString r = sendRequest(q.toString());
   Response s = Response::fromString(r);
-  return s.kind() == Response::Kind::Version ?
-    s 
-    : Response::Error("Invalid response from compiler");
+  return s.kind() == Response::Kind::Version ? s : Response::Error("Invalid response from compiler");
 }
 
 Response Compiler::compile(const QStringList &args)
@@ -145,7 +143,7 @@ Response Compiler::compile(const QStringList &args)
   Request q = Request::Compile(args);
   QString r = sendRequest(q.toString());
   Response s = Response::fromString(r);
-  return s.kind() == Response::Kind::Compiled ? s : Response::Error("Invalid response from compiler");
+  return s;
 }
 
 Response Compiler::checkFragment(const Fragment &fragment)
@@ -153,7 +151,8 @@ Response Compiler::checkFragment(const Fragment &fragment)
   Request q = Request::CheckFragment(fragment);
   QString r = sendRequest(q.toString());
   Response s = Response::fromString(r);
-  return s.kind() == Response::Kind::Checked ? s : Response::Error("Invalid response from compiler");
+  return s;
+  //return s.kind() == Response::Kind::Checked ? s : Response::Error("Invalid response from compiler");
 }
 
 void Compiler::report_error(QString ctx, QString loc, QString msg)

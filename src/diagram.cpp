@@ -570,6 +570,8 @@ QPair<QMap<QString,QString>,QMap<QString,QString>> Diagram::actualIos()
     qDebug() << "Adding IOs from state " << s->getId() << " : " << vars.second;
     outps.insert(vars.second);   
     }
+  // TODO: sort [inps] and [outps] (lexicographically ?)
+  // TODO: detect inouts 
   qDebug () << "Actual inputs are " << inps;
   qDebug () << "Actual outputs are " << outps;
   return qMakePair(inps,outps);
@@ -844,6 +846,7 @@ QString stringOfIoKind(Iov::IoKind k)
 void Diagram::exportRfsmInstance(QTextStream& os)
 {
   QMap<QString,QString> ios = actualInputs() + actualOutputs();
+  // TODO: add inouts
   os << "fsm " << name << " = " << name << "(";
   bool first = true;
   for (auto i = ios.cbegin(), end = ios.cend(); i != end; ++i) {
@@ -862,6 +865,7 @@ void Diagram::exportRfsmModel(QTextStream& os)
     if ( check() == false ) return;
     QMap<QString,QString> inps = actualInputs();
     QMap<QString,QString> outps = actualOutputs();
+  // TODO: add inouts
     os << "fsm model " << name << "(";
     if ( inps.size() + outps.size() > 0 ) {
       os << "\n";

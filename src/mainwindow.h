@@ -39,6 +39,7 @@ class QToolButton;
 class QAbstractButton;
 class QTabWidget;
 class QActionGroup;
+class TextViewer;
 class ImageViewer;
 class CompilerPaths;
 class CompilerOptions;
@@ -121,6 +122,8 @@ private:
     QFrame *toolbar;
     QButtonGroup *buttons;
     QStatusBar *statusBar;
+    QList<TextViewer*> textViewers;
+    QList<ImageViewer*> imageViewers;
 
     QAction *newModelAction;
     QAction *openFileAction;
