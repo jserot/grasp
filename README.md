@@ -2,7 +2,7 @@
 
 ![](./doc/snaps/snapshot.png)
 
-**Grasp** (Graph interface for ReActive State machine-based Programs) is a tool for editing and
+**Grasp** (Graphical tool for designing for ReActive State machine-based Programs) is a tool for editing and
   simulating systems modeled as concurrent _reactive finite state machines_.  A reactive state
   machine describes a behavior as a set of _states_ connected by _transitions_ triggered by an
   _event_ and a set of boolean _guards_ and triggering a sequence of _actions_. **Grasp** can also
