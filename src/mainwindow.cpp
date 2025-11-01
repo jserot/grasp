@@ -669,7 +669,7 @@ void MainWindow::closeDiagramTabs() // Note: this does _not_ delete the displaye
 
 // Popup windows (DOT rendering and generated code)
 
-void MainWindow::openTextFiles(QStringList fnames)
+void MainWindow::openTextFiles(QString title, QStringList fnames)
 {
   foreach ( QString fname, fnames ) {
     QFile file(fname);
@@ -678,7 +678,7 @@ void MainWindow::openTextFiles(QStringList fnames)
       return;
       }
     }
-  TextsViewer *viewer = new TextsViewer(fnames,this);
+  TextsViewer *viewer = new TextsViewer(title, fnames,this);
   viewer->show();
 }
 
@@ -730,9 +730,9 @@ void MainWindow::openResultFile(QString fname)
     }
 }
 
-void MainWindow::openResultFiles(QStringList fnames)
+void MainWindow::openResultFiles(QString title, QStringList fnames)
 {
-  openTextFiles(fnames); // TO FIX : also handle multi-dot !
+  openTextFiles(title, fnames); // TO FIX : also handle multi-dot !
 }
 
 void MainWindow::customView(QString toolName, QStringList args, QString wDir, bool detach)
@@ -816,9 +816,10 @@ void MainWindow::generate(QString target, bool withTestbench)
   QString fname = generateRfsm(withTestbench);
   QFileInfo fi(fname);
   if ( fname.isEmpty() ) return;
-  QString wDir = QFileInfo(fname).absolutePath();
+  QString wDir = fi.path();
+  qDebug() << "Generating compilation files in" << wDir;
   QStringList genOpts = Globals::compilerOptions->getOptions("general");
-  QString targetDir = ".";
+  QString targetDir = wDir;
   if ( target != "sim" && genOpts.contains("-target_dirs") ) {
     targetDir = target;
     QString targetPath = wDir + "/" + target; // TO FIX : do not use raw, OS-dependent "/" in file path
@@ -842,12 +843,13 @@ void MainWindow::generate(QString target, bool withTestbench)
     << Globals::compilerOptions->getOptions(target);
   //if ( target == "sim" ) args << "-main" <<  fi.baseName();
   if ( target == "ctask" || target == "systemc" ) args << "-show_models";
-  args << fi.fileName();
+  args << fi.filePath();
   Response r = Globals::compiler->compile(args);
   qDebug() << "compile result =" << r.toString();
   if ( r.kind() == Response::Kind::Compiled ) {
     if ( r.result() == true ) {
       QStringList resFiles = r.files();
+      QString title = target.toUpper();
       qDebug() << "Generated files=" << resFiles;
       logMessage("Generated file(s) : " + resFiles.join(", "));
       if ( ! withTestbench && target == "systemc" ) 
@@ -855,7 +857,7 @@ void MainWindow::generate(QString target, bool withTestbench)
       switch ( resFiles.size() ) {
         case 0: break;
         case 1: openResultFile(resFiles.first()); break;
-        default: openResultFiles(resFiles); break;
+        default: openResultFiles(title,resFiles); break;
         }
       }
     else { // Compilation failed

@@ -12,6 +12,7 @@
 - Export to SCXML ?
 
 * BUILD
+- build from sources failed for MacOS (`./dist/macos/rfsmc.exe` not found)
 - update icons for the Windows distro
 
 * TOOLS

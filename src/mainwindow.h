@@ -107,11 +107,11 @@ private:
     void saveToFile(QString fname);
     QString generateRfsm(bool withTestbench);
     void openTextFile(QString fname);
-    void openTextFiles(QStringList fname);
+    void openTextFiles(QString title, QStringList fname);
     void openImageFile(QString fname);
     void addDiagramTabs();
     void openResultFile(QString fname);
-    void openResultFiles(QStringList fname);
+    void openResultFiles(QString title, QStringList fname);
     Diagram *currentDiagram();
     void checkCompilerVersion();
     

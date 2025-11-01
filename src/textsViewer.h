@@ -18,7 +18,7 @@
 class TextsViewer : public QTabWidget
 {
 public:
-  TextsViewer(QStringList fnames, QWidget *parent = nullptr);
+  TextsViewer(QString title, QStringList fnames, QWidget *parent = nullptr);
   ~TextsViewer();
 protected:
 private:
