@@ -1,7 +1,10 @@
 * GENERAL
 
 * GUI
-- synchronous launching of `gtkwave` fails under MacOS 14
+- revamp configure/install process for Linux and Windows (done for MacOS); `./configure` should write both `./config` and
+  `dist/<platform>/grasp.ini`; `make` will refer to values in `./config` and the running app to
+  values defined in `*.ini`; currently, the coherence of these two files is not ensured
+- update `HOWTO.md`
 - add an option to set the location of the log file when debug mode is set
 - add a clickable region in the diagram panel to access local variables (more intuitive than right-click) ?
 - use json format for options save file

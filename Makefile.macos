@@ -2,40 +2,31 @@
 
 include config
 
-# Default values for compiler paths (to be overriden by configure)
-DOTPROGRAM="/usr/local/bin/dot"
-DOTVIEWER="/usr/local/bin/graphviz"
-VCDVIEWER="/opt/bin/gtkwave"
-TXTVIEWER="open"
-
 .PHONY: build install installer
 
 build: build-gui
 
-INSTALL_DIR=/tmp/grasp
+INSTALL_DIR=./dist/macos
 
 build-gui:
 	@echo "** Building GUI"
 	(cd src; qmake; make)
 
 run:
-	(cd src; open Grasp.app)
+	(cd ./dist/macos/Grasp.app/Contents/MacOS; ./Grasp)
 
-dist:
-	rm -rf ./dist/macos/Grasp.app
-	cp -r ./src/Grasp.app ./dist/macos
-	cp ./src/{grasp.ini,options_spec.txt} ./dist/macos/Grasp.app/Contents/MacOS
-	cp ./dist/macos/rfsmc.exe ./dist/macos/Grasp.app/Contents/MacOS
-
-install: dist
+install:
 	@echo "** Installing in $(INSTALL_DIR)"
-	rm -rf $(INSTALL_DIR)
-	mkdir $(INSTALL_DIR)
-	cp -r ./dist/macos/Grasp.app $(INSTALL_DIR)/Grasp.app
-	cp ./dist/macos/INSTALL $(INSTALL_DIR)/INSTALL
+	rm -rf $(INSTALL_DIR)/Grasp.app
+	cp -r ./src/Grasp.app $(INSTALL_DIR)
+	cp -f $(INSTALL_DIR)/rfsmc.exe $(INSTALL_DIR)/Grasp.app/Contents/MacOS
+	cp -r ./src/options_spec.txt $(INSTALL_DIR)/Grasp.app/Contents/MacOS
+	cp -r $(INSTALL_DIR)/grasp.ini $(INSTALL_DIR)/Grasp.app/Contents/MacOS
+	rm -rf $(INSTALL_DIR)/doc
 	mkdir $(INSTALL_DIR)/doc
 	cp  doc/Using.md $(INSTALL_DIR)/doc
 	cp -r doc/imgs $(INSTALL_DIR)/doc
+	rm -rf $(INSTALL_DIR)/examples
 	mkdir $(INSTALL_DIR)/examples
 	cp -r examples/* $(INSTALL_DIR)/examples
 	rm -f $(INSTALL_DIR)/examples/Makefile
@@ -64,7 +55,10 @@ clean:
 
 clobber: clean
 	(cd src; qmake; make distclean)
-	rm -rf ./dist/macos/Grasp.app
+	rm -rf $(INSTALL_DIR)/Grasp.app
+	rm -rf $(INSTALL_DIR)/doc
+	rm -rf $(INSTALL_DIR)/examples
+	rm -f $(INSTALL_DIR)/{CHANGES.md,KNOWN-BUGS.md,LICENSE,README.md}
 
 .PHONY:
 .PHONY: dist

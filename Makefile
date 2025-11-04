@@ -24,16 +24,7 @@ clean:
 
 clobber: 
 	make -f $(MAKEFILE) clobber
-	#(cd doc/um; make clobber)
 	\rm -f *~
-	# rm -f *~
-	# rm -rf ./dist/macos/*.app
-	# rm -rf ./dist/macos/*.dmg
-	# rm -f ./dist/windows/*.exe
-	# rm -f ./dist/windows/*.dll
-	# rm -f ./dist/windows/options_spec.txt
-	# rm -f ./dist/windows/grasp.ini
-	# rm -rf ./dist/windows/{generic,imageformats,networkinformation,platforms,styles,tls,translations}
 
 .PHONY:
 .PHONY: dist
