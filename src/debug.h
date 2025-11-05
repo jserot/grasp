@@ -12,6 +12,4 @@
 
 #include <QtGlobal>
 
-extern bool traceMode;
-
 void debugMessageHandler(QtMsgType type, const QMessageLogContext &, const QString & msg);

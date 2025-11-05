@@ -23,6 +23,7 @@ class CommandExec;
 class QDockWidget;
 class Model;
 class QTabWidget;
+class QFile;
 
 class Globals
 {
@@ -48,5 +49,8 @@ public:
     static const QRegularExpression re_lid;
     static bool check_model;
     const static QString socketPath; // For connecting to the compiler server
+    static bool traceMode;
+    const static QString traceFilePath;
+    static QFile *traceFile;
 };
 

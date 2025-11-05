@@ -115,6 +115,8 @@ MainWindow::~MainWindow()
     Globals::compiler->close();
     delete Globals::compiler; // This will shutdown the compiler server
     }
+  if ( Globals::traceFile ) 
+    Globals::traceFile->close();
 }
 
 Diagram *MainWindow::currentDiagram()
@@ -935,7 +937,7 @@ void MainWindow::setCompilerOptions()
 {
   Globals::compilerOptions->edit(this);
   QStringList opts = Globals::compilerOptions->getOptions("general");
-  traceMode = opts.contains("-debug");
+  // traceMode = opts.contains("-debug"); // TO FIX
   Globals::check_model = ! opts.contains("-no_model_check");
   updateActions(); 
   //if ( traceMode ) qDebug() << "Debug mode activated";

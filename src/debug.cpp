@@ -16,13 +16,13 @@
 #include <QFile>
 #include <QTextStream>
 #include <stdio.h>
+#include "globals.h"
 
 #define QT_ENDL Qt::endl
 
-bool traceMode = false;
-
 void debugMessageHandler(QtMsgType type, const QMessageLogContext &, const QString & msg)
 {
+    if ( ! Globals::traceMode ) return;
     QString txt;
     switch  ( type ) {
       case QtDebugMsg: txt = QString("Debug: %1").arg(msg); break;
@@ -31,10 +31,8 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext &, const QStri
       case QtCriticalMsg: txt = QString("Critical: %1").arg(msg); break;
       case QtFatalMsg: txt = QString("Fatal: %1").arg(msg); break;
       }
-    if ( traceMode ) {
-      QFile outFile("grasp.log");
-      outFile.open(QIODevice::WriteOnly | QIODevice::Append);
-      QTextStream ts(&outFile);
+    if ( Globals::traceFile ) {
+      QTextStream ts(Globals::traceFile);
       ts << txt << QT_ENDL;
       }
     else

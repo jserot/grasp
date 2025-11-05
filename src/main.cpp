@@ -17,6 +17,10 @@
 
 int main(int argv, char *args[])
 {
+    if ( Globals::traceMode ) { // TO FIX: we should be able to set traceMode when launching the app 
+      Globals::traceFile = new QFile(Globals::traceFilePath);
+      Globals::traceFile->open(QIODevice::WriteOnly | QIODevice::Append);
+      }
     qInstallMessageHandler(debugMessageHandler); 
 
     QApplication app(argv, args);
