@@ -219,7 +219,6 @@ bool State::check_valuations(QStringList valuations)
     enclosingDiagram->potentialOutputs(),
     enclosingDiagram->localVars()
     };
-  //Fragment::Context ctx = enclosingDiagram->build_context(); 
   // First, check each valuation separately
   foreach ( QString valuation, valuations ) 
     if ( ! check_valuation(ctx, valuation) ) return false;
@@ -246,7 +245,6 @@ bool State::check()
 QPair<QMap<QString,QString>,QMap<QString,QString>> State::varsOf()
 {
   qDebug() << "Getting vars of state " << id;
-  //Fragment::Context ctx = enclosingDiagram->build_context(); 
   Fragment::Context ctx = {
     enclosingDiagram->potentialInputs(),
     enclosingDiagram->potentialOutputs(),

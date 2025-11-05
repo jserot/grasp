@@ -152,7 +152,6 @@ Response Compiler::checkFragment(const Fragment &fragment)
   QString r = sendRequest(q.toString());
   Response s = Response::fromString(r);
   return s;
-  //return s.kind() == Response::Kind::Checked ? s : Response::Error("Invalid response from compiler");
 }
 
 void Compiler::report_error(QString ctx, QString loc, QString msg)

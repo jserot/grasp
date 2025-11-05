@@ -54,7 +54,6 @@ QStringList Response::files() const { return m_files; }
 QStringList Response::rds() const { return m_rds; }
 QStringList Response::wrs() const { return m_wrs; }
 QString Response::message() const { return m_message; }
-//QString Response::error() const { return m_error; }
 
 QJsonObject Response::toJson() const {
     QJsonObject obj;

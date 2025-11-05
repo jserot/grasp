@@ -1,8 +1,6 @@
 * GENERAL
 
 * GUI
-- code cleaning
-- add an option to set the location of the log file when debug mode is set
 - after adding or deleting an item, reset the tool to the pointer ("select") mode ?
 - add a clickable region in the diagram panel to access local variables (more intuitive than right-click) ?
 - use json format for options save file

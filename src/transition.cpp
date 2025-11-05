@@ -353,7 +353,6 @@ bool Transition::check()
 QPair<QMap<QString,QString>,QMap<QString,QString>> Transition::varsOf()
 {
   qDebug() << "Getting vars of transition " << toString();
-  //Fragment::Context ctx = enclosingDiagram->build_context(); 
   Fragment::Context ctx = {
     enclosingDiagram->potentialInputs(),
     enclosingDiagram->potentialOutputs(),

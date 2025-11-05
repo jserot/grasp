@@ -758,60 +758,6 @@ bool MainWindow::isMainFile(QString fname) {
   return f.fileName() == mainName;
 }
 
-// void MainWindow::generate(QString target, bool withTestbench)
-// {
-  // Q_ASSERT(model);
-  // QString fname = generateRfsm(withTestbench);
-  // QFileInfo fi(fname);
-  // if ( fname.isEmpty() ) return;
-  // qDebug () << "generate.fname = " << fname;
-  // QString wDir = QFileInfo(fname).absolutePath();
-  // QStringList genOpts = Globals::compilerOptions->getOptions("general");
-  // QString targetDir = ".";
-  // if ( target != "sim" && genOpts.contains("-target_dirs") ) {
-  //   targetDir = target;
-  //   QString targetPath = wDir + "/" + target; // TO FIX : do not use raw, OS-dependent "/" in file path
-  //   genOpts.removeOne("-target_dirs");
-  //   QDir dir(targetPath);
-  //   if ( ! dir.exists() ) {
-  //     qDebug() << "Creating directory " << targetPath;
-  //     QDir().mkdir(targetPath);
-  //     }
-  //   }
-  // foreach ( QString opt, genOpts)
-  //   if ( genOpts.contains(opt) ) genOpts.removeOne(opt);
-  // QString mainName = model->getName();
-  // if ( mainName.isEmpty() ) mainName = "main";
-  // QStringList args =
-  //   QStringList()
-  //   << "-" + target
-  //   << "-main" << mainName
-  //   << "-target_dir" << targetDir
-  //   << genOpts
-  //   << Globals::compilerOptions->getOptions(target);
-  // //if ( target == "sim" ) args << "-main" <<  fi.baseName();
-  // if ( target == "ctask" || target == "systemc" ) args << "-show_models";
-  // if ( Globals::compiler->run(fi.fileName(), args, wDir) ) {
-  //   QStringList resFiles = Globals::compiler->getOutputFiles(target, wDir, mainName); 
-  //   logMessage("Generated file(s) : " + resFiles.join(", "));
-  //   if ( ! withTestbench && target == "systemc" ) 
-  //     resFiles.removeIf([this](QString fname) { return this->isMainFile(fname); });
-  //   switch ( resFiles.size() ) {
-  //     case 0: 
-  //       break;
-  //     case 1: 
-  //       openResultFile(resFiles.first());
-  //       break;
-  //     default:
-  //       openResultFiles(resFiles);
-  //     }
-  //   }
-  // else {
-  //   QStringList compileErrors = Globals::compiler->getErrors();
-  //   QMessageBox::warning(this, "", "Error when compiling model\n" + compileErrors.join("\n"));
-  //   }
-// }
-
 void MainWindow::generate(QString target, bool withTestbench)
 {
   Q_ASSERT(model);
@@ -843,7 +789,6 @@ void MainWindow::generate(QString target, bool withTestbench)
     << "-target_dir" << targetDir
     << genOpts
     << Globals::compilerOptions->getOptions(target);
-  //if ( target == "sim" ) args << "-main" <<  fi.baseName();
   if ( target == "ctask" || target == "systemc" ) args << "-show_models";
   args << fi.filePath();
   Response r = Globals::compiler->compile(args);
@@ -890,7 +835,6 @@ bool MainWindow::dotTransform(QFileInfo f, QString wDir)
   if ( dotProgram.isNull() || dotProgram.isEmpty() ) dotProgram = "dot"; // Last chance..
   QString srcFile = f.filePath();
   QString dstFile = changeSuffix(srcFile, ".gif");
-  //QString opts = ""; // getOption("-dot_options");
   QString wdir = f.canonicalPath();
   QStringList args = { "-Tgif",  "-o", dstFile, srcFile };
   if ( Globals::executor->execute(wDir, dotProgram, args) )
@@ -937,11 +881,8 @@ void MainWindow::setCompilerOptions()
 {
   Globals::compilerOptions->edit(this);
   QStringList opts = Globals::compilerOptions->getOptions("general");
-  // traceMode = opts.contains("-debug"); // TO FIX
   Globals::check_model = ! opts.contains("-no_model_check");
   updateActions(); 
-  //if ( traceMode ) qDebug() << "Debug mode activated";
-  //else qDebug() << "Debug mode desactivated";
 }
 
 // Logging 

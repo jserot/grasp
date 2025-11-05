@@ -45,7 +45,6 @@ public:
     QStringList rds() const;
     QStringList wrs() const;
     QString message() const;
-  //QString error() const;
 
     QJsonObject toJson() const;
     QString toString() const;
@@ -60,7 +59,6 @@ private:
     QStringList m_rds;
     QStringList m_wrs;
     QString m_message;
-    //QString m_error;
 
     // Private constructors
     explicit Response(Kind kind);
