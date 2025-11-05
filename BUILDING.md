@@ -21,8 +21,8 @@ packages, will be required to view results when running the application.
 
 * `./configure -draft -platform <platform_name> [other options]` (`./configure --help` for the list of options)
 - `make`
-- `make install` (for Linux - this will install binaries in `<install_dir>/bin` and config files and
-  examples in `<install_dir>/share/grasp`)
+- `make install` (under Linux, this will install binaries in `<install_dir>/bin` and config files and
+  examples in `<install_dir>/share/grasp`; for MacOS, this will install the app under `./dist/macos/Grasp.app`)
 - `make run` (for testing)
 
 #### To build and create the self-installers (for MacOS and Windows)
@@ -30,7 +30,7 @@ packages, will be required to view results when running the application.
 * `./configure -platform <platform_name> [other options]` (`./configure --help` for the list of options)
 - `make`
 - `make install` 
-- `make installer` (this will put in `./binaries`)
+- `make installer` (this will put the installer in `./binaries`)
 
 **Note** If you can't or don't want to build the documentation from source, pass the `--no-doc` option to
 `configure`. A pre-built version of the documentation is available

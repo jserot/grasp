@@ -7,6 +7,7 @@
 *.bak
 _build/
 binaries/
+HOWTO.md
 CHANGES.txt
 CHANGES.html
 README.txt
