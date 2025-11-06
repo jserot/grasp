@@ -13,7 +13,7 @@ build-gui:
 run:
 	(cd src; ./Grasp)
 
-install: dist
+install: 
 	@echo "** Installing in $(INSTALL_DIR)"
 	mkdir -p $(INSTALL_DIR)/bin
 	cp ./src/Grasp $(INSTALL_DIR)/bin
@@ -31,7 +31,6 @@ clobber: clean
 	(cd src; qmake; make distclean)
 	rm -f ./dist/linux/Grasp
 	rm -f ./dist/linux/grasp.ini
-	rm -f ./dist/linux/options_spec.txt
 
 .PHONY:
 .PHONY: dist

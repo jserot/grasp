@@ -17,8 +17,6 @@ while : ; do
     "") break;;
     -platform|--platform)
         platform=$2; shift;;
-#    -rfsmc|--rfsmc)
-#        rfsmc=$2; shift;;
     -no-doc|--no-doc)
         doc='';;
     -dot|--dot)
