@@ -901,7 +901,6 @@ void MainWindow::dumpModel(void) // For debug only
 void MainWindow::serverError(QString error)
 {
   QMessageBox::critical(this, "Compiler", error); 
-  delete this;
 }
 
 void MainWindow::checkCompilerVersion()

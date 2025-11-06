@@ -18,8 +18,8 @@ while : ; do
     "") break;;
     -platform|--platform)
         platform=$2; shift;;
-    -rfsmc|--rfsmc)
-        rfsmc=$2; shift;;
+#    -rfsmc|--rfsmc)
+#        rfsmc=$2; shift;;
     -no-doc|--no-doc)
         doc='';;
     -dot|--dot)
@@ -39,7 +39,6 @@ while : ; do
 Usage: configure [options]
 Options: [defaults in brackets after descriptions]
   --platform NAME         target platform (macos,linux,windows) [default: linux]
-  --rfsmc PATH            path to the rfsmc compiler 
   --no-doc                do not build the documentation from sources
   --dot NAME              command for runing dot program 
   --dotviewer NAME        command for displaying .dot files
@@ -89,26 +88,26 @@ fi
 
 # Write ./config
 
-case "$platform" in
-  macos)
-      if [ -n "$draft" ]; then
-          echo "RFSMC=../dist/macos/rfsmc.exe" >> ./config
-      else
-          echo "RFSMC=/Applications/Grasp.app/Contents/MacOS/rfsmc.exe" >> ./config
-      fi;;
-  linux)
-      if [ -n "$draft" ]; then
-          echo "RFSMC=../dist/linux/rfsmc.exe" >> ./config
-      else
-          echo "COMPILER=$install_dir/bin/rfsmc.exe" >> ./config
-      fi;;
-  windows)
-# These are temporary, dev-only locations. The definitive ones will be specified when running the Installer wizard
-      echo "RFSMC=Z:/Caml/rfsm-2.1-w7/_build/default/src/guests/std/bin/rfsmc.exe" >> ./config;;
-  *) 
-      echo "Unknown platform: $platform";
-      exit 3;;
-esac
+# case "$platform" in
+#   macos)
+#       if [ -n "$draft" ]; then
+#           echo "RFSMC=../dist/macos/rfsmc.exe" >> ./config
+#       else
+#           echo "RFSMC=/Applications/Grasp.app/Contents/MacOS/rfsmc.exe" >> ./config
+#       fi;;
+#   linux)
+#       if [ -n "$draft" ]; then
+#           echo "RFSMC=../dist/linux/rfsmc.exe" >> ./config
+#       else
+#           echo "COMPILER=$install_dir/bin/rfsmc.exe" >> ./config
+#       fi;;
+#   windows)
+# # These are temporary, dev-only locations. The definitive ones will be specified when running the Installer wizard
+#       echo "RFSMC=Z:/Caml/rfsm-2.1-w7/_build/default/src/guests/std/bin/rfsmc.exe" >> ./config;;
+#   *) 
+#       echo "Unknown platform: $platform";
+#       exit 3;;
+# esac
 echo "DOTPROGRAM=$dotprogram" >> config
 echo "DOTVIEWER=$dotviewer" >> config
 echo "VCDVIEWER=$vcdviewer" >> config

@@ -95,9 +95,10 @@ QString Compiler::readAnswer()
     line.chop(1);
     return line;
     }
-  else
+  else {
     qDebug() << "compiler: timeout when waiting for response";
     return "<no response>";
+    }
 }
 
 void Compiler::stopServer() {

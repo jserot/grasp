@@ -13,23 +13,14 @@ build-gui:
 run:
 	(cd src; ./Grasp)
 
-dist:
-	rm -f ./dist/linux/Grasp
-	cp ./src/Grasp ./dist/linux/
-	cp ./src/grasp.ini ./dist/linux
-	cp ./src/options_spec.txt ./dist/linux
-	@if [ -n "$(RFSMC)" ]; then\
-		cp $(RFSMC) ./dist/linux;\
-	fi
-
 install: dist
 	@echo "** Installing in $(INSTALL_DIR)"
 	mkdir -p $(INSTALL_DIR)/bin
-	cp ./dist/linux/Grasp $(INSTALL_DIR)/bin
+	cp ./src/Grasp $(INSTALL_DIR)/bin
 	cp ./dist/linux/rfsmc.exe $(INSTALL_DIR)/bin
 	mkdir -p $(INSTALL_DIR)/share/grasp
 	cp ./dist/linux/grasp.ini $(INSTALL_DIR)/share/grasp/
-	cp ./dist/linux/options_spec.txt $(INSTALL_DIR)/share/grasp/
+	cp ./src/options_spec.txt $(INSTALL_DIR)/share/grasp/
 	mkdir -p $(INSTALL_DIR)/share/grasp/examples
 	cp -r examples/[a-z]* $(INSTALL_DIR)/share/grasp//examples/
 
