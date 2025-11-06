@@ -11,9 +11,7 @@
 - Export to SCXML ?
 
 * BUILD
-- revamp configure/install process for Linux and Windows (done for MacOS); `./configure` should write both `./config` and
-  `dist/<platform>/grasp.ini`; `make` will refer to values in `./config` and the running app to
-  values defined in `*.ini`; currently, the coherence of these two files is not ensured
+- revamp configure/install process for Windows (done for MacOS and Linux)
 - update icons for the Windows distro
 
 * TOOLS
