@@ -14,23 +14,24 @@ run:
 	(cd src; ./Grasp)
 
 install: 
-	@echo "** Installing in $(INSTALL_DIR)"
-	mkdir -p $(INSTALL_DIR)/bin
-	cp ./src/Grasp $(INSTALL_DIR)/bin
-	cp ./dist/linux/rfsmc.exe $(INSTALL_DIR)/bin
-	mkdir -p $(INSTALL_DIR)/share/grasp
-	cp ./dist/linux/grasp.ini $(INSTALL_DIR)/share/grasp/
-	cp ./src/options_spec.txt $(INSTALL_DIR)/share/grasp/
-	mkdir -p $(INSTALL_DIR)/share/grasp/examples
-	cp -r examples/[a-z]* $(INSTALL_DIR)/share/grasp//examples/
+	@echo "** Creating package tree in $(INSTALL_DIR)"
+	cp ./src/Grasp ./dist/linux/grasp/usr/bin
+	cp ./dist/linux/grasp.ini ./dist/linux/grasp/usr/share/grasp/
+	cp ./src/options_spec.txt ./dist/linux/grasp/usr/share/grasp/
+	rm -rf ./dist/linux/grasp/usr/share/grasp/examples/*
+	mkdir -p ./dist/linux/grasp/usr/share/grasp/examples
+	cp -r examples/[a-z]* ./dist/linux/grasp/usr/share/grasp/examples/
+
+installer:
+	(cd ./dist/linux; dpkg-deb --build grasp)
+	mv ./dist/linux/grasp.deb ./binaries/grasp-$(VERSION)-x64.deb
 
 clean:
 	(cd src; qmake; make clean)
 
 clobber: clean
 	(cd src; qmake; make distclean)
-	rm -f ./dist/linux/Grasp
-	rm -f ./dist/linux/grasp.ini
+	rm -f ./dist/linux/grasp/usr/bin/grasp
 
 .PHONY:
 .PHONY: dist

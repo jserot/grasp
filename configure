@@ -6,7 +6,7 @@ platform=linux
 doc='yes'
 sysc_dir='/usr/local/systemc-3.0.0'
 draft=
-install_dir=/usr/local
+#install_dir=/usr/local
 
 # Parse command-line arguments
 
@@ -27,8 +27,8 @@ while : ; do
         vcdviewer=$2; shift;;
     -txtviewer|--txtviewer)
         txtviewer=$2; shift;;
-    -install-dir|--install-dir)
-        install_dir=$2; shift;;
+#    -install-dir|--install-dir)
+#        install_dir=$2; shift;;
     -draft|--draft)
         draft='yes';;
     -help|--help)
@@ -41,7 +41,6 @@ Options: [defaults in brackets after descriptions]
   --dotviewer NAME        command for displaying .dot files
   --vcdviewer NAME        command for displaying .vcd files
   --txtviewer NAME        command for displaying text files
-  --install-dir PATH      install root directory for Linux platforms [default: $install_dir]
   --draft                 build for local testing (not for building installers) [default: $draft]
   --help                  print this message
 EOF
@@ -70,7 +69,7 @@ case "$platform" in
       if [ -z "$txtviewer" ]; then txtviewer="nano"; fi;
       if [ -z "$install-dir" ]; then install-dir="/usr/local"; fi;
       echo "WINDEPLOYQT=unused_command" >> config;
-      echo "INSTALL_DIR=$install_dir" >> config;;
+      echo "INSTALL_DIR=./dist/linux/grasp" >> config;;
   windows)
       echo "PLATFORM=windows" >> config;
       echo "WINDEPLOYQT=/ucrt64/bin/windeployqt6.exe" >> config;;
@@ -110,17 +109,11 @@ case "$platform" in
       echo "TXTVIEWER=$txtviewer" >> ./dist/$platform/grasp.ini;
       echo "INITDIR=~/Documents" >> ./dist/$platform/grasp.ini;;
   linux)
-      if [ -n "$draft" ]; then
-          echo "COMPILER=../dist/linux/rfsmc.exe" >> ./dist/$platform/grasp.ini
-      else
-          echo "COMPILER=$install_dir/bin/rfsmc.exe" >> ./dist/$platform/grasp.ini
-
-      fi;
       echo "DOTPROGRAM=$dotprogram" >> ./dist/$platform/grasp.ini;
       echo "DOTVIEWER=$dotviewer" >> ./dist/$platform/grasp.ini;
       echo "VCDVIEWER=$vcdviewer" >> ./dist/$platform/grasp.ini;
       echo "TXTVIEWER=$txtviewer" >> ./dist/$platform/grasp.ini;
-      echo "INITDIR=$install_dir/share/grasp/examples" >> ./dist/$platform/grasp.ini;;
+      echo "INITDIR=/usr/share/grasp/examples" >> ./dist/$platform/grasp.ini;;
   windows)
 # These are temporary, dev-only locations. The definitive ones will be specified when running the Installer wizard
       echo "COMPILER=Z:/Caml/rfsm-2.1-w7/_build/default/src/guests/std/bin/rfsmc.exe" >> ./src/grasp.ini;

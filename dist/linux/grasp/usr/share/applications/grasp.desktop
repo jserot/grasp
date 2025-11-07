@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Grasp
+Exec=grasp
+Icon=grasp
+Categories=Graphics;Science;
+Comment=A tool for manipulating reactive state-machine based programs
