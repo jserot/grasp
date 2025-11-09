@@ -11,6 +11,7 @@
 /***********************************************************************/
 
 #include "request.h"
+#include <QJsonParseError>
 
 Request Request::GetVersion() { return Request(Kind::GetVersion); }
 Request Request::CheckFragment(const Fragment &frag) { return Request(frag); }

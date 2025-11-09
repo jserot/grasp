@@ -6,7 +6,6 @@ platform=linux
 doc='yes'
 sysc_dir='/usr/local/systemc-3.0.0'
 draft=
-#install_dir=/usr/local
 
 # Parse command-line arguments
 
@@ -27,8 +26,8 @@ while : ; do
         vcdviewer=$2; shift;;
     -txtviewer|--txtviewer)
         txtviewer=$2; shift;;
-#    -install-dir|--install-dir)
-#        install_dir=$2; shift;;
+    -rfsmc|--rfsmc)
+        rfsmc=$2; shift;;
     -draft|--draft)
         draft='yes';;
     -help|--help)
@@ -37,10 +36,11 @@ Usage: configure [options]
 Options: [defaults in brackets after descriptions]
   --platform NAME         target platform (macos,linux,windows) [default: linux]
   --no-doc                do not build the documentation from sources
-  --dot NAME              command for runing dot program 
-  --dotviewer NAME        command for displaying .dot files
-  --vcdviewer NAME        command for displaying .vcd files
-  --txtviewer NAME        command for displaying text files
+  --dot path              command for runing dot program 
+  --dotviewer path        command for displaying .dot files
+  --vcdviewer path        command for displaying .vcd files
+  --txtviewer path        command for displaying text files
+  --rfmsc path            path to the rfsmc compiler (to be copied in the install tree) 
   --draft                 build for local testing (not for building installers) [default: $draft]
   --help                  print this message
 EOF
@@ -67,7 +67,6 @@ case "$platform" in
       if [ -z "$dotviewer" ]; then dotviewer="/usr/bin/dotty"; fi;
       if [ -z "$vcdviewer" ]; then vcdviewer="/usr/bin/gtkwave"; fi;
       if [ -z "$txtviewer" ]; then txtviewer="nano"; fi;
-      if [ -z "$install-dir" ]; then install-dir="/usr/local"; fi;
       echo "WINDEPLOYQT=unused_command" >> config;
       echo "INSTALL_DIR=./dist/linux/grasp" >> config;;
   windows)
@@ -84,6 +83,7 @@ fi
 
 # Write ./config
 
+echo "RFSMC=$rfsmc" >> config
 echo "DOTPROGRAM=$dotprogram" >> config
 echo "DOTVIEWER=$dotviewer" >> config
 echo "VCDVIEWER=$vcdviewer" >> config
@@ -109,6 +109,11 @@ case "$platform" in
       echo "TXTVIEWER=$txtviewer" >> ./dist/$platform/grasp.ini;
       echo "INITDIR=~/Documents" >> ./dist/$platform/grasp.ini;;
   linux)
+      if [ -n "$draft" ]; then
+          echo "COMPILER=../dist/linux/rfsmc.exe" >> ./dist/$platform/grasp.ini
+      else
+          echo "COMPILER=/usr/lib/grasp/rfsmc.exe" >> ./dist/$platform/grasp.ini
+      fi;
       echo "DOTPROGRAM=$dotprogram" >> ./dist/$platform/grasp.ini;
       echo "DOTVIEWER=$dotviewer" >> ./dist/$platform/grasp.ini;
       echo "VCDVIEWER=$vcdviewer" >> ./dist/$platform/grasp.ini;

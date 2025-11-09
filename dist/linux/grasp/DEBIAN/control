@@ -1,8 +1,7 @@
-Package: Grasp
+Package: grasp
 Version: 1.0.0
 Section: utils
 Priority: optional
-Architecture: amd64
-Depends: 
+Architecture: arm64
 Maintainer: J. Sérot <jocelyn.serot@uca.fr>
 Description: A Qt-based app for designing for reactive state-machine based programs

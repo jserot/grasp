@@ -11,6 +11,7 @@
 /***********************************************************************/
 
 #include "response.h"
+#include <QJsonParseError>
 
 // Public ctors
 Response Response::Version(const QString &v) { return Response(Kind::Version,v); }
