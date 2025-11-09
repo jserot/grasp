@@ -213,7 +213,7 @@ bool State::check_valuation(Fragment::Context ctx, QString valuation)
 
 bool State::check_valuations(QStringList valuations)
 {
-  qDebug() << "Checking state valuations: " << valuations;
+  qDebug() << "Checking state valuations for state " << getId() << " : " << valuations;
   Fragment::Context ctx = {
     enclosingDiagram->potentialInputs(),
     enclosingDiagram->potentialOutputs(),

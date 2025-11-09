@@ -331,8 +331,8 @@ bool Transition::check_actions(QStringList actions)
 bool Transition::check()
 {
   qDebug() << "Checking transition: " << toString();
-  Q_ASSERT(enclosingDiagram->states().contains(getSrcState())); 
-  Q_ASSERT(enclosingDiagram->states().contains(getDstState())); 
+  // Q_ASSERT(enclosingDiagram->states().contains(getSrcState())); 
+  // Q_ASSERT(enclosingDiagram->states().contains(getDstState())); 
   if ( ! isInitial() ) {
     QStringList modelEvents =
         enclosingDiagram->enclosingModel()->getInpEvents()

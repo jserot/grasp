@@ -60,7 +60,7 @@ Diagram::Diagram(
       this->vars.append(var);
       }
     foreach ( State *state, states ) {
-      qDebug () << "Creating diagram: adding state" << state->getId();
+      qDebug () << "Creating diagram: adding state" << state->getId() << "[" << state << "]";
       addState(state);
       }
     foreach ( Transition *transition, transitions ) {
@@ -88,20 +88,23 @@ Diagram *Diagram::duplicate()
     for ( State *state : this->states() ) {
       State *copied_state = 
         state->isPseudo() ?
-        new State(this, state->pos())
-        : new State(this, state->getId(), state->getAttrs(), state->pos());
+        new State(NULL, state->pos())
+        : new State(NULL, state->getId(), state->getAttrs(), state->pos());
+      // Note: the enclosing diagram is set to NULL here since it does not exists yet ! It will be updated later
       copied_states.insert(state,copied_state);
       }   
+    qDebug() << "Copied states" << copied_states;
     QList<Transition *> copied_transitions;
     for ( Transition *transition : this->transitions() ) {
       State *srcState = copied_states.value(transition->getSrcState());
       State *dstState = copied_states.value(transition->getDstState());
-      Transition *copied_transition = new Transition(this, srcState,
+      Transition *copied_transition = new Transition(NULL, srcState,
                                               dstState,
                                               transition->getEvent(),
                                               transition->getGuards(),
                                               transition->getActions(),
                                               transition->getLocation());
+      // Note: the enclosing diagram is set to NULL here since it does not exists yet ! It will be updated later
       copied_transitions.append(copied_transition);
       }
     qDebug() << "Copied transitions" << copied_transitions;
@@ -113,6 +116,11 @@ Diagram *Diagram::duplicate()
     QString new_name = name + name.last(1); // S0 -> S00 
     Diagram *copied_diagram =
       new Diagram(this->model, new_name, copied_vars, copied_states.values(), copied_transitions, parent); 
+    // We now can update the enclosing diagram of the copied states and transitions
+    for ( State *s : copied_states.values() ) 
+      s->setDiagram(copied_diagram);
+    for ( Transition *t : copied_transitions) 
+      t->setDiagram(copied_diagram);
     return copied_diagram;
 }
 
@@ -172,7 +180,7 @@ State* Diagram::addPseudoState(QPointF pos)
 
 void Diagram::editState(State *state)
 {
-  qDebug() << "Editing state" << state->getId();
+  qDebug() << "Editing state" << state->getId() << "[" << state << "]";
   StateProperties *dialog = new StateProperties(state, this, view);
   dialog->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint);
   dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -394,7 +402,7 @@ void Diagram::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             // qDebug() << "** Existing items:";
             // foreach (QGraphicsItem* item, items()) 
             //   qDebug() << "     " << item << item->scenePos() << item->boundingRect();
-            // item = itemAt(mouseEvent->scenePos(), QTransform());
+            item = itemAt(mouseEvent->scenePos(), QTransform());
             qDebug() << "** SelectItem got" << item;
             if ( item != NULL ) {
               // if ( QGuiApplication::keyboardModifiers().testFlag(Qt::ControlModifier) ) // LeftClick+Ctl
