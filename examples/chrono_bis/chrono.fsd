@@ -24,36 +24,36 @@
       ],
       "transitions": [
         {
+          "actions": "c:=c+1,sec:=c",
+          "dst_state": "Running",
+          "event": "h",
+          "guard": "startStop=0",
+          "location": 3,
+          "src_state": "Running"
+        },
+        {
           "actions": "",
           "dst_state": "Stopped",
-          "event": "",
-          "guard": "",
+          "event": "h",
+          "guard": "startStop=1",
           "location": 0,
-          "src_state": "_init"
+          "src_state": "Running"
         },
         {
           "actions": "c:=0,sec:=0",
           "dst_state": "Running",
-          "event": "startStop",
-          "guard": "",
+          "event": "h",
+          "guard": "startStop=1",
           "location": 0,
           "src_state": "Stopped"
         },
         {
           "actions": "",
           "dst_state": "Stopped",
-          "event": "startStop",
+          "event": "",
           "guard": "",
           "location": 0,
-          "src_state": "Running"
-        },
-        {
-          "actions": "c:=c+1,sec:=c",
-          "dst_state": "Running",
-          "event": "h",
-          "guard": "",
-          "location": 3,
-          "src_state": "Running"
+          "src_state": "_init"
         }
       ],
       "vars": [
@@ -74,8 +74,8 @@
     {
       "kind": "in",
       "name": "startStop",
-      "stim": "Sporadic 25 85",
-      "type": "event"
+      "stim": "ValueChanges 0 0 25 1 35 0 75 1 85 0",
+      "type": "bool"
     },
     {
       "kind": "out",
