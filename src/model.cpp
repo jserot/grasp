@@ -236,10 +236,9 @@ void Model::saveToFile(QString fname)
 
 QString Model::exportSingleDot(Diagram *diagram, QString basename, QStringList options)
 {
-  //QString fname = basename + "_" + diagram->getName() + ".dot";
-  Q_UNUSED(basename);
-  QString fname = diagram->getName() + ".dot";
+  QString fname = basename + "_" + diagram->getName() + ".dot";
   QFile file(fname);
+  qDebug() << "Opening file" << file.fileName() << "for writing";
   file.open(QIODevice::WriteOnly | QIODevice::Text);
   if ( file.error() != QFile::NoError ) {
     QMessageBox::warning(Globals::mainWindow, "","Cannot open file " + file.fileName());
