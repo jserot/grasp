@@ -25,15 +25,17 @@ simulator and compiler.
 A minimalistic "Howto" is available
 [here](https://github.com/jserot/grasp/blob/master/doc/Using.md)
 
+Some video tutorials are available (sorry, in french for now).
+[here](https://github.com/jserot/grasp/blob/master/videos)
+
 ## INSTALLATION
 
-### Using binary versions
+### Using pre-compiled versions
 
-Prebuilt Windows and MacOS (Intel and M1) versions can be downloaded
+Ready-to-install versions are available for Linux (`.deb` package) and MacOS (`.dmg`)
 [here](https://github.com/jserot/grasp/releases) (check the `Assets` tab).
 
-For Windows, a quick Install Guide is available
-[here](https://github.com/jserot/grasp/blob/master/dist/windows/windows-install-guide.pdf)
+A Windows version is in preparation. 
 
 **Note** the [Graphviz](http://www.graphviz.org) package and the [gtkwave](http://gtkwave.sourceforge.net)
 application (used, respectively, to display diagrams and viewing simulation results) are _not_
