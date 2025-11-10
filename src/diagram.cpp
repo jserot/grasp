@@ -342,7 +342,7 @@ void Diagram::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
     Transition *transition;
     QGraphicsItem *item;
     Qt::MouseButton buttonPressed = mouseEvent->button();
-    qDebug() << "Diagram::mousePressEvent: " << buttonPressed << QGuiApplication::keyboardModifiers();
+    // qDebug() << "Diagram::mousePressEvent: " << buttonPressed << QGuiApplication::keyboardModifiers();
     switch ( buttonPressed ) {
     case Qt::LeftButton:
       switch ( Globals::mode ) {
@@ -403,7 +403,7 @@ void Diagram::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             // foreach (QGraphicsItem* item, items()) 
             //   qDebug() << "     " << item << item->scenePos() << item->boundingRect();
             item = itemAt(mouseEvent->scenePos(), QTransform());
-            qDebug() << "** SelectItem got" << item;
+            // qDebug() << "** SelectItem got" << item;
             if ( item != NULL ) {
               // if ( QGuiApplication::keyboardModifiers().testFlag(Qt::ControlModifier) ) // LeftClick+Ctl
               //   editItem(item);
@@ -608,17 +608,6 @@ QMap<QString,QString> Diagram::localVars()
 }
 
 // Checking
-
-// Fragment::Context Diagram::build_context()
-// {
-//   Fragment::Context ctx = {
-//     /* inps */ inputs() + localVars(), // including shared variables
-//     /* outps */ outputs() + localVars(), // including shared variables
-//     /* local vars */ QMap<QString,QString>() // empty here, since local vars have been included in inps and outps
-//     };
-//   return ctx;
-// }
-
 
 bool Diagram::check()
 {
