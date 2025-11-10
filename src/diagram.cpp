@@ -34,7 +34,7 @@
 #define SKIP_EMPTY_PARTS Qt::SkipEmptyParts
 
 QString Diagram::statePrefix = "S";
-int Diagram::stateCounter = 0;
+int Diagram::stateCounter = 1;
 QColor Diagram::lineColor = Qt::lightGray;
 QColor Diagram::boxColor = Qt::black;
 
