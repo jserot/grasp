@@ -515,7 +515,7 @@ void MainWindow::addDiagramTab(Diagram* diagram)
 void MainWindow::newDiagram()
 {
   Q_ASSERT(model); 
-  QString name = "A" + QString::number(diagrams->count());
+  QString name = "A" + QString::number(diagrams->count()+1);
   Diagram *diagram = new Diagram(model, name, diagrams);
   model->addDiagram(diagram);
   addDiagramTab(diagram);

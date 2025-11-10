@@ -2,7 +2,6 @@
 
 * GUI
 - after adding or deleting an item, reset the tool to the pointer ("select") mode ?
-- start diagram enumeration at 1, not 0 (?)
 - add a clickable region in the diagram panel to access local variables (more intuitive than right-click) ?
 - use json format for options save file
 - add sized ints
