@@ -24,7 +24,7 @@ Stimuli::Stimuli(Stimulus::Kind kind, Iov* inp, QWidget *parent)
   selectedInp = inp;
   selectedKind = kind;
   QRect r = parent->geometry();
-  setGeometry(QRect(r.x()+r.width()/2,r.y()+r.height()/2,250,40));
+  setGeometry(QRect(r.x()+r.width()/2,r.y()+r.height()/2,250,160));
   centralWidget = new QWidget(parent);
   verticalLayout = new QVBoxLayout(centralWidget);
   verticalLayout->setSpacing(6);
