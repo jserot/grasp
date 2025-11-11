@@ -12,11 +12,10 @@
 * BUILD
 - add graphviz and gtkwave to dep pkgs in debian dist
 - revamp configure/install process for Windows (done for MacOS and Linux)
-- use `macdeployqt` for building the MacOS app bundle
+- use `macdeployqt` for building the MacOS app bundle (?)
 - update icons for the Windows distro
 
 * TOOLS
 
 * DOC
-- video tutorials in english
 - update Windows Installer Guide

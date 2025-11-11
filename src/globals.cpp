@@ -18,7 +18,7 @@
 #include "model.h"
 #include <QRegularExpression>
 
-const QString Globals::version = "2.0.0"; 
+const QString Globals::version = "1.0.0"; 
 const QStringList Globals::guiOnlyOpts = { "-dot_external_viewer", "-no_model_check" };
 CompilerPaths *Globals::compilerPaths = NULL;
 CompilerOptions *Globals::compilerOptions = NULL;

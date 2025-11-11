@@ -25,9 +25,12 @@ simulator and compiler.
 A minimalistic "Howto" is available
 [here](https://github.com/jserot/grasp/blob/master/doc/Using.md)
 
-Some video tutorials are available (sorry, in french for now)
-- [Part 1 - editing and simulating a simple model](https://youtu.be/T0YVf1ipY5c)
-- [Part 2 - editing and simulating multi-diagrams models](https://youtu.be/ZmJOC5WFAro)
+Some video tutorials are available
+- [Part 1 - editing and simulating a simple model](https://youtu.be/PqV9cECaC1Q)
+- [Part 2 - editing and simulating a multi-diagrams model](https://youtu.be/2uznkPFUTtU)
+
+These videoa are also available in french [here](https://youtu.be/T0YVf1ipY5c) and
+[here](https://youtu.be/ZmJOC5WFAro).
 
 ## INSTALLATION
 
