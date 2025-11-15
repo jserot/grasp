@@ -1,6 +1,6 @@
 #!include(../config) { error("Cannot open config file. Run configure script in top directory") }
 
-CONFIG   += debug
+#CONFIG   += debug
 QT       += widgets network
 
 HEADERS += include/nlohmann_json.h \

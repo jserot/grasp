@@ -7,6 +7,7 @@
 *.bak
 _build/
 binaries/
+qt_runtime/
 HOWTO.md
 CHANGES.txt
 CHANGES.html

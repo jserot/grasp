@@ -26,6 +26,7 @@ run:
 install: 
 	@echo "** Creating package tree in $(INSTALL_DIR)"
 	cp ./src/Grasp ./dist/linux/grasp/usr/bin/grasp
+	patchelf --set-rpath '$$ORIGIN/../lib/grasp/qt6' ./dist/linux/grasp/usr/bin/grasp
 	rm -f ./dist/linux/grasp/usr/lib/grasp/rfsmc.exe
 	cp $(RFSMC) ./dist/linux/grasp/usr/lib/grasp/rfsmc.exe
 	cp ./dist/linux/grasp.ini ./dist/linux/grasp/usr/share/grasp/
