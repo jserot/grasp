@@ -36,13 +36,14 @@ SyntaxHighlighter* makeSyntaxHighlighter(QString suffix, QTextDocument* doc)
 TextViewer::TextViewer(QString fname, QWidget *parent) : QPlainTextEdit(parent)
 {
     QFile file(fname);
-    Q_ASSERT(file.open(QIODevice::ReadOnly | QIODevice::Text));
-
+    if ( file.open(QIODevice::ReadOnly | QIODevice::Text) )
+      setPlainText(QString::fromUtf8(file.readAll()));
+    else
+      setPlainText("Cannot open file " + fname);
     setFont(defaultFont);
     QFileInfo fi(file);
     setWindowFlag(Qt::Window, true);  // Required to make the window toplevel
     setWindowTitle(fi.fileName());
-    setPlainText(QString::fromUtf8(file.readAll()));
     setReadOnly(true);
 
     highlighter = makeSyntaxHighlighter(fi.suffix(), document());

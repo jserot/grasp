@@ -1,6 +1,7 @@
 * GENERAL
 
 * GUI
+- check for potentially errors due to non-op QT_ASSERT macros in release version
 - add a clickable region in the diagram panel to access local variables (more intuitive than right-click) ?
 - use json format for options save file
 - add sized ints
