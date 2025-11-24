@@ -14,6 +14,7 @@
 #include "globals.h"
 
 #include <QFile>
+#include <QThread>
 #include <QFileInfo>
 #include <QString>
 #include <QStringList>
@@ -44,6 +45,52 @@ Compiler::~Compiler() {
   stopServer();
 }
 
+void Compiler::startServer(const QString &serverPath, const QString &socketPath)
+{
+    this->socketPath = socketPath;
+    QFile socketFile(socketPath);
+    if (socketFile.exists()) {
+        qDebug() << "compiler: socket" << socketPath << "exists. Deleting";
+        socketFile.remove();
+    }
+
+    QStringList serverArgs;
+    serverArgs << "-server_mode" << "-socket_path" << socketPath; // << "-verbose";
+    qDebug() << "compiler: launching server:" << serverPath << serverArgs;
+
+    serverProcess.start(serverPath, serverArgs);
+    // Wait for server to start (max 5 sec)
+    if (!serverProcess.waitForStarted(5000)) { // 5 secondes max
+        qDebug() << "compiler: cannot launch server";
+        emit serverError("Cannot launch compiler server");
+        return;
+    }
+    qDebug() << "compiler: server started in" << serverProcess.workingDirectory();
+
+    // Connect to socket
+    // Use blocking wait here since GUI is not started yet
+    socketName = QFileInfo(socketPath).fileName();
+    QElapsedTimer timer;
+    timer.start();
+    const int timeoutMs = 2000;
+    // Give some time to the server for creating the socket
+    while ( !QFile::exists(socketPath) && timer.elapsed() < timeoutMs ) {
+        QThread::msleep(50);
+    }
+    if (!QFile::exists(socketPath)) {
+        qDebug() << "compiler: socket not created within timeout";
+        emit serverError("Socket not available");
+        return;
+    }
+    socket.connectToServer(socketName);
+    if ( !socket.waitForConnected(timeoutMs) ) {
+        qDebug() << "compiler: failed to connect to server within timeout";
+        emit serverError("Cannot connect to compiler server");
+        return;
+    }
+    qDebug() << "compiler: connected to compiler server!";
+}
+
 // void Compiler::startServer(const QString &serverPath, const QString &socketPath)
 // {
 //     this->socketPath = socketPath;
@@ -58,67 +105,19 @@ Compiler::~Compiler() {
 //     qDebug() << "compiler: launching:" << serverPath << serverArgs;
 //     serverProcess.start(serverPath, serverArgs);
 //     socketName = QFileInfo(socketPath).fileName();
-//     if ( serverProcess.waitForStarted(3000) ) {
+//     if ( serverProcess.waitForStarted(5000) ) { // Timeout=5s
 //       qDebug() << "compiler: server started in" << serverProcess.workingDirectory();
 //       //emit serverStarted();
 //       qDebug() << "compiler: connecting to socket " << socketName;
-//       QTimer::singleShot(300, this, [this]() { socket.connectToServer(socketName); });
+//       QTimer::singleShot(800, this, [this]() { socket.connectToServer(socketName); });
+//       // Wait for 800 ms before attempting to connect. This should leave enough time to RFSMC to start.
+//       // Another soln is to use the tryConnect method below. 
 //       }
 //     else {
 //       qDebug() << "compiler: cannot launch server";
 //       emit serverError("Cannot launch compiler server");
 //       }
 // }
-
-void Compiler::startServer(const QString &serverPath, const QString &socketPath)
-{
-    this->socketPath = socketPath;
-    QFile socketFile(socketPath);
-    if (socketFile.exists()) {
-        qDebug() << "Socket" << socketPath << "exists. Deleting";
-        socketFile.remove();
-    }
-
-    QStringList serverArgs;
-    // serverArgs << "-server_mode" << "-socket_path" << socketPath << "-verbose";
-    serverArgs << "-server_mode" << "-socket_path" << socketPath;
-    qDebug() << "compiler: launching:" << serverPath << serverArgs;
-
-    serverProcess.start(serverPath, serverArgs);
-
-    socketName = QFileInfo(socketPath).fileName();
-
-    if (!serverProcess.waitForStarted(5000)) { // Wait for 5s 
-      qDebug() << "compiler: cannot launch server";
-      emit serverError("Cannot launch compiler server");
-      return;
-      }
-
-    qDebug() << "compiler: server started in" << serverProcess.workingDirectory();
-    // emit serverStarted();
-
-    tryConnect();
-}
-
-void Compiler::tryConnect(int retries, int intervalMs)
-{
-    if (socket.state() == QLocalSocket::ConnectedState) return;
-    if (QFile::exists(socketPath)) {
-        socket.connectToServer(socketName);
-        if (socket.waitForConnected(100)) {
-            qDebug() << "Connected to compiler server!";
-            return;
-        }
-    }
-    if (retries > 0) {
-        QTimer::singleShot(intervalMs, this, [this, retries, intervalMs]() {
-            tryConnect(retries - 1, intervalMs);
-        });
-    } else {
-        qDebug() << "Failed to connect to compiler server after retries";
-        emit serverError("Cannot connect to compiler server");
-    }
-}
 
 void Compiler::sendAsyncRequest(const QString &text)
 {
@@ -225,7 +224,7 @@ bool Compiler::handle_response(QString ctx, QString loc, Response r)
       }
     }
   else {
-    qDebug() << "Wrong response to check_fragment request: " << r.message();
+    qDebug() << "compiler: wrong response to check_fragment request: " << r.message();
     QMessageBox::critical(Globals::mainWindow, tr("Diagram checking"), r.message());
     return false;
     }
