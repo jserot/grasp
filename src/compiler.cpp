@@ -61,12 +61,14 @@ void Compiler::startServer(const QString &serverPath, const QString &socketPath)
     if ( serverProcess.waitForStarted(3000) ) {
       qDebug() << "compiler: server started in" << serverProcess.workingDirectory();
       //emit serverStarted();
+      qDebug() << "compiler: connecting to socket " << socketName;
       QTimer::singleShot(300, this, [this]() { socket.connectToServer(socketName); });
       }
     else {
       qDebug() << "compiler: cannot launch server";
       emit serverError("Cannot launch compiler server");
       }
+}
 
 
 void Compiler::sendAsyncRequest(const QString &text)
