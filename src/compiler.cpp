@@ -44,32 +44,81 @@ Compiler::~Compiler() {
   stopServer();
 }
 
+// void Compiler::startServer(const QString &serverPath, const QString &socketPath)
+// {
+//     this->socketPath = socketPath;
+//     QFile socketFile(socketPath);
+//     if ( socketFile.exists() ) {
+//       qDebug() << "Socket" << socketPath << "exists. Deleting";
+//       socketFile.remove();
+//       }
+//     QStringList serverArgs;
+//     serverArgs << "-server_mode" << "-socket_path" << socketPath;
+//     serverArgs << "-verbose"; 
+//     qDebug() << "compiler: launching:" << serverPath << serverArgs;
+//     serverProcess.start(serverPath, serverArgs);
+//     socketName = QFileInfo(socketPath).fileName();
+//     if ( serverProcess.waitForStarted(3000) ) {
+//       qDebug() << "compiler: server started in" << serverProcess.workingDirectory();
+//       //emit serverStarted();
+//       qDebug() << "compiler: connecting to socket " << socketName;
+//       QTimer::singleShot(300, this, [this]() { socket.connectToServer(socketName); });
+//       }
+//     else {
+//       qDebug() << "compiler: cannot launch server";
+//       emit serverError("Cannot launch compiler server");
+//       }
+// }
+
 void Compiler::startServer(const QString &serverPath, const QString &socketPath)
 {
     this->socketPath = socketPath;
     QFile socketFile(socketPath);
-    if ( socketFile.exists() ) {
-      qDebug() << "Socket" << socketPath << "exists. Deleting";
-      socketFile.remove();
-      }
+    if (socketFile.exists()) {
+        qDebug() << "Socket" << socketPath << "exists. Deleting";
+        socketFile.remove();
+    }
+
     QStringList serverArgs;
+    // serverArgs << "-server_mode" << "-socket_path" << socketPath << "-verbose";
     serverArgs << "-server_mode" << "-socket_path" << socketPath;
-    serverArgs << "-verbose"; 
     qDebug() << "compiler: launching:" << serverPath << serverArgs;
+
     serverProcess.start(serverPath, serverArgs);
+
     socketName = QFileInfo(socketPath).fileName();
-    if ( serverProcess.waitForStarted(3000) ) {
-      qDebug() << "compiler: server started in" << serverProcess.workingDirectory();
-      //emit serverStarted();
-      qDebug() << "compiler: connecting to socket " << socketName;
-      QTimer::singleShot(300, this, [this]() { socket.connectToServer(socketName); });
-      }
-    else {
+
+    if (!serverProcess.waitForStarted(5000)) { // Wait for 5s 
       qDebug() << "compiler: cannot launch server";
       emit serverError("Cannot launch compiler server");
+      return;
       }
+
+    qDebug() << "compiler: server started in" << serverProcess.workingDirectory();
+    // emit serverStarted();
+
+    tryConnect();
 }
 
+void Compiler::tryConnect(int retries, int intervalMs)
+{
+    if (socket.state() == QLocalSocket::ConnectedState) return;
+    if (QFile::exists(socketPath)) {
+        socket.connectToServer(socketName);
+        if (socket.waitForConnected(100)) {
+            qDebug() << "Connected to compiler server!";
+            return;
+        }
+    }
+    if (retries > 0) {
+        QTimer::singleShot(intervalMs, this, [this, retries, intervalMs]() {
+            tryConnect(retries - 1, intervalMs);
+        });
+    } else {
+        qDebug() << "Failed to connect to compiler server after retries";
+        emit serverError("Cannot connect to compiler server");
+    }
+}
 
 void Compiler::sendAsyncRequest(const QString &text)
 {

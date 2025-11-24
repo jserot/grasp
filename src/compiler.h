@@ -65,6 +65,7 @@ private slots:
 private:
     static const int TimeOutMs = 2000;  // Timeout when waiting for a response after sending a request (synchronous mode)
 
+    void tryConnect(int retries = 20, int intervalMs = 100);
     QString readAnswer();
     QProcess serverProcess;
     QLocalSocket socket;
