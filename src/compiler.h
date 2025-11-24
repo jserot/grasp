@@ -69,4 +69,5 @@ private:
     QProcess serverProcess;
     QLocalSocket socket;
     QString socketPath;
+    QString socketName;
 };

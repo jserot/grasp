@@ -14,6 +14,7 @@
 #include "globals.h"
 
 #include <QFile>
+#include <QFileInfo>
 #include <QString>
 #include <QStringList>
 #include <QLocalSocket>
@@ -56,16 +57,17 @@ void Compiler::startServer(const QString &serverPath, const QString &socketPath)
     serverArgs << "-verbose"; 
     qDebug() << "compiler: launching:" << serverPath << serverArgs;
     serverProcess.start(serverPath, serverArgs);
+    socketName = QFileInfo(socketPath).fileName();
     if ( serverProcess.waitForStarted(3000) ) {
       qDebug() << "compiler: server started in" << serverProcess.workingDirectory();
       //emit serverStarted();
-      QTimer::singleShot(300, this, [this]() { socket.connectToServer(this->socketPath); });
+      QTimer::singleShot(300, this, [this]() { socket.connectToServer(socketName); });
       }
     else {
       qDebug() << "compiler: cannot launch server";
       emit serverError("Cannot launch compiler server");
       }
-}
+
 
 void Compiler::sendAsyncRequest(const QString &text)
 {

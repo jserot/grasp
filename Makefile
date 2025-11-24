@@ -10,9 +10,6 @@ build:
 run:
 	make -f $(MAKEFILE) run
 
-dist:
-	make -f $(MAKEFILE) dist
-
 install:
 	make -f $(MAKEFILE) install
 
