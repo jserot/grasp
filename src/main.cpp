@@ -13,12 +13,14 @@
 #include "mainwindow.h"
 
 #include <QApplication>
+#include <QDir>
 #include "debug.h"
 
 int main(int argv, char *args[])
 {
     if ( Globals::traceMode ) { // TO FIX: we should be able to set traceMode when launching the app 
-      Globals::traceFile = new QFile(Globals::traceFilePath);
+      QString traceFilePath = QDir::temp().filePath(Globals::traceFileName);
+      Globals::traceFile = new QFile(traceFilePath);
       Globals::traceFile->open(QIODevice::WriteOnly);
       }
     qInstallMessageHandler(debugMessageHandler); 

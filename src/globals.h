@@ -50,7 +50,7 @@ public:
     static bool check_model;
     const static int socketPort; // For connecting to the compiler server
     static bool traceMode;
-    const static QString traceFilePath;
+    const static QString traceFileName;
     static QFile *traceFile;
 };
 
