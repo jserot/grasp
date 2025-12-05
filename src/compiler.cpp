@@ -18,7 +18,7 @@
 #include <QFileInfo>
 #include <QString>
 #include <QStringList>
-#include <QLocalSocket>
+#include <QTcpSocket>
 #include <QProcess>
 #include <QTimer>
 #include <QJsonDocument>
@@ -28,16 +28,16 @@
 #include "request.h"
 #include "response.h"
 
-const QString Compiler::minimalVersion = "2.2";
+const QString Compiler::minimalVersion = "2.3"; // Rfsm 2.2 used Unix-based sockets
 
 Compiler::Compiler(QObject *parent) : QObject(parent)
 {
     serverProcess.setProcessChannelMode(QProcess::ForwardedChannels);
 
-    connect(&socket, &QLocalSocket::connected, this, &Compiler::onConnected);
-    // connect(&socket, &QLocalSocket::readyRead, this, &Compiler::onReadyRead);  // not used here
-    connect(&socket, &QLocalSocket::disconnected, this, &Compiler::onDisconnected);
-    connect(&socket, &QLocalSocket::errorOccurred, this, &Compiler::onErrorOccurred);
+    connect(&socket, &QTcpSocket::connected, this, &Compiler::onConnected);
+    // connect(&socket, &QTcpSocket::readyRead, this, &Compiler::onReadyRead);  // not used here
+    connect(&socket, &QTcpSocket::disconnected, this, &Compiler::onDisconnected);
+    connect(&socket, &QTcpSocket::errorOccurred, this, &Compiler::onErrorOccurred);
 }
 
 Compiler::~Compiler() {
@@ -45,17 +45,10 @@ Compiler::~Compiler() {
   stopServer();
 }
 
-void Compiler::startServer(const QString &serverPath, const QString &socketPath)
+void Compiler::startServer(const QString &serverPath, const int socketPort)
 {
-    this->socketPath = socketPath;
-    QFile socketFile(socketPath);
-    if (socketFile.exists()) {
-        qDebug() << "compiler: socket" << socketPath << "exists. Deleting";
-        socketFile.remove();
-    }
-
     QStringList serverArgs;
-    serverArgs << "-server_mode" << "-socket_path" << socketPath; // << "-verbose";
+    serverArgs << "-server_mode" << "-socket_port" << QString::number(socketPort) << "-verbose";
     qDebug() << "compiler: launching server:" << serverPath << serverArgs;
 
     serverProcess.start(serverPath, serverArgs);
@@ -68,60 +61,27 @@ void Compiler::startServer(const QString &serverPath, const QString &socketPath)
     qDebug() << "compiler: server started in" << serverProcess.workingDirectory();
 
     // Connect to socket
-    // Use blocking wait here since GUI is not started yet
-    socketName = QFileInfo(socketPath).fileName();
-    QElapsedTimer timer;
-    timer.start();
-    const int timeoutMs = 2000;
-    // Give some time to the server for creating the socket
-    while ( !QFile::exists(socketPath) && timer.elapsed() < timeoutMs ) {
-        QThread::msleep(50);
-    }
-    if (!QFile::exists(socketPath)) {
-        qDebug() << "compiler: socket not created within timeout";
-        emit serverError("Socket not available");
-        return;
-    }
-    socket.connectToServer(socketName);
-    if ( !socket.waitForConnected(timeoutMs) ) {
-        qDebug() << "compiler: failed to connect to server within timeout";
-        emit serverError("Cannot connect to compiler server");
-        return;
-    }
-    qDebug() << "compiler: connected to compiler server!";
+    bool connected = false;
+    for ( int i=0; i<50; ++i ) { // Retry loop
+      socket.connectToHost("127.0.0.1", socketPort);
+      if (socket.waitForConnected(100)) {  // 100 ms max
+        connected = true;
+        break;
+        }
+      QThread::msleep(50);
+      }
+    if ( connected )
+      qDebug() << "compiler: connected to compiler server!";
+    else {
+      qDebug() << "compiler: failed to connect to server";
+      emit serverError("Cannot connect to compiler server");
+      return;
+      }
 }
-
-// void Compiler::startServer(const QString &serverPath, const QString &socketPath)
-// {
-//     this->socketPath = socketPath;
-//     QFile socketFile(socketPath);
-//     if ( socketFile.exists() ) {
-//       qDebug() << "Socket" << socketPath << "exists. Deleting";
-//       socketFile.remove();
-//       }
-//     QStringList serverArgs;
-//     serverArgs << "-server_mode" << "-socket_path" << socketPath;
-//     serverArgs << "-verbose"; 
-//     qDebug() << "compiler: launching:" << serverPath << serverArgs;
-//     serverProcess.start(serverPath, serverArgs);
-//     socketName = QFileInfo(socketPath).fileName();
-//     if ( serverProcess.waitForStarted(5000) ) { // Timeout=5s
-//       qDebug() << "compiler: server started in" << serverProcess.workingDirectory();
-//       //emit serverStarted();
-//       qDebug() << "compiler: connecting to socket " << socketName;
-//       QTimer::singleShot(800, this, [this]() { socket.connectToServer(socketName); });
-//       // Wait for 800 ms before attempting to connect. This should leave enough time to RFSMC to start.
-//       // Another soln is to use the tryConnect method below. 
-//       }
-//     else {
-//       qDebug() << "compiler: cannot launch server";
-//       emit serverError("Cannot launch compiler server");
-//       }
-// }
 
 void Compiler::sendAsyncRequest(const QString &text)
 {
-    if (socket.state() == QLocalSocket::ConnectedState) {
+    if (socket.state() == QTcpSocket::ConnectedState) {
         QByteArray data = text.trimmed().toUtf8() + '\n';
         //qDebug() << "compiler: sending: " << data;
         socket.write(data);
@@ -155,8 +115,8 @@ QString Compiler::readAnswer()
 
 void Compiler::stopServer() {
   qDebug() << "compiler: stopping server: socket.state=" << socket.state() << " process state=" << serverProcess.state();
-  //if (socket.state() == QLocalSocket::ConnectedState) {
-        socket.disconnectFromServer();
+  //if (socket.state() == QTcpSocket::ConnectedState) {
+        socket.disconnectFromHost();
       //}
       //if (serverProcess.state() == QProcess::Running) {
         serverProcess.terminate();
@@ -176,7 +136,7 @@ void Compiler::onDisconnected() {
   qDebug() << "compiler: disconnected from server";
 }
 
-void Compiler::onErrorOccurred(QLocalSocket::LocalSocketError) {
+void Compiler::onErrorOccurred(QTcpSocket::SocketError) {
     qDebug() << "compiler: got error:" << socket.errorString();
     //emit serverError(socket.errorString());
 }

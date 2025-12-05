@@ -13,7 +13,7 @@
 
 #include <QString>
 #include <QProcess>
-#include <QLocalSocket>
+#include <QTcpSocket>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -33,7 +33,7 @@ public:
 
     static const QString minimalVersion;
 
-    void startServer(const QString &serverPath, const QString &socketPath);
+    void startServer(const QString &serverPath, const int socketPort);
     void stopServer();
 
     bool handle_response(QString ctx, QString loc, Response r);
@@ -60,14 +60,12 @@ private slots:
     void onConnected();
     // void onReadyRead();  // For asynchronous reception of responses; not used here
     void onDisconnected();
-    void onErrorOccurred(QLocalSocket::LocalSocketError socketError);
+    void onErrorOccurred(QTcpSocket::SocketError socketError);
 
 private:
     static const int TimeOutMs = 2000;  // Timeout when waiting for a response after sending a request (synchronous mode)
 
     QString readAnswer();
     QProcess serverProcess;
-    QLocalSocket socket;
-    QString socketPath;
-    QString socketName;
+    QTcpSocket socket;
 };

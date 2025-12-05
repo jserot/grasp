@@ -7,6 +7,7 @@ include config
 build: build-gui
 
 INSTALL_DIR=./dist/macos
+ARCH= $(shell arch)
 
 build-gui:
 	@echo "** Building GUI"
@@ -48,7 +49,7 @@ installer:
 	hdiutil convert /tmp/Grasp.dmg -format UDZO -o /tmp/Grasp_ro.dmg
 	@echo "** Copying disk image into ./binaries"
 	mkdir -p ./binaries # May not exist on cloned repositories
-	mv /tmp/Grasp_ro.dmg ./binaries/Grasp-$(VERSION).dmg
+	mv /tmp/Grasp_ro.dmg ./binaries/Grasp-$(VERSION)-$(ARCH).dmg
 
 clean:
 	(cd src; qmake; make clean)

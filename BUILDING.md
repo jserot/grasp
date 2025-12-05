@@ -3,14 +3,18 @@
 Building from sources is currently supported for (at least) the following platforms :
 - MacOS 14.7 (Sonoma) with Qt6 (platform name: `macos`)
 - LinuxMint 6.8 with Qt6) (platform name: `linux`)
-- Windows10 running MSYS2/ucrt64 development env and Qt6 (platform name: `windows`)
+- Windows 10 with Qt6 (platform name: `windows`)
 
 ## Pre-requisites
 
-* [Qt](http://www.qt.io) (version>=6.9)
+* [Qt](http://www.qt.io) (version>=6.8)
 
 The `graphviz` and `gtkwave` external tools are not required for building but, as for the binary
 packages, will be required to view results when running the application.
+
+Check that the executable for the RFSM compiler (`rfsmc.exe`) is present in `dist/<platform>` and up
+to date (for example, `Grasp 1.0.1` requires `rfsmc >= 2.3`). If not install or build the `rfsm`
+package.
 
 #### How to build
 
@@ -25,7 +29,7 @@ packages, will be required to view results when running the application.
   examples in `<install_dir>/share/grasp`; for MacOS, this will install the app under `./dist/macos/Grasp.app`)
 - `make run` (for testing)
 
-#### To build and create the self-installers (for MacOS and Windows)
+#### To build and create the self-installers
 
 * `./configure -platform <platform_name> [other options]` (`./configure --help` for the list of options)
 - `make`

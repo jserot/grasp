@@ -18,7 +18,7 @@
 #include "model.h"
 #include <QRegularExpression>
 
-const QString Globals::version = "1.0.0"; 
+const QString Globals::version = "1.0.1"; 
 const QStringList Globals::guiOnlyOpts = { "-dot_external_viewer", "-no_model_check" };
 CompilerPaths *Globals::compilerPaths = NULL;
 CompilerOptions *Globals::compilerOptions = NULL;
@@ -33,4 +33,4 @@ bool Globals::check_model = true;
 bool Globals::traceMode = true;
 const QString Globals::traceFilePath = "/tmp/grasp.log";
 QFile *Globals::traceFile = NULL;
-const QString Globals::socketPath = "/tmp/grasp_rfsm_sock";
+const int Globals::socketPort = 12345;

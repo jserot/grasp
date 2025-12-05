@@ -8,11 +8,6 @@
 _build/
 binaries/
 qt_runtime/
-HOWTO.md
-CHANGES.txt
-CHANGES.html
-README.txt
-README.html
 doc/Using.txt
 doc/Using.html
 platform

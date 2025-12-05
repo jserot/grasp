@@ -52,7 +52,7 @@ MainWindow::MainWindow()
     if ( compilerPath.isNull() || compilerPath.isEmpty() ) compilerPath = "rfsmc"; // Last chance..
     Globals::compiler = new Compiler();
     connect(Globals::compiler, &Compiler::serverError, this, &MainWindow::serverError);
-    Globals::compiler->startServer(compilerPath,Globals::socketPath);
+    Globals::compiler->startServer(compilerPath,Globals::socketPort);
     QTimer::singleShot(300, this, [this]() { checkCompilerVersion(); }); // Allow 300ms delay for server to start up
 
     Globals::executor = new CommandExec(); // For other programs (graphviz, ...)
