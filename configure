@@ -125,9 +125,9 @@ case "$platform" in
   windows)
 # These are temporary, dev-only locations. The definitive ones will be specified when running the Installer wizard
       if [ -n "$draft" ]; then
-          echo "COMPILER=../dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.ini
+          echo "COMPILER=Z:/qt/grasp/dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.ini
       else
-          echo "COMPILER=../dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.ini # TO FIX
+          echo "COMPILER=Z:/qt/grasp/dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.ini # TO FIX
       fi;
       echo "DOTPROGRAM=$dotprogram" >> ./dist/$platform/grasp.ini;
       echo "DOTVIEWER=$dotviewer" >> ./dist/$platform/grasp.ini;

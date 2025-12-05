@@ -33,19 +33,19 @@ install:
 	rm -f $(INSTALL_DIR)/examples/Makefile
 	cp {CHANGES.md,KNOWN-BUGS.md,LICENSE,README.md} $(INSTALL_DIR)
 
-RFSM_VOLUME=Grasp-$(VERSION)
+GRASP_VOLUME=Grasp-$(VERSION)
 
 installer:
 	@echo "** Creating disk image"
 	rm -f /tmp/Grasp.dmg
-	hdiutil create -size 16m -fs HFS+ -volname "$(RFSM_VOLUME)" /tmp/Grasp.dmg
+	hdiutil create -size 16m -fs HFS+ -volname "$(GRASP_VOLUME)" /tmp/Grasp.dmg
 	hdiutil attach /tmp/Grasp.dmg
-	cp -r $(INSTALL_DIR)/Grasp.app /Volumes/$(RFSM_VOLUME)
-	ln -s /Applications /Volumes/$(RFSM_VOLUME)/Applications
-	cp -r $(INSTALL_DIR)/examples /Volumes/$(RFSM_VOLUME)/Examples
-	cp -r $(INSTALL_DIR)/doc /Volumes/$(RFSM_VOLUME)/Documentation
-	cp $(INSTALL_DIR)/{CHANGES.md,KNOWN-BUGS.md,LICENSE,README.md,INSTALL} /Volumes/$(RFSM_VOLUME)
-	hdiutil detach /Volumes/$(RFSM_VOLUME)
+	cp -r $(INSTALL_DIR)/Grasp.app /Volumes/$(GRASP_VOLUME)
+	ln -s /Applications /Volumes/$(GRASP_VOLUME)/Applications
+	cp -r $(INSTALL_DIR)/examples /Volumes/$(GRASP_VOLUME)/Examples
+	cp -r $(INSTALL_DIR)/doc /Volumes/$(GRASP_VOLUME)/Documentation
+	cp $(INSTALL_DIR)/{CHANGES.md,KNOWN-BUGS.md,LICENSE,README.md,INSTALL} /Volumes/$(GRASP_VOLUME)
+	hdiutil detach /Volumes/$(GRASP_VOLUME)
 	hdiutil convert /tmp/Grasp.dmg -format UDZO -o /tmp/Grasp_ro.dmg
 	@echo "** Copying disk image into ./binaries"
 	mkdir -p ./binaries # May not exist on cloned repositories

@@ -20,6 +20,7 @@
 #include <QStringList>
 #include <QTcpSocket>
 #include <QProcess>
+#include <QCoreApplication>
 #include <QTimer>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -51,6 +52,9 @@ void Compiler::startServer(const QString &serverPath, const int socketPort)
     serverArgs << "-server_mode" << "-socket_port" << QString::number(socketPort) << "-verbose";
     qDebug() << "compiler: launching server:" << serverPath << serverArgs;
 
+    serverReady = false;
+    serverProcess.setProcessChannelMode(QProcess::MergedChannels); // catch stdout and stderr
+    serverProcess.setWorkingDirectory(QCoreApplication::applicationDirPath());
     serverProcess.start(serverPath, serverArgs);
     // Wait for server to start (max 5 sec)
     if (!serverProcess.waitForStarted(5000)) { // 5 secondes max
@@ -59,9 +63,25 @@ void Compiler::startServer(const QString &serverPath, const int socketPort)
         return;
     }
     qDebug() << "compiler: server started in" << serverProcess.workingDirectory();
+    // Wait for message from server telling it's listening for connection
+    if (serverProcess.waitForReadyRead(5000)) {
+      QByteArray firstOutput = serverProcess.readAll();
+      qDebug() << firstOutput;
+      if ( firstOutput.contains("listening") ) {
+        qDebug() << "compiler: server now listening"; 
+        connectToServer(socketPort);
+        }
+      else
+        qDebug() << "compiler: server is not listening";
+      }
+    else
+      qDebug() << "compiler: server gave no output";
+}
 
-    // Connect to socket
+void Compiler::connectToServer(const int socketPort)
+{
     bool connected = false;
+    qDebug() << "compiler: attempting socket connection";
     for ( int i=0; i<50; ++i ) { // Retry loop
       socket.connectToHost("127.0.0.1", socketPort);
       if (socket.waitForConnected(100)) {  // 100 ms max

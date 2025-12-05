@@ -1,0 +1,34 @@
+# Makefile to build the Windows (10) distribution
+
+include config
+
+.PHONY: build install installer
+
+build: build-gui
+
+DIST_DIR=./dist/windows
+DEPLOY_DIR=./dist/windows/deploy
+#ARCH=x86_64
+ARCH=x64
+
+build-gui:
+	@echo "To build: cd src; qmake; make"
+
+install:
+	@echo "** Deploying in $(DEPLOY_DIR)"
+	powershell -Command "cp ./src/release/Grasp.exe $(DEPLOY_DIR)"
+	$(WINDEPLOYQT) --release $(DEPLOY_DIR)/Grasp.exe
+	powershell -Command "cp ./src/options_spec.txt $(DEPLOY_DIR)"
+	powershell -Command "cp $(DIST_DIR)/rfsmc.exe $(DEPLOY_DIR)"
+	powershell -Command "cp $(DIST_DIR)/grasp.ini $(DEPLOY_DIR)"
+	powershell -Command "cp CHANGES.md $(DEPLOY_DIR)"
+	powershell -Command "cp KNOWN-BUGS.md $(DEPLOY_DIR)"
+	powershell -Command "cp LICENSE $(DEPLOY_DIR)"
+	powershell -Command "cp README.md $(DEPLOY_DIR)"
+
+installer:
+	@echo "** Creating installer"
+	"C:/Program Files (x86)/Inno Setup 6/iscc" ./dist/windows/grasp.iss
+
+.PHONY:
+.PHONY: dist

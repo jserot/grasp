@@ -148,9 +148,10 @@
 								<key>Pad</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;\red255\green204\blue102;}
+{\*\expandedcolortbl;;\csgenericrgb\c100000\c80000\c40000;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs34 \cf2 e}</string>
@@ -260,9 +261,10 @@
 								<key>Pad</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;\red255\green204\blue102;}
+{\*\expandedcolortbl;;\csgenericrgb\c100000\c80000\c40000;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs34 \cf2 h}</string>
@@ -333,9 +335,10 @@
 						<key>Pad</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;\red255\green204\blue102;}
+{\*\expandedcolortbl;;\csgenericrgb\c100000\c80000\c40000;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs34 \cf2 c}</string>
@@ -643,9 +646,10 @@
 						<key>Pad</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;\red255\green204\blue102;}
+{\*\expandedcolortbl;;\csgenericrgb\c100000\c80000\c40000;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs44 \cf2 B}</string>
@@ -712,9 +716,10 @@
 						<key>Pad</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;\red255\green204\blue102;}
+{\*\expandedcolortbl;;\csgenericrgb\c100000\c80000\c40000;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs44 \cf2 A}</string>
@@ -999,7 +1004,7 @@
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{297, 51}, {101, 54}}</string>
+					<string>{{277.10938, 26.304688}, {149, 56}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1047,12 +1052,13 @@
 						<key>Pad</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;\red255\green204\blue102;}
+{\*\expandedcolortbl;;\csgenericrgb\c100000\c80000\c40000;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs72 \cf2 Light}</string>
+\f0\fs86 \cf2 Grasp}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -1076,7 +1082,7 @@
 									<array>
 										<dict>
 											<key>Bounds</key>
-											<string>{{408.02441, 363.88339}, {20, 47}}</string>
+											<string>{{408.02441, 363.88339}, {20, 48}}</string>
 											<key>Class</key>
 											<string>ShapedGraphic</string>
 											<key>FitText</key>
@@ -1124,9 +1130,10 @@
 												<key>Pad</key>
 												<integer>0</integer>
 												<key>Text</key>
-												<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+												<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs62 \cf1 e}</string>
@@ -1171,7 +1178,7 @@
 										</dict>
 										<dict>
 											<key>Bounds</key>
-											<string>{{408.02441, 316.88339}, {20, 47}}</string>
+											<string>{{408.02441, 316.88339}, {20, 48}}</string>
 											<key>Class</key>
 											<string>ShapedGraphic</string>
 											<key>FitText</key>
@@ -1219,9 +1226,10 @@
 												<key>Pad</key>
 												<integer>0</integer>
 												<key>Text</key>
-												<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+												<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs62 \cf1 h}</string>
@@ -1237,7 +1245,7 @@
 								</dict>
 								<dict>
 									<key>Bounds</key>
-									<string>{{281.04395, 327.83749}, {20, 47}}</string>
+									<string>{{281.04395, 327.83749}, {20, 48}}</string>
 									<key>Class</key>
 									<string>ShapedGraphic</string>
 									<key>FitText</key>
@@ -1285,9 +1293,10 @@
 										<key>Pad</key>
 										<integer>0</integer>
 										<key>Text</key>
-										<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+										<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs62 \cf1 c}</string>
@@ -1493,7 +1502,7 @@
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{342.17285, 404.01718}, {25, 54}}</string>
+							<string>{{342.17285, 404.01718}, {25, 55}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -1541,9 +1550,10 @@
 								<key>Pad</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs72 \cf1 B}</string>
@@ -1555,7 +1565,7 @@
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{341.17285, 258.83749}, {27, 54}}</string>
+							<string>{{341.17285, 258.83749}, {27, 55}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>FitText</key>
@@ -1603,9 +1613,10 @@
 								<key>Pad</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs72 \cf1 A}</string>
@@ -1801,7 +1812,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{289.10938, 153}, {137, 54}}</string>
+					<string>{{289.10938, 153}, {137, 55}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1861,23 +1872,25 @@
 						ZVNlbGVjdGVkQ29udHJvbFRleHRD
 						b2xvcoaEm5sDhAJmZgEBhoaShJaW
 						EE5TUGFyYWdyYXBoU3R5bGWGkoSE
-						hBBOU1BhcmFncmFwaFN0eWxlAJSE
-						BENDQFMCAISEhAdOU0FycmF5AJSZ
-						DJKEhIQJTlNUZXh0VGFiAJSEAkNm
-						AByGkoSlogA4hpKEpaIAVIaShKWi
-						AHCGkoSlogCBjACGkoSlogCBqACG
-						koSlogCBxACGkoSlogCB4ACGkoSl
-						ogCB/ACGkoSlogCBGAGGkoSlogCB
-						NAGGkoSlogCBUAGGhgCGkoSWlgZO
-						U0ZvbnSGkoSEhAZOU0ZvbnQelJkg
-						hAVbMzJjXQYAAAAYAAAA//5DAGgA
-						YQBsAGsAZAB1AHMAdABlAHIAhAFm
-						JJsAmwGbAJsAhoaG
+						hBdOU011dGFibGVQYXJhZ3JhcGhT
+						dHlsZQCEhBBOU1BhcmFncmFwaFN0
+						eWxlAJSEBENDQFMCAISEhAdOU0Fy
+						cmF5AJSZDJKEhIQJTlNUZXh0VGFi
+						AJSEAkNmAByGkoSmowA4hpKEpqMA
+						VIaShKajAHCGkoSmowCBjACGkoSm
+						owCBqACGkoSmowCBxACGkoSmowCB
+						4ACGkoSmowCB/ACGkoSmowCBGAGG
+						koSmowCBNAGGkoSmowCBUAGGhgCG
+						koSWlgZOU0ZvbnSGkoSEhAZOU0Zv
+						bnQelJkghAVbMzJjXQYAAAAYAAAA
+						//5DAGgAYQBsAGsAZAB1AHMAdABl
+						AHIAhAFmJJsAmwGbAJsAhoaG
 						</data>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;\red255\green255\blue255;}
+{\*\expandedcolortbl;;\csgray\c100000;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs72 \cf2 READY}</string>
@@ -1889,7 +1902,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{327.5, 99}, {40, 108}}</string>
+					<string>{{327.5, 85}, {40, 109}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1948,116 +1961,30 @@
 						U3lzdGVthoSWliFhbHRlcm5hdGVT
 						ZWxlY3RlZENvbnRyb2xUZXh0Q29s
 						b3KGhJubA4QCZmYBAYaGkoSWlhBO
-						U1BhcmFncmFwaFN0eWxlhpKEhIQQ
-						TlNQYXJhZ3JhcGhTdHlsZQCUhARD
-						Q0BTAgCEhIQHTlNBcnJheQCUmQyS
-						hISECU5TVGV4dFRhYgCUhAJDZgAc
-						hpKEpaIAOIaShKWiAFSGkoSlogBw
-						hpKEpaIAgYwAhpKEpaIAgagAhpKE
-						paIAgcQAhpKEpaIAgeAAhpKEpaIA
-						gfwAhpKEpaIAgRgBhpKEpaIAgTQB
-						hpKEpaIAgVABhoYAhpKElpYGTlNG
-						b250hpKEhIQGTlNGb250HpSZIIQF
-						WzMyY10GAAAAGAAAAP/+QwBoAGEA
-						bABrAGQAdQBzAHQAZQByAIQBZiSb
-						AJsBmwCbAIaGhg==
+						U1BhcmFncmFwaFN0eWxlhpKEhIQX
+						TlNNdXRhYmxlUGFyYWdyYXBoU3R5
+						bGUAhIQQTlNQYXJhZ3JhcGhTdHls
+						ZQCUhARDQ0BTAgCEhIQHTlNBcnJh
+						eQCUmQyShISECU5TVGV4dFRhYgCU
+						hAJDZgAchpKEpqMAOIaShKajAFSG
+						koSmowBwhpKEpqMAgYwAhpKEpqMA
+						gagAhpKEpqMAgcQAhpKEpqMAgeAA
+						hpKEpqMAgfwAhpKEpqMAgRgBhpKE
+						pqMAgTQBhpKEpqMAgVABhoYAhpKE
+						lpYGTlNGb250hpKEhIQGTlNGb250
+						HpSZIIQFWzMyY10GAAAAGAAAAP/+
+						QwBoAGEAbABrAGQAdQBzAHQAZQBy
+						AIQBZiSbAJsBmwCbAIaGhg==
 						</data>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;\red255\green255\blue255;}
+{\*\expandedcolortbl;;\csgray\c100000;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs72 \cf2 IS\
 }</string>
-						<key>VerticalPad</key>
-						<integer>0</integer>
-					</dict>
-					<key>Wrap</key>
-					<string>NO</string>
-				</dict>
-				<dict>
-					<key>Bounds</key>
-					<string>{{296, 8.0280457}, {103, 54}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>FitText</key>
-					<string>YES</string>
-					<key>Flow</key>
-					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>catalog</key>
-							<string>System</string>
-							<key>name</key>
-							<string>alternateSelectedControlTextColor</string>
-						</dict>
-						<key>Font</key>
-						<string>Chalkduster</string>
-						<key>Size</key>
-						<real>36</real>
-					</dict>
-					<key>ID</key>
-					<integer>196</integer>
-					<key>Shape</key>
-					<string>Rectangle</string>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-					</dict>
-					<key>Text</key>
-					<dict>
-						<key>Pad</key>
-						<integer>0</integer>
-						<key>RTFD</key>
-						<data>
-						BAtzdHJlYW10eXBlZIHoA4QBQISE
-						hBJOU0F0dHJpYnV0ZWRTdHJpbmcA
-						hIQITlNPYmplY3QAhZKEhIQITlNT
-						dHJpbmcBlIQBKwRSRlNNhoQCaUkB
-						BJKEhIQMTlNEaWN0aW9uYXJ5AJSE
-						AWkDkoSWlgdOU0NvbG9yhpKEhIQH
-						TlNDb2xvcgCUhAFjBoQDQEBAhJaW
-						BlN5c3RlbYaElpYhYWx0ZXJuYXRl
-						U2VsZWN0ZWRDb250cm9sVGV4dENv
-						bG9yhoSbmwOEAmZmAQGGhpKElpYQ
-						TlNQYXJhZ3JhcGhTdHlsZYaShISE
-						EE5TUGFyYWdyYXBoU3R5bGUAlIQE
-						Q0NAUwIAhISEB05TQXJyYXkAlJkM
-						koSEhAlOU1RleHRUYWIAlIQCQ2YA
-						HIaShKWiADiGkoSlogBUhpKEpaIA
-						cIaShKWiAIGMAIaShKWiAIGoAIaS
-						hKWiAIHEAIaShKWiAIHgAIaShKWi
-						AIH8AIaShKWiAIEYAYaShKWiAIE0
-						AYaShKWiAIFQAYaGAIaShJaWBk5T
-						Rm9udIaShISEBk5TRm9udB6UmSCE
-						BVszMmNdBgAAABgAAAD//kMAaABh
-						AGwAawBkAHUAcwB0AGUAcgCEAWYk
-						mwCbAZsAmwCGhoY=
-						</data>
-						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
-\cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
-{\colortbl;\red255\green255\blue255;\red255\green255\blue255;}
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
-
-\f0\fs72 \cf2 RFSM}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -2165,9 +2092,10 @@
 								<key>Pad</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;\red255\green204\blue102;}
+{\*\expandedcolortbl;;\csgenericrgb\c100000\c80000\c40000;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs34 \cf2 e}</string>
@@ -2277,9 +2205,10 @@
 								<key>Pad</key>
 								<integer>0</integer>
 								<key>Text</key>
-								<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+								<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;\red255\green204\blue102;}
+{\*\expandedcolortbl;;\csgenericrgb\c100000\c80000\c40000;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs34 \cf2 h}</string>
@@ -2350,9 +2279,10 @@
 						<key>Pad</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;\red255\green204\blue102;}
+{\*\expandedcolortbl;;\csgenericrgb\c100000\c80000\c40000;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs34 \cf2 c}</string>
@@ -2660,9 +2590,10 @@
 						<key>Pad</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;\red255\green204\blue102;}
+{\*\expandedcolortbl;;\csgenericrgb\c100000\c80000\c40000;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs44 \cf2 B}</string>
@@ -2729,9 +2660,10 @@
 						<key>Pad</key>
 						<integer>0</integer>
 						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
 \cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Chalkduster;}
 {\colortbl;\red255\green255\blue255;\red255\green204\blue102;}
+{\*\expandedcolortbl;;\csgenericrgb\c100000\c80000\c40000;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\fs44 \cf2 A}</string>
@@ -3072,7 +3004,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2019-07-03 10:46:27 +0000</string>
+	<string>2025-12-05 15:59:10 +0000</string>
 	<key>Modifier</key>
 	<string>Jocelyn Sérot</string>
 	<key>NotesVisible</key>

@@ -15,6 +15,7 @@
 #include <QString>
 #include <QFile>
 #include <QTextStream>
+#include <QDateTime>
 #include <stdio.h>
 #include "globals.h"
 
@@ -33,7 +34,7 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext &, const QStri
       }
     if ( Globals::traceFile ) {
       QTextStream ts(Globals::traceFile);
-      ts << txt << QT_ENDL;
+      ts << "[" << QDateTime::currentDateTime().toString("hh:mm:ss.zzz") << "]" << txt << QT_ENDL;
       }
     else
       fprintf(stderr, "%s\n", txt.toStdString().c_str());

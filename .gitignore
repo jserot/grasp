@@ -21,10 +21,8 @@ dist/linux/grasp/usr/share/grasp/examples
 dist/macos
 !dist/macos/INSTALL
 !dist/macos/rfsmc.exe
-dist/windows
-!dist/windows/windows-install-guide.pdf
-!doc/using.pdf
-src/grasp.ini
+dist/windows/deploy/
+rc/grasp.ini
 *.aux
 *.log
 *.rel
