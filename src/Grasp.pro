@@ -3,6 +3,8 @@
 #CONFIG   += debug
 QT       += widgets network
 
+QMAKE_CXXFLAGS += -Wno-return-type
+
 HEADERS += include/nlohmann_json.h \
            globals.h \
            transition.h  \

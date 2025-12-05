@@ -71,7 +71,10 @@ case "$platform" in
       echo "INSTALL_DIR=./dist/linux/grasp" >> config;;
   windows)
       echo "PLATFORM=windows" >> config;
-      echo "WINDEPLOYQT=/ucrt64/bin/windeployqt6.exe" >> config;;
+      if [ -z "$dotprogram" ]; then dotprogram="C:\Program Files\Graphviz\bin\dot.exe"; fi;
+      if [ -z "$vcdviewer" ]; then vcdviewer="C:\Users\js\Desktop\gtkwave\gtkwave64\bin\gtkwave.exe"; fi;
+      if [ -z "$txtviewer" ]; then txtviewer="notepad"; fi;
+      echo "WINDEPLOYQT=windeployqt.exe" >> config;;
   *) 
       echo "Unknown platform: $platform";
       rm -f config;
@@ -121,10 +124,16 @@ case "$platform" in
       echo "INITDIR=/usr/share/grasp/examples" >> ./dist/$platform/grasp.ini;;
   windows)
 # These are temporary, dev-only locations. The definitive ones will be specified when running the Installer wizard
-      echo "COMPILER=Z:/Caml/rfsm-2.1-w7/_build/default/src/guests/std/bin/rfsmc.exe" >> ./src/grasp.ini;
-      echo "DOTPROGRAM=C:/Program Files (x86)/Graphviz2.38/bin/dot.exe" >> ./src/grasp.ini;
-      echo "VCDVIEWER=C:/Users/js/Desktop/gtkwave/bin/gtkwave.exe" >> ./src/grasp.ini;
-      echo "INITDIR=Z:/Qt/grasp/examples" >> ./src/grasp.ini;;
+      if [ -n "$draft" ]; then
+          echo "COMPILER=../dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.ini
+      else
+          echo "COMPILER=../dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.ini # TO FIX
+      fi;
+      echo "DOTPROGRAM=$dotprogram" >> ./dist/$platform/grasp.ini;
+      echo "DOTVIEWER=$dotviewer" >> ./dist/$platform/grasp.ini;
+      echo "VCDVIEWER=$vcdviewer" >> ./dist/$platform/grasp.ini;
+      echo "TXTVIEWER=$txtviewer" >> ./dist/$platform/grasp.ini;
+      echo "INITDIR=Z:/qt/grasp/examples" >> ./src/grasp.ini;;
   *) 
       echo "Unknown platform: $platform";
       exit 3;;
