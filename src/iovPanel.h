@@ -58,5 +58,5 @@ protected slots:
   void stimEdited();
 
 private:
-  static QRegularExpressionValidator *name_validator;
+  QRegularExpressionValidator *name_validator;
 };

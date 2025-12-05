@@ -29,14 +29,14 @@
 #define QCOMBOBOX_INDEX_CHANGED (&QComboBox::currentIndexChanged)
 #define QCOMBOBOX_ACTIVATED (&QComboBox::activated)
 
-QRegularExpressionValidator *IovPanel::name_validator = new QRegularExpressionValidator(Globals::re_lid);
-
 IovPanel::IovPanel(Iov::IoKind kind, QString title, QString rowPrefix, Client client)
   : DynamicPanel(title)
 {
   this->kind = kind;
   this->client = client;
   this->rowPrefix = rowPrefix;
+
+  name_validator = new QRegularExpressionValidator(Globals::re_lid);
 
   Q_ASSERT(Globals::mainWindow);
   connect(this, SIGNAL(modelModified()), Globals::mainWindow, SLOT(modelModified()));
