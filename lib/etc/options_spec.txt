@@ -1,12 +1,3 @@
-# GUI-specific options (others will be extracted from compiler sources)
-ide;general;-dot_external_viewer;Arg.Unit;;use DOTVIEWER external program for viewing .dot files
-ide;general;-dot_qgv;Arg.Unit;;use QGV library for DOT rendering instead of generating DOT files (warning: this may result in poor rendering)
-ide;general;-target_dirs;Arg.Unit;;generated code in separate directories (./dot,./ctask,...)
-ide;general;-stop_time;Arg.Int;set_stop_time;set stop time for the SystemC and VHDL test-bench (default: 100)
-ide;general;-debug;Arg.Unit;;run in debug mode (log all messages)
-ide;general;-sync_externals;Arg.Unit;;launch external programs synchronously (wait for termination)
-ide;dot;-dot_options;Arg.String;;options for calling the DOT program (ex: -Grankdir=LR)
-# RFSMC options
 noide;general;-main;Arg.String;set_main_prefix;set prefix for the generated main files
 noide;general;-dump_typed;Arg.Unit;set_dump_typed;dump typed representation of model(s)/program to stdout
 noide;general;-dump_static;Arg.Unit;set_dump_static;dump static representation of model(s)/program to stdout
@@ -19,10 +10,11 @@ noide;general;-systemc;Arg.Unit;set_systemc;generate SystemC code
 noide;general;-vhdl;Arg.Unit;set_vhdl;generate VHDL code
 noide;general;-version;Arg.Unit;set_print_version;print version of the compiler and quit
 noide;general;-show_models;Arg.Unit;set_show_models;generate separate representations for uninstanciated FSM models 
+noide;general;-server_mode;Arg.Unit;set_server_mode;run the compiler in server mode (to be used by the grasp app)
+ide;general;-verbose;Arg.Unit;set_verbose;run the compiler in verbose mode (including server)
+noide;general;-socket_port;Arg.Int;set_socket_port;set socket port when running in server mode
 noide;dot;-dot_qual_ids;Arg.Unit;set_dot_qual_ids;print qualified identifiers in DOT representations
-noide;gui;-gui;Arg.Unit;set_gui;generate report and error messages for interacting with rfsm-light
-noide;gui;-check_fragment;Arg.Unit;set_check_fragment;check a program fragment (for GUI use only)
-ide;dot;-dot_no_captions;Arg.Unit;set_dot_no_captions;Remove captions in .dot representation(s)
+ide;dot;-dot_captions;Arg.Unit;set_dot_captions;Add captions in .dot representation(s)
 ide;dot;-dot_short_trans;Arg.Unit;set_dot_short_trans;Print single-line transition labels (default is multi-lines)
 ide;dot;-dot_abbrev_types;Arg.Unit;set_dot_abbrev_types;Print abbreviated types (default is to print definitions)
 ide;dot;-dot_boxed;Arg.Unit;set_dot_boxed;Draw FSM instances in boxes

@@ -1,7 +1,8 @@
 * GENERAL
 
 * GUI
-- check for potentially errors due to non-op QT_ASSERT macros in release version
+- use Qt standard locations for config files
+- add socket port number to config file 
 - add a clickable region in the diagram panel to access local variables (more intuitive than right-click) ?
 - use json format for options save file
 - add sized ints
@@ -12,11 +13,9 @@
 
 * BUILD
 - add graphviz and gtkwave to dep pkgs in debian dist
-- revamp configure/install process for Windows (done for MacOS and Linux)
 - use `macdeployqt` for building the MacOS app bundle (?)
-- update icons for the Windows distro
 
 * TOOLS
 
 * DOC
-- update Windows Installer Guide
+- update the section *Trouble Shooting* in `doc/Using.md`
