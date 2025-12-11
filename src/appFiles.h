@@ -12,41 +12,36 @@
 
 #pragma once
 
-#include <QObject>
 #include <QString>
-#include <QMap>
-#include <QAbstractButton>
+#include <QDir>
+#include "globals.h"
 
-class CompilerPaths : public QObject
-{
-  Q_OBJECT
-public:
-    CompilerPaths(QWidget *parent = 0);
-    ~CompilerPaths();
+class AppFiles {
+ public:
+  static QString appDir() {
+    QString dir = QApplication::applicationDirPath();
+#ifdef Q_OS_LINUX
+    dir.replace("bin","share/grasp");
+#endif
+    return dir;
+  }
 
-    QString getPath(QString name);
-    void edit(QWidget *parent);
+  static QString optionsSpecFile() {
+    // return ":/config/options_spec.txt";
+    return appDir() + "/options_spec.txt"; 
+  }
+    
+  static QString iniFile() {
+    /* QString dir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation); */
+    /* QDir().mkpath(dir); */
+    /* return dir + "/grasp.ini"; */
+    return appDir() + "/grasp.ini";
+  }
 
-  const QString defaultCompiler;
-  const QString defaultDotProgram;
-  const QString defaultDotViewer;
-  const QString defaultVcdViewer;
-
-private slots:
-  void valueChanged(const QString&);
-  //void buttonClicked(QAbstractButton*);
-  void saveToFile();
-
-signals:
-    void compilerPathChanged(QString newPath);
-
-private:
-    QWidget *parent;
-    QDialog *dialog;
-    QMap<QString,QString> paths;
-    QMap<QString,QString> editedPaths;
-    void setDefaults();
-    void readFromFile(QString fname);
-    void logMessage(QString msg);
+  static QString logFile() {
+    /* QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation); */
+    /* QDir().mkpath(dir); */
+    /* return dir + "/grasp.log"; */
+    return QDir::temp().filePath(Globals::traceFileName);
+  }
 };
-

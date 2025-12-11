@@ -22,7 +22,7 @@ class CompilerOptions : public QObject
 {
   Q_OBJECT
 public:
-    CompilerOptions(QString specFile, QWidget *parent = 0);
+    CompilerOptions(QWidget *parent = 0);
     ~CompilerOptions();
 
     void edit(QWidget *parent);

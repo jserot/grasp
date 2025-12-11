@@ -37,14 +37,9 @@ MainWindow::MainWindow()
     // Non-GUI setup
 
     Globals::mainWindow = this;
-    QString appDir = QApplication::applicationDirPath();
-#ifdef Q_OS_LINUX
-    appDir.replace("bin","share/grasp");
-#endif
-    qDebug() << "APPDIR=" << appDir;
-    Globals::compilerPaths = new CompilerPaths(appDir + "/grasp.ini", this);
+    Globals::compilerPaths = new CompilerPaths(this);
     connect(Globals::compilerPaths, SIGNAL(compilerPathChanged(QString)), this, SLOT(compilerPathUpdated(QString)));
-    Globals::compilerOptions = new CompilerOptions(appDir + "/options_spec.txt", this);
+    Globals::compilerOptions = new CompilerOptions(this);
     Globals::initDir = Globals::compilerPaths->getPath("INITDIR");
 
     // Start compiler server

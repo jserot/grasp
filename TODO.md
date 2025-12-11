@@ -2,7 +2,7 @@
 
 * GUI
 - add socket port number to config file 
-- use Qt standard locations for options_spec, .ini and log files
+- use Qt standard locations for options_spec, .ini and log files (see `src/appFiles.h`)
 - add a clickable region in the diagram panel to access local variables (more intuitive than right-click) ?
 - use json format for options save file
 - add sized ints

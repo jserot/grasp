@@ -19,6 +19,7 @@
 #include <QPushButton>
 
 #include "compilerPaths.h"
+#include "appFiles.h"
 
 static const QString defaultCompiler = "rfsmc";  // Fall-back, default values
 static const QString defaultDotProgram = "dot";
@@ -26,9 +27,10 @@ static const QString defaultDotViewer = "graphviz";
 static const QString defaultVcdViewer = "gtkwave";
 static const int defaultPathLength = 60;
 
-CompilerPaths::CompilerPaths(QString iniFile, QWidget *parent) : parent(parent)
+CompilerPaths::CompilerPaths(QWidget *parent) : parent(parent)
 {
   setDefaults();
+  QString iniFile = AppFiles::iniFile();
   readFromFile(iniFile); 
   QMapIterator<QString, QString> i(paths);
   while (i.hasNext()) {

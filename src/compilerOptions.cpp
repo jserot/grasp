@@ -19,13 +19,14 @@
 #include <QFileDialog>
 
 #include "compilerOptions.h"
+#include "appFiles.h"
 
 #define QT_ENDL Qt::endl
 
-CompilerOptions::CompilerOptions(QString specFile, QWidget *parent)
+CompilerOptions::CompilerOptions(QWidget *parent)
 {
   this->parent = parent;
-  readSpecFile(specFile);
+  readSpecFile(AppFiles::optionsSpecFile());
   // options.insert("-dot_no_captions", CompilerOption("dot","-dot_no_captions",true));
   // The above is a hack until the rfsmc option -dot_no_captions is replaced by -dot_captions
   options.insert("-no_model_check", CompilerOption("general","-no_model_check",false));
