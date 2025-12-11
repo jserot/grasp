@@ -40,7 +40,7 @@ Options: [defaults in brackets after descriptions]
   --dotviewer path        command for displaying .dot files
   --vcdviewer path        command for displaying .vcd files
   --txtviewer path        command for displaying text files
-  --rfmsc path            path to the rfsmc compiler (to be copied in the install tree) 
+  --rfmsc path            path to the rfsmc compiler (to be copied, if required, in the install tree) 
   --draft                 build for local testing (not for building installers) [default: $draft]
   --help                  print this message
 EOF
@@ -86,7 +86,11 @@ fi
 
 # Write ./config
 
-echo "RFSMC=$rfsmc" >> config
+if [ -n "$rfsmc" ]; then
+    echo "Copying $rfsmc to ./dist/$platform"
+    cp $rfsmc ./dist/$platform
+fi;
+    
 echo "DOTPROGRAM=$dotprogram" >> config
 echo "DOTVIEWER=$dotviewer" >> config
 echo "VCDVIEWER=$vcdviewer" >> config

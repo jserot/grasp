@@ -7,7 +7,9 @@ include config
 build: build-gui
 
 INSTALL_DIR=./dist/macos
+DEPLOY_DIR=./dist/macos/deploy
 ARCH= $(shell arch)
+MACDEPLOYQT=macdeployqt
 
 build-gui:
 	@echo "** Building GUI"
@@ -17,39 +19,28 @@ run:
 	(cd ./dist/macos/Grasp.app/Contents/MacOS; ./Grasp)
 
 install:
-	@echo "** Installing in $(INSTALL_DIR)"
-	rm -rf $(INSTALL_DIR)/Grasp.app
-	cp -r ./src/Grasp.app $(INSTALL_DIR)
-	cp -f $(INSTALL_DIR)/rfsmc.exe $(INSTALL_DIR)/Grasp.app/Contents/MacOS
-	cp -r ./src/options_spec.txt $(INSTALL_DIR)/Grasp.app/Contents/MacOS
-	cp -r $(INSTALL_DIR)/grasp.ini $(INSTALL_DIR)/Grasp.app/Contents/MacOS
-	rm -rf $(INSTALL_DIR)/doc
-	mkdir $(INSTALL_DIR)/doc
-	cp  doc/Using.md $(INSTALL_DIR)/doc
-	cp -r doc/imgs $(INSTALL_DIR)/doc
-	rm -rf $(INSTALL_DIR)/examples
-	mkdir $(INSTALL_DIR)/examples
-	cp -r examples/* $(INSTALL_DIR)/examples
-	rm -f $(INSTALL_DIR)/examples/Makefile
-	cp {CHANGES.md,KNOWN-BUGS.md,LICENSE,README.md} $(INSTALL_DIR)
+	@echo "** Installing in $(DEPLOY_DIR)"
+	rm -rf $(DEPLOY_DIR)
+	mkdir $(DEPLOY_DIR)
+	cp -r ./src/Grasp.app $(DEPLOY_DIR)
+	$(MACDEPLOYQT) $(DEPLOY_DIR)/Grasp.app # Add Framework
+	cp -f $(INSTALL_DIR)/rfsmc.exe $(DEPLOY_DIR)/Grasp.app/Contents/MacOS
+	cp -f ./src/options_spec.txt $(DEPLOY_DIR)/Grasp.app/Contents/MacOS
+	cp -f $(INSTALL_DIR)/grasp.ini $(DEPLOY_DIR)/Grasp.app/Contents/MacOS
+	mkdir $(DEPLOY_DIR)/doc
+	cp  doc/Using.md $(DEPLOY_DIR)/doc
+	cp -r doc/imgs $(DEPLOY_DIR)/doc
+	mkdir $(DEPLOY_DIR)/examples
+	cp -r examples/* $(DEPLOY_DIR)/examples
+	rm -f $(DEPLOY_DIR)/examples/Makefile
+	cp {CHANGES.md,KNOWN-BUGS.md,LICENSE,README.md} $(DEPLOY_DIR)
+	ln -s /Applications $(DEPLOY_DIR)/Applications
 
 GRASP_VOLUME=Grasp-$(VERSION)
 
 installer:
 	@echo "** Creating disk image"
-	rm -f /tmp/Grasp.dmg
-	hdiutil create -size 16m -fs HFS+ -volname "$(GRASP_VOLUME)" /tmp/Grasp.dmg
-	hdiutil attach /tmp/Grasp.dmg
-	cp -r $(INSTALL_DIR)/Grasp.app /Volumes/$(GRASP_VOLUME)
-	ln -s /Applications /Volumes/$(GRASP_VOLUME)/Applications
-	cp -r $(INSTALL_DIR)/examples /Volumes/$(GRASP_VOLUME)/Examples
-	cp -r $(INSTALL_DIR)/doc /Volumes/$(GRASP_VOLUME)/Documentation
-	cp $(INSTALL_DIR)/{CHANGES.md,KNOWN-BUGS.md,LICENSE,README.md,INSTALL} /Volumes/$(GRASP_VOLUME)
-	hdiutil detach /Volumes/$(GRASP_VOLUME)
-	hdiutil convert /tmp/Grasp.dmg -format UDZO -o /tmp/Grasp_ro.dmg
-	@echo "** Copying disk image into ./binaries"
-	mkdir -p ./binaries # May not exist on cloned repositories
-	mv /tmp/Grasp_ro.dmg ./binaries/Grasp-$(VERSION)-$(ARCH).dmg
+	hdiutil create -volname $(GRASP_VOLUME) -srcfolder $(DEPLOY_DIR) -ov -format UDZO ./binaries/Grasp-$(VERSION)-$(ARCH).dmg
 
 clean:
 	(cd src; qmake; make clean)
@@ -60,6 +51,3 @@ clobber: clean
 	rm -rf $(INSTALL_DIR)/doc
 	rm -rf $(INSTALL_DIR)/examples
 	rm -f $(INSTALL_DIR)/{CHANGES.md,KNOWN-BUGS.md,LICENSE,README.md}
-
-.PHONY:
-.PHONY: dist

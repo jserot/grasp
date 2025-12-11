@@ -1,8 +1,8 @@
 * GENERAL
 
 * GUI
-- use Qt standard locations for config files
 - add socket port number to config file 
+- use Qt standard locations for options_spec, .ini and log files
 - add a clickable region in the diagram panel to access local variables (more intuitive than right-click) ?
 - use json format for options save file
 - add sized ints
@@ -13,7 +13,6 @@
 
 * BUILD
 - add graphviz and gtkwave to dep pkgs in debian dist
-- use `macdeployqt` for building the MacOS app bundle (?)
 
 * TOOLS
 
