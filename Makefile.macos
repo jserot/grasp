@@ -23,7 +23,7 @@ install:
 	$(MACDEPLOYQT) $(DEPLOY_DIR)/Grasp.app # Add Framework
 	cp -f $(INSTALL_DIR)/rfsmc.exe $(DEPLOY_DIR)/Grasp.app/Contents/MacOS
 	cp -f ./src/options_spec.txt $(DEPLOY_DIR)/Grasp.app/Contents/MacOS
-	cp -f $(INSTALL_DIR)/grasp.ini $(DEPLOY_DIR)/Grasp.app/Contents/MacOS
+	cp -f $(INSTALL_DIR)/grasp.conf $(DEPLOY_DIR)/Grasp.app/Contents/MacOS
 	mkdir $(DEPLOY_DIR)/doc
 	cp  doc/Using.md $(DEPLOY_DIR)/doc
 	cp -r doc/imgs $(DEPLOY_DIR)/doc

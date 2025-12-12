@@ -99,30 +99,30 @@ echo "BUILD_DOC=$doc" >> config
 # echo "SOCKET_PORT=$socket_port" >> config
 echo "** Wrote file ./config"
 
-# Write ./dist/<platform>/grasp.ini
+# Write ./dist/<platform>/grasp.conf
 
-rm -f ./dist/$platform/grasp.ini
-touch ./dist/$platform/grasp.ini
+rm -f ./dist/$platform/grasp.conf
+touch ./dist/$platform/grasp.conf
 
-echo "DOTPROGRAM=$dotprogram" >> ./dist/$platform/grasp.ini
-echo "VCDVIEWER=$vcdviewer" >> ./dist/$platform/grasp.ini
-echo "TXTVIEWER=$txtviewer" >> ./dist/$platform/grasp.ini
-echo "SOCKETPORT=$socket_port" >> ./dist/$platform/grasp.ini
+echo "DOTPROGRAM=$dotprogram" >> ./dist/$platform/grasp.conf
+echo "VCDVIEWER=$vcdviewer" >> ./dist/$platform/grasp.conf
+echo "TXTVIEWER=$txtviewer" >> ./dist/$platform/grasp.conf
+echo "SOCKETPORT=$socket_port" >> ./dist/$platform/grasp.conf
 
 case "$platform" in
   macos)
-#      echo "COMPILER=../dist/macos/rfsmc.exe" >> ./dist/$platform/grasp.ini
-      echo "COMPILER=/Applications/Grasp.app/Contents/MacOS/rfsmc.exe" >> ./dist/$platform/grasp.ini
-      echo "INITDIR=~/Documents" >> ./dist/$platform/grasp.ini;;
+#      echo "COMPILER=../dist/macos/rfsmc.exe" >> ./dist/$platform/grasp.conf
+      echo "COMPILER=/Applications/Grasp.app/Contents/MacOS/rfsmc.exe" >> ./dist/$platform/grasp.conf
+      echo "INITDIR=~/Documents" >> ./dist/$platform/grasp.conf;;
   linux)
-#     echo "COMPILER=../dist/linux/rfsmc.exe" >> ./dist/$platform/grasp.ini
-      echo "COMPILER=/usr/lib/grasp/rfsmc.exe" >> ./dist/$platform/grasp.ini
-      echo "INITDIR=/usr/share/grasp/examples" >> ./dist/$platform/grasp.ini;;
+#     echo "COMPILER=../dist/linux/rfsmc.exe" >> ./dist/$platform/grasp.conf
+      echo "COMPILER=/usr/lib/grasp/rfsmc.exe" >> ./dist/$platform/grasp.conf
+      echo "INITDIR=/usr/share/grasp/examples" >> ./dist/$platform/grasp.conf;;
   windows)
 # These are temporary, dev-only locations. The definitive ones will be specified when running the Installer wizard
-#     echo "COMPILER=Z:/qt/grasp/dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.ini
-      echo "COMPILER=Z:/qt/grasp/dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.ini # TO FIX
-      echo "INITDIR=Z:/qt/grasp/examples" >> ./src/grasp.ini;;
+#     echo "COMPILER=Z:/qt/grasp/dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.conf
+      echo "COMPILER=Z:/qt/grasp/dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.conf # TO FIX
+      echo "INITDIR=Z:/qt/grasp/examples" >> ./src/grasp.conf;;
 esac
 
-echo "** Wrote file ./dist/$platform/grasp.ini"
+echo "** Wrote file ./dist/$platform/grasp.conf"

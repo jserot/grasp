@@ -33,26 +33,22 @@ class AppFiles {
     return appDir() + "/options_spec.txt"; 
   }
     
-  static QString iniFile() {
+  static QString configFile() {
     QString dir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     QDir().mkpath(dir);
-    QString iniPath = dir + "/grasp.ini";
-    if ( ! QFile::exists(iniPath) ) {
-      QString defaultIni = QCoreApplication::applicationDirPath() + "/grasp.ini";
-      if (QFile::exists(defaultIni)) {
-        qDebug() << "Copying" << defaultIni << "file to" << iniPath;
-        QFile::copy(defaultIni, iniPath);
-        QFile::setPermissions(iniPath,
+    QString configPath = dir + "/grasp.conf";
+    if ( ! QFile::exists(configPath) ) {
+      QString defaultConfPath = QCoreApplication::applicationDirPath() + "/grasp.conf";
+      if (QFile::exists(defaultConfPath)) {
+        qDebug() << "Copying" << defaultConfPath << "file to" << configPath;
+        QFile::copy(defaultConfPath, configPath);
+        QFile::setPermissions(configPath,
                               QFileDevice::ReadOwner  | QFileDevice::WriteOwner |
                               QFileDevice::ReadUser   | QFileDevice::WriteUser  |
                               QFileDevice::ReadGroup  | QFileDevice::ReadOther);
       }
     }
-    return iniPath;
-    // QString dir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    // QDir().mkpath(dir);
-    // return dir + "/grasp.ini";
-    // return appDir() + "/grasp.ini";
+    return configPath;
   }
 
 static QString logFile() {

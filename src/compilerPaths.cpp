@@ -31,8 +31,8 @@ static const int defaultPathLength = 60;
 CompilerPaths::CompilerPaths(QWidget *parent) : parent(parent)
 {
   setDefaults();
-  QString iniFile = AppFiles::iniFile();
-  readFromFile(iniFile); 
+  QString configFile = AppFiles::configFile();
+  readFromFile(configFile); 
   QMapIterator<QString, QString> i(paths);
   while (i.hasNext()) {
     i.next();
@@ -143,7 +143,7 @@ void CompilerPaths::saveToFile()
   // QString fname;
   // fname = QFileDialog::getSaveFileName(parent, "Save configuration to file", "", "INI file (*.ini)");
   // if ( fname.isEmpty() ) return;
-  QString fname = AppFiles::iniFile();
+  QString fname = AppFiles::configFile();
   QFileInfo fi(fname);
   QFile f(fname);
   if ( ! f.open(QFile::WriteOnly | QFile::Text) ) 

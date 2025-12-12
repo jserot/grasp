@@ -39,14 +39,14 @@ Compiler::Compiler(QWidget *parent)
     this->parent = parent;
     serverPath = Globals::compilerPaths->getPath("COMPILER");
     if ( serverPath.isNull() || serverPath.isEmpty() ) {
-      QMessageBox::critical(parent, "", "Invalid path for RFSMC compiler ("+ serverPath +")\nCheck file " + AppFiles::iniFile());
+      QMessageBox::critical(parent, "", "Invalid path for RFSMC compiler ("+ serverPath +")\nCheck file " + AppFiles::configFile());
       exit(1);
       }
     QString socketPortSpec = Globals::compilerPaths->getPath("SOCKETPORT");
     bool ok; 
     socketPort = socketPortSpec.toInt(&ok);
     if ( ! ok ) {
-      QMessageBox::critical(parent, "", "Invalid socket port number (" + socketPortSpec + ")\nCheck file " + AppFiles::iniFile());
+      QMessageBox::critical(parent, "", "Invalid socket port number (" + socketPortSpec + ")\nCheck file " + AppFiles::configFile());
       exit(1);
       }
 
