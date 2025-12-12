@@ -23,7 +23,6 @@
 
 void debugMessageHandler(QtMsgType type, const QMessageLogContext &, const QString & msg)
 {
-    if ( ! Globals::traceMode ) return;
     QString txt;
     switch  ( type ) {
       case QtDebugMsg: txt = QString("Debug: %1").arg(msg); break;

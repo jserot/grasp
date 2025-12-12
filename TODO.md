@@ -1,7 +1,6 @@
 * GENERAL
 
 * GUI
-- add socket port number to config file 
 - use Qt standard locations for options_spec, .ini and log files (see `src/appFiles.h`)
 - add a clickable region in the diagram panel to access local variables (more intuitive than right-click) ?
 - use json format for options save file
@@ -12,8 +11,6 @@
 - Export to SCXML ?
 
 * BUILD
-- remove `Globals::traceMode` ; we are always writing a log file, aren't we ? 
-- remove DOTVIEWER path (use only DOTPROGRAM) ? 
 - use Qt::standardLocations for .ini and _spec files
 - check defn of INSTALL_DIR in ./configure for Linux
 - remove `-draft` option

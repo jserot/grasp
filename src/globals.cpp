@@ -30,6 +30,6 @@ QWidget *Globals::mainWindow = NULL;
 QTabWidget* Globals::diagrams = NULL; 
 const QRegularExpression Globals::re_lid("[a-z][A-Za-z0-9_]*");
 bool Globals::check_model = true; 
-bool Globals::traceMode = true;
+// bool Globals::traceMode = true;
 const QString Globals::traceFileName = "grasp.log";
 QFile *Globals::traceFile = NULL;

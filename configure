@@ -20,8 +20,6 @@ while : ; do
         doc='';;
     -dot|--dot)
         dotprogram=$2; shift;;
-    -dotviewer|--dotviewer)
-        dotviewer=$2; shift;;
     -vcdviewer|--vcdviewer)
         vcdviewer=$2; shift;;
     -txtviewer|--txtviewer)
@@ -39,7 +37,6 @@ Options: [defaults in brackets after descriptions]
   --platform NAME         target platform (macos,linux,windows) [default: linux]
   --no-doc                do not build the documentation from sources
   --dot path              command for runing dot program 
-  --dotviewer path        command for displaying .dot files
   --vcdviewer path        command for displaying .vcd files
   --txtviewer path        command for displaying text files
   --rfmsc path            path to the rfsmc compiler (to be copied, if required, in the install tree) 
@@ -99,7 +96,6 @@ case "$platform" in
       echo "WINDEPLOYQT=windeployqt.exe" >> config;;
 esac
 echo "DOTPROGRAM=$dotprogram" >> config
-if [ -n "$dotviewer" ]; then echo "DOTVIEWER=$dotviewer" >> config; fi
 echo "VCDVIEWER=$vcdviewer" >> config
 echo "TXTVIEWER=$txtviewer" >> config
 echo "BUILD_DOC=$doc" >> config
@@ -112,7 +108,6 @@ rm -f ./dist/$platform/grasp.ini
 touch ./dist/$platform/grasp.ini
 
 echo "DOTPROGRAM=$dotprogram" >> ./dist/$platform/grasp.ini
-echo "DOTVIEWER=$dotviewer" >> ./dist/$platform/grasp.ini
 echo "VCDVIEWER=$vcdviewer" >> ./dist/$platform/grasp.ini
 echo "TXTVIEWER=$txtviewer" >> ./dist/$platform/grasp.ini
 echo "SOCKETPORT=$socket_port" >> ./dist/$platform/grasp.ini

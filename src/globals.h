@@ -48,7 +48,7 @@ public:
     static QTabWidget* diagrams; 
     static const QRegularExpression re_lid;
     static bool check_model;
-    static bool traceMode;
+  // static bool traceMode;
     const static QString traceFileName;
     static QFile *traceFile;
 };

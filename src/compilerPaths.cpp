@@ -44,10 +44,8 @@ void CompilerPaths::setDefaults()
 {
   paths.clear();
   paths.insert("COMPILER", defaultCompiler);
-#ifndef USE_QGV
   paths.insert("DOTPROGRAM", defaultDotProgram);
-  paths.insert("DOTVIEWER", defaultDotViewer);
-#endif
+  // paths.insert("DOTVIEWER", defaultDotViewer);
   paths.insert("VCDVIEWER", defaultDotViewer);
   paths.insert("INITDIR", "");
   paths.insert("SOCKETPORT", defaultSocketPort);

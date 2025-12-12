@@ -20,11 +20,9 @@ int main(int argv, char *args[])
 {
     // QCoreApplication::setOrganizationName("GraspSoftware");
     QCoreApplication::setApplicationName("grasp");
-    if ( Globals::traceMode ) { 
-      Globals::traceFile = new QFile(AppFiles::logFile());
-      //fprintf(stderr, "logFile=%s\n", AppFiles::logFile().toStdString().c_str());
-      Globals::traceFile->open(QIODevice::WriteOnly);
-      }
+    Globals::traceFile = new QFile(AppFiles::logFile());
+    //fprintf(stderr, "logFile=%s\n", AppFiles::logFile().toStdString().c_str());
+    Globals::traceFile->open(QIODevice::WriteOnly);
     qInstallMessageHandler(debugMessageHandler); 
 
     QApplication app(argv, args);

@@ -707,12 +707,8 @@ void MainWindow::openResultFile(QString fname)
   QStringList genOpts = Globals::compilerOptions->getOptions("general");
   QStringList args = { fname };
   if ( f.suffix() == "dot" ) {
-    if ( genOpts.contains("-dot_external_viewer") )
-      customView("DOTVIEWER", args, wDir, true);
-    else {
-      if ( dotTransform(f, wDir) )
-        openImageFile(changeSuffix(fname, ".gif"));
-      }
+    if ( dotTransform(f, wDir) )
+      openImageFile(changeSuffix(fname, ".gif"));
     }
   else if ( f.suffix() == "vcd" ) {
     QString gFile = changeSuffix(fname, ".gtkw");
