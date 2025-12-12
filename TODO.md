@@ -11,7 +11,7 @@
 - Export to SCXML ?
 
 * BUILD
-- use Qt::standardLocations for .ini and _spec files
+- use Qt::standardLocations for .ini and _spec files (in the current state, .ini files cannot be saved in place !)
 - check defn of INSTALL_DIR in ./configure for Linux
 - remove `-draft` option
 - add graphviz and gtkwave to dep pkgs in debian dist

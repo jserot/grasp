@@ -28,8 +28,6 @@ while : ; do
         rfsmc=$2; shift;;
     -socket-port|--socket-port)
         socket-port=$2; shift;;
-    -draft|--draft)
-        draft='yes';;
     -help|--help)
         cat <<EOF
 Usage: configure [options]
@@ -41,7 +39,6 @@ Options: [defaults in brackets after descriptions]
   --txtviewer path        command for displaying text files
   --rfmsc path            path to the rfsmc compiler (to be copied, if required, in the install tree) 
   --socket-port           socket port number for communicating with the compiler server [default: $socket_port]
-  --draft                 build for local testing (not for building installers) [default: $draft]
   --help                  print this message
 EOF
 	exit 0;;
@@ -114,26 +111,17 @@ echo "SOCKETPORT=$socket_port" >> ./dist/$platform/grasp.ini
 
 case "$platform" in
   macos)
-      if [ -n "$draft" ]; then
-          echo "COMPILER=../dist/macos/rfsmc.exe" >> ./dist/$platform/grasp.ini
-      else
-          echo "COMPILER=/Applications/Grasp.app/Contents/MacOS/rfsmc.exe" >> ./dist/$platform/grasp.ini
-      fi;
+#      echo "COMPILER=../dist/macos/rfsmc.exe" >> ./dist/$platform/grasp.ini
+      echo "COMPILER=/Applications/Grasp.app/Contents/MacOS/rfsmc.exe" >> ./dist/$platform/grasp.ini
       echo "INITDIR=~/Documents" >> ./dist/$platform/grasp.ini;;
   linux)
-      if [ -n "$draft" ]; then
-          echo "COMPILER=../dist/linux/rfsmc.exe" >> ./dist/$platform/grasp.ini
-      else
-          echo "COMPILER=/usr/lib/grasp/rfsmc.exe" >> ./dist/$platform/grasp.ini
-      fi;
+#     echo "COMPILER=../dist/linux/rfsmc.exe" >> ./dist/$platform/grasp.ini
+      echo "COMPILER=/usr/lib/grasp/rfsmc.exe" >> ./dist/$platform/grasp.ini
       echo "INITDIR=/usr/share/grasp/examples" >> ./dist/$platform/grasp.ini;;
   windows)
 # These are temporary, dev-only locations. The definitive ones will be specified when running the Installer wizard
-      if [ -n "$draft" ]; then
-          echo "COMPILER=Z:/qt/grasp/dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.ini
-      else
-          echo "COMPILER=Z:/qt/grasp/dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.ini # TO FIX
-      fi;
+#     echo "COMPILER=Z:/qt/grasp/dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.ini
+      echo "COMPILER=Z:/qt/grasp/dist/windows/rfsmc.exe" >> ./dist/$platform/grasp.ini # TO FIX
       echo "INITDIR=Z:/qt/grasp/examples" >> ./src/grasp.ini;;
 esac
 
