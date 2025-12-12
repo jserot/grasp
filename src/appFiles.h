@@ -34,13 +34,28 @@ class AppFiles {
   }
     
   static QString iniFile() {
-    /* QString dir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation); */
-    /* QDir().mkpath(dir); */
-    /* return dir + "/grasp.ini"; */
-    return appDir() + "/grasp.ini";
+    QString dir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    QDir().mkpath(dir);
+    QString iniPath = dir + "/grasp.ini";
+    if ( ! QFile::exists(iniPath) ) {
+      QString defaultIni = QCoreApplication::applicationDirPath() + "/grasp.ini";
+      if (QFile::exists(defaultIni)) {
+        qDebug() << "Copying" << defaultIni << "file to" << iniPath;
+        QFile::copy(defaultIni, iniPath);
+        QFile::setPermissions(iniPath,
+                              QFileDevice::ReadOwner  | QFileDevice::WriteOwner |
+                              QFileDevice::ReadUser   | QFileDevice::WriteUser  |
+                              QFileDevice::ReadGroup  | QFileDevice::ReadOther);
+      }
+    }
+    return iniPath;
+    // QString dir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    // QDir().mkpath(dir);
+    // return dir + "/grasp.ini";
+    // return appDir() + "/grasp.ini";
   }
 
-  static QString logFile() {
+static QString logFile() {
     QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir().mkpath(dir);
     return dir + "/grasp.log";

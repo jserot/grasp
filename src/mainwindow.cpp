@@ -50,7 +50,6 @@ MainWindow::MainWindow()
 
     Globals::executor = new CommandExec(); // For other programs (graphviz, ...)
 
-    
     model = NULL;
 
     // GUI setup

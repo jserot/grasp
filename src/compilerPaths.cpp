@@ -140,9 +140,10 @@ void CompilerPaths::valueChanged(const QString& txt)
 
 void CompilerPaths::saveToFile()
 {
-  QString fname;
-  fname = QFileDialog::getSaveFileName(parent, "Save configuration to file", "", "INI file (*.ini)");
-  if ( fname.isEmpty() ) return;
+  // QString fname;
+  // fname = QFileDialog::getSaveFileName(parent, "Save configuration to file", "", "INI file (*.ini)");
+  // if ( fname.isEmpty() ) return;
+  QString fname = AppFiles::iniFile();
   QFileInfo fi(fname);
   QFile f(fname);
   if ( ! f.open(QFile::WriteOnly | QFile::Text) ) 
