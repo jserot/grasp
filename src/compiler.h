@@ -28,12 +28,12 @@ class Compiler : public QObject {
     Q_OBJECT
 
 public:
-    explicit Compiler(QObject *parent = nullptr);
+    explicit Compiler(QWidget *parent = 0);
     ~Compiler();
 
     static const QString minimalVersion;
 
-    void startServer(const QString &serverPath, const int socketPort);
+    void startServer();
     void stopServer();
 
     bool handle_response(QString ctx, QString loc, Response r);
@@ -63,11 +63,13 @@ private slots:
     void onErrorOccurred(QTcpSocket::SocketError socketError);
 
 private:
+    QWidget *parent;
     static const int TimeOutMs = 2000;  // Timeout when waiting for a response after sending a request (synchronous mode)
-
     QString readAnswer();
     void connectToServer(const int socketPort);
     bool serverReady;
     QProcess serverProcess;
+    QString serverPath;
+    int socketPort;
     QTcpSocket socket;
 };

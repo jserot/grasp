@@ -33,4 +33,3 @@ bool Globals::check_model = true;
 bool Globals::traceMode = true;
 const QString Globals::traceFileName = "grasp.log";
 QFile *Globals::traceFile = NULL;
-const int Globals::socketPort = 12345;

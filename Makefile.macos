@@ -15,9 +15,6 @@ build-gui:
 	@echo "** Building GUI"
 	(cd src; qmake; make)
 
-run:
-	(cd ./dist/macos/Grasp.app/Contents/MacOS; ./Grasp)
-
 install:
 	@echo "** Installing in $(DEPLOY_DIR)"
 	rm -rf $(DEPLOY_DIR)
@@ -35,6 +32,10 @@ install:
 	rm -f $(DEPLOY_DIR)/examples/Makefile
 	cp {CHANGES.md,KNOWN-BUGS.md,LICENSE,README.md} $(DEPLOY_DIR)
 	ln -s /Applications $(DEPLOY_DIR)/Applications
+
+run:
+	$(DEPLOY_DIR)/Grasp.app/Contents/MacOS/Grasp
+
 
 GRASP_VOLUME=Grasp-$(VERSION)
 

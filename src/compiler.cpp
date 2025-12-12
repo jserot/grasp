@@ -12,6 +12,7 @@
 
 #include "compiler.h"
 #include "globals.h"
+#include "appFiles.h"
 
 #include <QFile>
 #include <QThread>
@@ -28,11 +29,27 @@
 #include <QMessageBox>
 #include "request.h"
 #include "response.h"
+#include "globals.h"
+#include "compilerPaths.h"
 
 const QString Compiler::minimalVersion = "2.3"; // Rfsm 2.2 used Unix-based sockets
 
-Compiler::Compiler(QObject *parent) : QObject(parent)
+Compiler::Compiler(QWidget *parent)
 {
+    this->parent = parent;
+    serverPath = Globals::compilerPaths->getPath("COMPILER");
+    if ( serverPath.isNull() || serverPath.isEmpty() ) {
+      QMessageBox::critical(parent, "", "Invalid path for RFSMC compiler ("+ serverPath +")\nCheck file " + AppFiles::iniFile());
+      exit(1);
+      }
+    QString socketPortSpec = Globals::compilerPaths->getPath("SOCKETPORT");
+    bool ok; 
+    socketPort = socketPortSpec.toInt(&ok);
+    if ( ! ok ) {
+      QMessageBox::critical(parent, "", "Invalid socket port number (" + socketPortSpec + ")\nCheck file " + AppFiles::iniFile());
+      exit(1);
+      }
+
     serverProcess.setProcessChannelMode(QProcess::ForwardedChannels);
 
     connect(&socket, &QTcpSocket::connected, this, &Compiler::onConnected);
@@ -46,9 +63,10 @@ Compiler::~Compiler() {
   stopServer();
 }
 
-void Compiler::startServer(const QString &serverPath, const int socketPort)
+void Compiler::startServer()
 {
     QStringList serverArgs;
+
     serverArgs << "-server_mode" << "-socket_port" << QString::number(socketPort) << "-verbose";
     qDebug() << "compiler: launching server:" << serverPath << serverArgs;
 

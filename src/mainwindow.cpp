@@ -43,11 +43,9 @@ MainWindow::MainWindow()
     Globals::initDir = Globals::compilerPaths->getPath("INITDIR");
 
     // Start compiler server
-    QString compilerPath = Globals::compilerPaths->getPath("COMPILER");
-    if ( compilerPath.isNull() || compilerPath.isEmpty() ) compilerPath = "rfsmc"; // Last chance..
-    Globals::compiler = new Compiler();
+    Globals::compiler = new Compiler(this);
     connect(Globals::compiler, &Compiler::serverError, this, &MainWindow::serverError);
-    Globals::compiler->startServer(compilerPath,Globals::socketPort);
+    Globals::compiler->startServer();
     QTimer::singleShot(300, this, [this]() { checkCompilerVersion(); }); // Allow 300ms delay for server to start up
 
     Globals::executor = new CommandExec(); // For other programs (graphviz, ...)

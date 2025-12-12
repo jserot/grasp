@@ -48,7 +48,6 @@ public:
     static QTabWidget* diagrams; 
     static const QRegularExpression re_lid;
     static bool check_model;
-    const static int socketPort; // For connecting to the compiler server
     static bool traceMode;
     const static QString traceFileName;
     static QFile *traceFile;

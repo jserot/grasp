@@ -25,6 +25,7 @@ static const QString defaultCompiler = "rfsmc";  // Fall-back, default values
 static const QString defaultDotProgram = "dot";
 static const QString defaultDotViewer = "graphviz";
 static const QString defaultVcdViewer = "gtkwave";
+static const QString defaultSocketPort = "51000";
 static const int defaultPathLength = 60;
 
 CompilerPaths::CompilerPaths(QWidget *parent) : parent(parent)
@@ -49,6 +50,7 @@ void CompilerPaths::setDefaults()
 #endif
   paths.insert("VCDVIEWER", defaultDotViewer);
   paths.insert("INITDIR", "");
+  paths.insert("SOCKETPORT", defaultSocketPort);
 }
 
 void CompilerPaths::readFromFile(QString fname)
@@ -87,6 +89,7 @@ void CompilerPaths::edit(QWidget *parent)
     QMapIterator<QString, QString> i(paths);
     while (i.hasNext()) {
         i.next();
+        if ( i.key() == "SOCKETPORT" ) continue; // Non editable property
         QLabel *name = new QLabel(i.key());
         QLineEdit *path = new QLineEdit();
         path->setObjectName(i.key()); // Sender identification

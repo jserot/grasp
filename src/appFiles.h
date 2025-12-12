@@ -13,6 +13,8 @@
 #pragma once
 
 #include <QString>
+#include <QApplication>
+#include <QStandardPaths>
 #include <QDir>
 #include "globals.h"
 
@@ -39,9 +41,8 @@ class AppFiles {
   }
 
   static QString logFile() {
-    /* QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation); */
-    /* QDir().mkpath(dir); */
-    /* return dir + "/grasp.log"; */
-    return QDir::temp().filePath(Globals::traceFileName);
+    QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir().mkpath(dir);
+    return dir + "/grasp.log";
   }
 };

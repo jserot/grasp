@@ -18,8 +18,11 @@
 
 int main(int argv, char *args[])
 {
-    if ( Globals::traceMode ) { // TO FIX: we should be able to set traceMode when launching the app
+    // QCoreApplication::setOrganizationName("GraspSoftware");
+    QCoreApplication::setApplicationName("grasp");
+    if ( Globals::traceMode ) { 
       Globals::traceFile = new QFile(AppFiles::logFile());
+      //fprintf(stderr, "logFile=%s\n", AppFiles::logFile().toStdString().c_str());
       Globals::traceFile->open(QIODevice::WriteOnly);
       }
     qInstallMessageHandler(debugMessageHandler); 
