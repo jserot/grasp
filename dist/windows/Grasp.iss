@@ -31,14 +31,14 @@ Name: "{commondesktop}\Grasp"; Filename: "{app}\Grasp.exe";    IconFilename: "Z:
 Filename: "{app}\Grasp.exe"; Description: "Launch application"; Flags: postinstall nowait skipifsilent unchecked
 
 [INI]
-Filename: "{app}\grasp.ini"; Section: "Settings"; Flags: uninsdeletesection
-Filename: "{app}\grasp.ini"; Section: "Settings"; Key: "COMPILER"; String: "{app}\rfsmc.exe"
-Filename: "{app}\grasp.ini"; Section: "Settings"; Key: "DOTPROGRAM"; String: "{code:GetFiles|0}"
-Filename: "{app}\grasp.ini"; Section: "Settings"; Key: "VCDVIEWER"; String: "{code:GetFiles|1}"
-Filename: "{app}\grasp.ini"; Section: "Settings"; Key: "INITDIR"; String: "{code:GetDirs|0}\GraspExamples"
+Filename: "{app}\grasp.conf"; Section: "Settings"; Flags: uninsdeletesection
+Filename: "{app}\grasp.conf"; Section: "Settings"; Key: "COMPILER"; String: "{app}\rfsmc.exe"
+Filename: "{app}\grasp.conf"; Section: "Settings"; Key: "DOTPROGRAM"; String: "{code:GetFiles|0}"
+Filename: "{app}\grasp.conf"; Section: "Settings"; Key: "VCDVIEWER"; String: "{code:GetFiles|1}"
+Filename: "{app}\grasp.conf"; Section: "Settings"; Key: "INITDIR"; String: "{code:GetDirs|0}\GraspExamples"
 
 [UninstallDelete]
-Type: files; Name: "{app}\grasp.ini"
+Type: files; Name: "{app}\grasp.conf"
 
 [Code]
 var

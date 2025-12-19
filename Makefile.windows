@@ -20,7 +20,7 @@ install:
 	$(WINDEPLOYQT) --release $(DEPLOY_DIR)/Grasp.exe
 	powershell -Command "cp ./src/options_spec.txt $(DEPLOY_DIR)"
 	powershell -Command "cp $(DIST_DIR)/rfsmc.exe $(DEPLOY_DIR)"
-	powershell -Command "cp $(DIST_DIR)/grasp.ini $(DEPLOY_DIR)"
+	powershell -Command "cp $(DIST_DIR)/grasp.conf $(DEPLOY_DIR)"
 	powershell -Command "cp CHANGES.md $(DEPLOY_DIR)"
 	powershell -Command "cp KNOWN-BUGS.md $(DEPLOY_DIR)"
 	powershell -Command "cp LICENSE $(DEPLOY_DIR)"
