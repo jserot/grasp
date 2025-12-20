@@ -4,7 +4,7 @@ include config
 ARCH=$(shell dpkg --print-architecture)
 
 PKG_NAME="grasp"
-PKG_VERSION="1.0.0"
+PKG_VERSION="1.0.1"
 PKG_MAINTAINER="J. Sérot <jocelyn.serot@uca.fr>"
 PKG_DESCRIPTION="A Qt-based app for designing for reactive state-machine based programs"
 PKG_SECTION="utils"
@@ -29,7 +29,7 @@ install:
 	patchelf --set-rpath '$$ORIGIN/../lib/grasp/qt6' ./dist/linux/grasp/usr/bin/grasp
 	rm -f ./dist/linux/grasp/usr/lib/grasp/rfsmc.exe
 	cp $(RFSMC) ./dist/linux/grasp/usr/lib/grasp/rfsmc.exe
-	cp ./dist/linux/grasp.ini ./dist/linux/grasp/usr/share/grasp/
+	cp ./dist/linux/grasp.conf ./dist/linux/grasp/usr/share/grasp/
 	cp ./src/options_spec.txt ./dist/linux/grasp/usr/share/grasp/
 	rm -rf ./dist/linux/grasp/usr/share/grasp/examples/*
 	mkdir -p ./dist/linux/grasp/usr/share/grasp/examples
@@ -44,7 +44,7 @@ install:
 
 installer:
 	(cd ./dist/linux; dpkg-deb --build grasp)
-	mv ./dist/linux/grasp.deb ./binaries/grasp-$(VERSION)-$(ARCH).deb
+	mv ./dist/linux/grasp.deb ./binaries/grasp-$(PKG_VERSION)-$(ARCH).deb
 
 clean:
 	(cd src; qmake; make clean)

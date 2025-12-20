@@ -38,7 +38,7 @@ class AppFiles {
     QDir().mkpath(dir);
     QString configPath = dir + "/grasp.conf";
     if ( ! QFile::exists(configPath) ) {
-      QString defaultConfPath = QCoreApplication::applicationDirPath() + "/grasp.conf";
+      QString defaultConfPath = appDir() + "/grasp.conf";
       if (QFile::exists(defaultConfPath)) {
         qDebug() << "Copying" << defaultConfPath << "file to" << configPath;
         QFile::copy(defaultConfPath, configPath);
