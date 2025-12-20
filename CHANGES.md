@@ -1,6 +1,6 @@
 ## Changes
 
-# 1.0.1 (Dec 5, 2025)
+# 1.0.1 (Dec 20, 2025)
 
 * Switch to TCP sockets for communicating with the rfsmc server in preparation of Windows port (the
   mininum version for the `rfsmc` compiler is now `2.3`)
