@@ -10,7 +10,3 @@ Known bugs and limitations
 
 * The concept of transition priority used in RFSM is not supported; as a result, simulation may fail due to
   non-deterministic situations.
-
-* A portable way of building on Linux distros is still missing
-
-* Under Linux, the `-dot-external-viewer` relies on an working DOT viewer application. None seems to be working / supported currently for LinuxMint (`dotty`, `xdot`, ...) 

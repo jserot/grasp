@@ -10,7 +10,6 @@
 - Export to SCXML ?
 
 * BUILD
-- check defn of INSTALL_DIR in ./configure for Linux
 - add graphviz and gtkwave to dep pkgs in debian dist
 
 * TOOLS
