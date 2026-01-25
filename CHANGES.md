@@ -1,5 +1,9 @@
 ## Changes
 
+# 1.0.2 (Jan 25, 2026)
+
+* Fixed issue #1 (app crashes when typing backspace in text fields)
+
 # 1.0.1 (Dec 20, 2025)
 
 * Switch to TCP sockets for communicating with the rfsmc server in preparation of Windows port (the

@@ -243,7 +243,7 @@ void IovPanel::nameEdited()
   RowDesc *row_desc = widgetToRow.value(name_selector);
   Q_ASSERT(row_desc);
   Iov* io = row_desc->io;
-  qDebug() << "IovPanel: setting name for IOV" << io->toString();
+  qDebug() << "IovPanel: setting name for IOV" << io->name;
   QString name = name_selector->text().trimmed();
   QStringList defined;
   switch ( client.icKind ) {
@@ -263,7 +263,7 @@ void IovPanel::nameEdited()
     //name_selector->setText("");
     }
   io->name = name;
-  qDebug() << "IovPanel: updated IOV:" << io->toString();
+  qDebug() << "IovPanel: updated IOV" << io->name;
   emit modelModified();
 }
 
@@ -275,12 +275,12 @@ void IovPanel::typeEdited()
   RowDesc *row_desc = widgetToRow.value(type_selector);
   Q_ASSERT(row_desc);
   Iov* io = row_desc->io;
-  qDebug() << "IovPanel: setting type for IOV" << io->toString();
+  qDebug() << "IovPanel: setting type for IOV" << io->name;
   io->type = (Iov::IoType)(type_selector->currentIndex());
   qDebug () << "Setting IO type: " << io->type;
   if ( client.icKind == IcModel && row_desc->io->kind == Iov::IoIn ) 
     updateStimChoices(row_desc);
-  qDebug() << "IovPanel: updated IOV:" << io->toString();
+  qDebug() << "IovPanel: updated IOV:" << io->name;
   emit modelModified();
 }
 
@@ -292,7 +292,7 @@ void IovPanel::stimEdited()
   RowDesc *row_desc = widgetToRow.value(stim_selector);
   Q_ASSERT(row_desc);
   Iov* io = row_desc->io;
-  qDebug() << "IovPanel: setting stimuli for IOV" << io->toString();
+  qDebug() << "IovPanel: setting stimuli for IOV" << io->name;
   QString io_name = io->name;
   Stimulus::Kind kind = (Stimulus::Kind)(stim_selector->currentIndex()); 
   switch ( kind ) {
