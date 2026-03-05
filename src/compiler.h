@@ -32,6 +32,7 @@ public:
     ~Compiler();
 
     static const QString minimalVersion;
+    static const bool printServerMessages;
 
     void startServer();
     void stopServer();

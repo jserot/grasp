@@ -33,6 +33,7 @@
 #include "compilerPaths.h"
 
 const QString Compiler::minimalVersion = "2.3"; // Rfsm 2.2 used Unix-based sockets
+const bool Compiler::printServerMessages = false;
 
 Compiler::Compiler(QWidget *parent)
 {
@@ -50,12 +51,18 @@ Compiler::Compiler(QWidget *parent)
       exit(1);
       }
 
-    serverProcess.setProcessChannelMode(QProcess::ForwardedChannels);
+    //serverProcess.setProcessChannelMode(QProcess::ForwardedChannels);
+    //serverProcess.setProcessChannelMode(QProcess::MergedChannels); // Redirect both server's stdout and stderr to client
+    // connect(&serverProcess, &QProcess::readyReadStandardOutput, [&]() {
+    //   QByteArray msg = serverProcess.readAllStandardOutput();
+    //   qDebug() << "**** message from server:" << msg ;
+    //   });
 
     connect(&socket, &QTcpSocket::connected, this, &Compiler::onConnected);
     // connect(&socket, &QTcpSocket::readyRead, this, &Compiler::onReadyRead);  // not used here
     connect(&socket, &QTcpSocket::disconnected, this, &Compiler::onDisconnected);
     connect(&socket, &QTcpSocket::errorOccurred, this, &Compiler::onErrorOccurred);
+
 }
 
 Compiler::~Compiler() {
@@ -67,7 +74,8 @@ void Compiler::startServer()
 {
     QStringList serverArgs;
 
-    serverArgs << "-server_mode" << "-socket_port" << QString::number(socketPort) << "-verbose";
+    serverArgs << "-server_mode" << "-socket_port" << QString::number(socketPort);
+    if ( printServerMessages ) serverArgs = serverArgs << "-verbose"; 
     qDebug() << "compiler: launching server:" << serverPath << serverArgs;
 
     serverReady = false;
@@ -81,14 +89,23 @@ void Compiler::startServer()
         return;
     }
     qDebug() << "compiler: server started in" << serverProcess.workingDirectory();
-    // Wait for message from server telling it's listening for connection
+    // Wait for _first_ message from server telling it's listening for connection
+    // Note: this is crucial that this message is emitted even if the server is launched without the -verbose option
     if (serverProcess.waitForReadyRead(5000)) {
       QByteArray firstOutput = serverProcess.readAll();
       qDebug() << firstOutput;
       if ( firstOutput.contains("listening") ) {
         qDebug() << "compiler: server now listening"; 
         connectToServer(socketPort);
+      if ( printServerMessages ) {
+        // If set, just catch and print all messages from server on stdout/stderr
+        // Note: app-level messages are going through the established socket connexion !
+        connect(&serverProcess, &QProcess::readyReadStandardOutput, [&]() {
+          QByteArray msg = serverProcess.readAllStandardOutput();
+          qDebug() << "**" << msg ;
+          });
         }
+      }
       else
         qDebug() << "compiler: server is not listening";
       }
@@ -121,10 +138,10 @@ void Compiler::sendAsyncRequest(const QString &text)
 {
     if (socket.state() == QTcpSocket::ConnectedState) {
         QByteArray data = text.trimmed().toUtf8() + '\n';
-        //qDebug() << "compiler: sending: " << data;
+        qDebug() << "compiler: sending: " << data;
         socket.write(data);
         socket.flush();
-        //qDebug() << "compiler: sent";
+        qDebug() << "compiler: sent";
         }
     else {
         qDebug() << "compiler: server error: no active connexion";
@@ -135,15 +152,18 @@ QString Compiler::sendRequest(const QString &text)
 {
   sendAsyncRequest(text);
   QString response = readAnswer();
+  qDebug() << "compiler: received: " << response;
   return response;
 }
 
 QString Compiler::readAnswer()
 {
   if (socket.waitForReadyRead(3000)) {
-    QByteArray line = socket.readAll();
-    line.chop(1);
-    return line;
+    QByteArray line = socket.readLine();   // expects '\n'
+    return QString::fromUtf8(line).trimmed();
+    // QByteArray line = socket.readAll();
+    // line.chop(1);
+    // return line;
     }
   else {
     qDebug() << "compiler: timeout when waiting for response";

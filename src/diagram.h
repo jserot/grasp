@@ -56,9 +56,9 @@ public:
     QMap<QString,QString> potentialInputs();   // All potential inputs (excluding local variables)
     QMap<QString,QString> potentialOutputs();  // All potential outputs (excluding local variables)
     QMap<QString,QString> localVars();
-    QMap<QString,QString> actualInputs(); // Inputs actually refered to in transitions (guards and action RHSs)
-    QMap<QString,QString> actualOutputs(); // Outputs actually refered to in transitions (action LHSs) and state valuations
-    QMap<QString,QString> actualInOuts(); // Inputs being also outputs (typically, global shared variables)
+    // QMap<QString,QString> actualInputs(); // Inputs actually refered to in transitions (guards and action RHSs)
+    // QMap<QString,QString> actualOutputs(); // Outputs actually refered to in transitions (action LHSs) and state valuations
+    // QMap<QString,QString> actualInOuts(); // Inputs being also outputs (typically, global shared variables)
 
     QList<State*> states();
     QList<Transition*> transitions();
@@ -108,7 +108,7 @@ protected:
     void editTransition(Transition *transition);
     bool check_transition(Transition *t);
 
-    QPair<QMap<QString,QString>,QMap<QString,QString>> actualIos();
+    QMap<QString,QMap<QString,QString>> actualIos();
 
     void export_rfsm_model(QTextStream& os);
     void export_rfsm_testbench(QTextStream& os);

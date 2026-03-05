@@ -552,36 +552,37 @@ QMap<QString,QString> Diagram::potentialOutputs()
   return enclosingModel()->getOutputs() + enclosingModel()->getShared(); 
 }
 
-QMap<QString,QString> Diagram::actualInputs()
-{
-  QPair<QMap<QString,QString>,QMap<QString,QString>> ios = actualIos();
-  for (const auto &key : ios.second.keys()) // Remove all outputs from the inputs (these will be listed as inouts)
-    ios.first.remove(key);
-  return actualIos().first;
-}
+// QMap<QString,QString> Diagram::actualInputs()
+// {
+//   QPair<QMap<QString,QString>,QMap<QString,QString>> ios = actualIos();
+//   for (const auto &key : ios.second.keys()) // Remove all outputs from the inputs (these will be listed as inouts)
+//     ios.first.remove(key);
+//   return actualIos().first;
+// }
 
-QMap<QString,QString> Diagram::actualOutputs()
-{
-  QPair<QMap<QString,QString>,QMap<QString,QString>> ios = actualIos();
-  for (const auto &key : ios.first.keys()) // Remove all inputs from the outputs (these will be listed as inouts)
-    ios.second.remove(key);
-  return actualIos().second;
-}
+// QMap<QString,QString> Diagram::actualOutputs()
+// {
+//   QPair<QMap<QString,QString>,QMap<QString,QString>> ios = actualIos();
+//   for (const auto &key : ios.first.keys()) // Remove all inputs from the outputs (these will be listed as inouts)
+//     ios.second.remove(key);
+//   return actualIos().second;
+// }
 
-QMap<QString,QString> Diagram::actualInOuts()
-{
-  QPair<QMap<QString,QString>,QMap<QString,QString>> ios = actualIos();
-  QMap<QString,QString> r;
-  for (const auto &key : ios.first.keys()) // Find all inputs also listed as outputs
-    if ( ios.second.contains(key) ) 
-      r.insert(key,ios.first.value(key));
-  return r;
-}
+// QMap<QString,QString> Diagram::actualInOuts()
+// {
+//   QPair<QMap<QString,QString>,QMap<QString,QString>> ios = actualIos();
+//   QMap<QString,QString> r;
+//   for (const auto &key : ios.first.keys()) // Find all inputs also listed as outputs
+//     if ( ios.second.contains(key) ) 
+//       r.insert(key,ios.first.value(key));
+//   return r;
+// }
 
-QPair<QMap<QString,QString>,QMap<QString,QString>> Diagram::actualIos()
+QMap<QString,QMap<QString,QString>> Diagram::actualIos()
 {
   qDebug () << "** Computing actual IOs for diagram " << name;
-  QMap<QString,QString> inps, outps;
+  QMap<QString,QString> inps, outps, inouts;
+  QMap<QString,QMap<QString,QString>> res;
   for ( Transition *t : transitions() ) {  
     QPair<QMap<QString,QString>,QMap<QString,QString>> vars = t->varsOf();
     qDebug() << "Adding inputs from transition " << t->toString() << " : " << vars.first;
@@ -594,9 +595,19 @@ QPair<QMap<QString,QString>,QMap<QString,QString>> Diagram::actualIos()
     qDebug() << "Adding IOs from state " << s->getId() << " : " << vars.second;
     outps.insert(vars.second);   
     }
+  for (const auto &key : inps.keys() ) // Find all inputs also listed as outputs
+    if ( outps.contains(key) ) {
+      inouts.insert(key,inps.value(key)); // .. add them to inouts
+      inps.remove(key);                   // .. and remove them from inputs and outputs
+      outps.remove(key);                   // .. and remove them from inputs and outputs
+      }
   qDebug () << "Actual inputs are " << inps;
   qDebug () << "Actual outputs are " << outps;
-  return qMakePair(inps,outps);
+  qDebug () << "Actual inouts are " << inouts;
+  res.insert("inputs", inps);
+  res.insert("outputs", outps);
+  res.insert("inouts", inouts);
+  return res;
 }
 
 QMap<QString,QString> Diagram::localVars()
@@ -865,9 +876,10 @@ void exportRfsmInstanceIo(QMap<QString,QString>& ios, bool& first, QTextStream& 
 
 void Diagram::exportRfsmInstance(QTextStream& os)
 {
-  QMap<QString,QString> inps = actualInputs();
-  QMap<QString,QString> outps = actualOutputs();
-  QMap<QString,QString> inouts = actualInOuts();
+  QMap<QString,QMap<QString,QString>> ios = actualIos();
+  QMap<QString,QString> inps = ios.value("inputs");
+  QMap<QString,QString> outps = ios.value("outputs");
+  QMap<QString,QString> inouts = ios.value("inouts");
   os << "fsm " << name << " = " << name << "(";
   bool first = true;
   exportRfsmInstanceIo(inps, first, os); // Note: fixed order: inputs, then outputs, then inouts (all by QMap ascending order)
@@ -891,9 +903,10 @@ void Diagram::exportRfsmModel(QTextStream& os)
     QString indent = QString(2, ' ');
     bool first;
     if ( check() == false ) return;
-    QMap<QString,QString> inps = actualInputs();
-    QMap<QString,QString> outps = actualOutputs();
-    QMap<QString,QString> inouts = actualInOuts();
+    QMap<QString,QMap<QString,QString>> ios = actualIos();
+    QMap<QString,QString> inps = ios.value("inputs");
+    QMap<QString,QString> outps = ios.value("outputs");
+    QMap<QString,QString> inouts = ios.value("inouts");
     os << "fsm model " << name << "(";
     if ( inps.size() + outps.size() > 0 ) {
       os << "\n";
