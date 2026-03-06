@@ -32,8 +32,14 @@
 #include "globals.h"
 #include "compilerPaths.h"
 
-const QString Compiler::minimalVersion = "2.3"; // Rfsm 2.2 used Unix-based sockets
 const bool Compiler::printServerMessages = false;
+const bool Compiler::logClientServerMessages = false;
+
+const QVersionNumber& Compiler::minimalVersion()
+{
+    static const QVersionNumber v = QVersionNumber::fromString("2.3.1");
+    return v;
+} 
 
 Compiler::Compiler(QWidget *parent)
 {
@@ -138,10 +144,10 @@ void Compiler::sendAsyncRequest(const QString &text)
 {
     if (socket.state() == QTcpSocket::ConnectedState) {
         QByteArray data = text.trimmed().toUtf8() + '\n';
-        qDebug() << "compiler: sending: " << data;
+        if ( logClientServerMessages ) qDebug() << "compiler: sending: " << data;
         socket.write(data);
         socket.flush();
-        qDebug() << "compiler: sent";
+        if ( logClientServerMessages ) qDebug() << "compiler: sent";
         }
     else {
         qDebug() << "compiler: server error: no active connexion";
@@ -152,7 +158,7 @@ QString Compiler::sendRequest(const QString &text)
 {
   sendAsyncRequest(text);
   QString response = readAnswer();
-  qDebug() << "compiler: received: " << response;
+  if ( logClientServerMessages ) qDebug() << "compiler: received: " << response;
   return response;
 }
 

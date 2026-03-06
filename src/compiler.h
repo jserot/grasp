@@ -17,6 +17,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QVersionNumber>
 #include "diagram.h"
 #include "fragment.h"
 #include "request.h"
@@ -31,8 +32,9 @@ public:
     explicit Compiler(QWidget *parent = 0);
     ~Compiler();
 
-    static const QString minimalVersion;
+    static const QVersionNumber& minimalVersion();
     static const bool printServerMessages;
+    static const bool logClientServerMessages;
 
     void startServer();
     void stopServer();

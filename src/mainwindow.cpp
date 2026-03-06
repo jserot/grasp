@@ -897,8 +897,9 @@ void MainWindow::checkCompilerVersion()
   if ( r.kind() == Response::Kind::Version ) {
     QString v = r.version();
     qDebug() << "Compiler version=" << v;
-    if ( v < Compiler::minimalVersion ) {
-      QMessageBox::critical(this, "Compiler", "Invalid RFSM compiler version (" + v + ") (must be >= " + Compiler::minimalVersion + ")"); 
+    QVersionNumber mv = Compiler::minimalVersion();
+    if ( QVersionNumber::fromString(v) < mv ) {
+      QMessageBox::critical(this, "Compiler", "Invalid RFSM compiler version (" + v + ") (must be >= " + mv.toString() + ")"); 
       exit(1);
       }
     }

@@ -201,7 +201,7 @@ Response State::scan_valuation(Fragment::Context ctx, QString valuation)
     qDebug() << "Checking valuation: " << valuation;
     Fragment fragment(ctx, "sval " + valuation);
     Response r = Globals::compiler->checkFragment(fragment);
-    qDebug() << "Got response: " << r.toString();
+    if ( Compiler::logClientServerMessages ) qDebug() << "Got response: " << r.toString();
     return r;
 }
 

@@ -1,5 +1,10 @@
 ## Changes
 
+# 1.0.3 (Mar 5, 2026)
+
+* Fixed bug in the handling of the `rfsm` server responses (removed `\n` in phrases)
+* Application now requires version `>= 2.3.1` of `rfsm`
+
 # 1.0.2 (Jan 25, 2026)
 
 * Fixed issue #1 (app crashes when typing backspace in text fields)
