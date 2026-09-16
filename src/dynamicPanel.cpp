@@ -107,6 +107,8 @@ void DynamicPanel::clear()
 }
 
 void DynamicPanel::editStim()
+// TODO : this should not be in DynamicPanel but in function defined in the StimEditor class and
+// passed as a parameter to the DynamicPanel class (and called when the "Custom" button is clicked
 {
     Model *model = client.ctData.model;
     Q_ASSERT(model);
@@ -137,12 +139,42 @@ void DynamicPanel::editStim()
     // --- 2) Report des modifications de "scenario" vers "model" ---
     // TODO : relire scenario.tracks() et mettre à jour les signaux de "model"
       qDebug() << "DynamicPanel:: updating model with edited stimuli";
+      // !!!!!!!!!!!!!! TODO : get rid of all this forth-and-back conversion work by directly storing _tracks_ in
+      // models inputs !
       foreach ( StimulusTrack* track, scenario.tracks() ) {
         qDebug() << track->count() << "stimuli registred in track" << track->name();
-        for ( int i = 0; i<track->count(); i++ ) {
-          }
+        Iov *io = track->io();
+        Q_ASSERT(io->kind == Iov::IoIn);
+        QList<int> dates;
+        QList<int> vcs;
+        switch ( io->stim.kind ) {
+        case Stimulus::None:
+          break;
+        case Stimulus::Sporadic:
+        case Stimulus::Periodic:
+          // Note : since events may have been added manually on the track, it may no longer be periodic.
+          // and hence, all periodic stimuli are automatically turned to sporadic ones
+          for ( int i = 0; i<track->count(); i++ ) {
+            const TrackStimulus *st = track->at(i);
+            if ( st->type() == TrackStimulusType::Event )
+              dates.append(st->date());
+            }
+          io->stim = Stimulus(Stimulus::Sporadic, dates);
+          break;
+        case Stimulus::ValueChanges: 
+          for ( int i = 0; i<track->count(); i++ ) {
+            const TrackStimulus *st = track->at(i);
+            if ( st->type() == TrackStimulusType::ValueChange ) {
+              const ValueChangeStimulus *vc = static_cast<const ValueChangeStimulus *>(st);
+              vcs.append(vc->date());
+              vcs.append(vc->value().toInt());
+              }  
+            }
+          io->stim = Stimulus(Stimulus::ValueChanges, vcs);
+          break;
         }
-    }
+      }
+   }
 }
 
 DynamicPanel::~DynamicPanel()

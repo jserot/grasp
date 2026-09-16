@@ -25,6 +25,8 @@ public:
     TrackStimulusType type() const { return m_type; }
     void setType(TrackStimulusType type) { m_type = type; }
 
+    Iov* io() const { return m_io; }
+
     /// Supprime tous les stimuli de la piste (utile avant un changement de type)
     void clear() { m_stimuli.clear(); }
 
