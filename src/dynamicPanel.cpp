@@ -18,8 +18,15 @@
 #include <QBoxLayout>
 #include <QHBoxLayout>
 #include <QtDebug>
+#include <QMessageBox>
+#include "editStimPanel.h"
+#include "globals.h"
+#include "model.h"
+#include "aux/ChronogramEditorWidget.h"
+#include <QDialog>
+#include <QVBoxLayout>
 
-DynamicPanel::DynamicPanel(QString title) : QGroupBox(title)
+DynamicPanel::DynamicPanel(QString title, Client client) : QGroupBox(title)
 {
   layout = new QVBoxLayout();
   layout->setSpacing(0); // Minimize space between rows
@@ -29,12 +36,23 @@ DynamicPanel::DynamicPanel(QString title) : QGroupBox(title)
   clear_button = new QPushButton("Clear");
   top_row_layout->addWidget(add_button);
   top_row_layout->addWidget(clear_button);
+  this->client = client;
+  if ( client.ctTag == CtInputs ) {  // When displaying input rows, add a button to show the "edit stimuli" dialog
+    // TODO : the button and the associated callback should be passed as the custom data
+    custom_button = new QPushButton("STIM");
+    top_row_layout->addWidget(custom_button);
+    }
   layout->addLayout(top_row_layout);
   setLayout(layout);
   connect(add_button, &QPushButton::clicked, this, &DynamicPanel::addNewRow);
   connect(clear_button, &QPushButton::clicked, this, &DynamicPanel::clear);
   add_button->setDefault(false);
   clear_button->setDefault(false);
+  if ( client.ctTag == CtInputs ) {
+    connect(custom_button, &QPushButton::clicked, this, &DynamicPanel::editStim);
+    // TODO : the button and the associated callback should be passed as the custom data
+    custom_button->setDefault(false);
+    }
 }
 
 QHBoxLayout* DynamicPanel::addRow(void *row_data) {
@@ -86,6 +104,45 @@ void DynamicPanel::clear()
     qDebug() << "DynamicPanel: deleting row" << row->objectName();
     delete_row(row);
   }
+}
+
+void DynamicPanel::editStim()
+{
+    Model *model = client.ctData.model;
+    Q_ASSERT(model);
+    Q_ASSERT(Globals::mainWindow);
+    qDebug() << "DynamicPanel:: editing stimuli";
+
+    QDialog dialog(Globals::mainWindow);
+    dialog.setWindowTitle(tr("Stimuli editor"));
+    dialog.resize(900, 500);
+
+    auto *editor = new ChronogramEditorWidget(&dialog);
+    auto *layout = new QVBoxLayout(&dialog);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(editor);
+
+    connect(editor, &ChronogramEditorWidget::closeRequested, &dialog, &QDialog::accept);
+    connect(editor, &ChronogramEditorWidget::cancelRequested, &dialog, &QDialog::reject);
+
+    StimulusScenario &scenario = editor->scenario();
+    foreach (Iov *io, model->getIos()) { // TODO: model->getIns()
+      if (io->kind == Iov::IoIn) {
+        auto track = std::make_unique<StimulusTrack>(io);
+        scenario.addTrack(std::move(track));
+      }
+    }
+    editor->rebuildPanels();
+    if (dialog.exec() == QDialog::Accepted) {
+    // --- 2) Report des modifications de "scenario" vers "model" ---
+    // TODO : relire scenario.tracks() et mettre à jour les signaux de "model"
+      qDebug() << "DynamicPanel:: updating model with edited stimuli";
+      foreach ( StimulusTrack* track, scenario.tracks() ) {
+        qDebug() << track->count() << "stimuli registred in track" << track->name();
+        for ( int i = 0; i<track->count(); i++ ) {
+          }
+        }
+    }
 }
 
 DynamicPanel::~DynamicPanel()

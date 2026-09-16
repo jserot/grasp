@@ -1,6 +1,9 @@
 * GENERAL
 
 * GUI
+- make [Model]Inp a derived class from Iov
+- Use a unique representation for stimuli attached to model inputs and those manipulated by the
+  stimuli editor
 - add a cache mechanism to avoid recomputation of diagram IOs (frequent and costly) ?
 - within dynamic panels, put `Add` and `Clear` buttons at the bottom, not top
 - in the transition edit panel, add a combo for selecting side (N,E,W,S) ?

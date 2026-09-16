@@ -29,8 +29,15 @@
 #define QCOMBOBOX_INDEX_CHANGED (&QComboBox::currentIndexChanged)
 #define QCOMBOBOX_ACTIVATED (&QComboBox::activated)
 
+static DynamicPanel::Client mkCustomData(Iov::IoKind kind, IovPanel::Client client) 
+{
+  switch ( kind ) {
+    case Iov::IoIn: return { .ctTag = DynamicPanel::CtInputs, .ctData = { .model = client.icClient.model } };
+    default: return { .ctTag = DynamicPanel::CtOther };
+  }     
+}
 IovPanel::IovPanel(Iov::IoKind kind, QString title, QString rowPrefix, Client client)
-  : DynamicPanel(title)
+  : DynamicPanel(title,mkCustomData(kind,client))
 {
   this->kind = kind;
   this->client = client;
@@ -155,26 +162,27 @@ void IovPanel::addRowFields(QHBoxLayout *row_layout, void *row_data)
   row_layout->addWidget(type_selector);
   connect(type_selector, QCOMBOBOX_INDEX_CHANGED, this, &IovPanel::typeEdited);
 
-  QComboBox *stim_selector;
-  if ( client.icKind == IcModel && kind == Iov::IoIn ) {
-    stim_selector = new QComboBox();
-    stim_selector->addItem("None", QVariant(Stimulus::None));
-    stim_selector->addItem("Periodic", QVariant(Stimulus::Periodic));
-    stim_selector->addItem("Sporadic", QVariant(Stimulus::Sporadic));
-    stim_selector->addItem("ValueChanges", QVariant(Stimulus::ValueChanges));
-    setStimSelector(stim_selector, io->name != "", io);
-    row_layout->addWidget(stim_selector);
-    connect(stim_selector, QCOMBOBOX_ACTIVATED, this, &IovPanel::stimEdited);
-    }
-  else
-    stim_selector = nullptr;
+  // QComboBox *stim_selector;
+  // if ( client.icKind == IcModel && kind == Iov::IoIn ) {
+  //   stim_selector = new QComboBox();
+  //   stim_selector->addItem("None", QVariant(Stimulus::None));
+  //   stim_selector->addItem("Periodic", QVariant(Stimulus::Periodic));
+  //   stim_selector->addItem("Sporadic", QVariant(Stimulus::Sporadic));
+  //   stim_selector->addItem("ValueChanges", QVariant(Stimulus::ValueChanges));
+  //   setStimSelector(stim_selector, io->name != "", io);
+  //   row_layout->addWidget(stim_selector);
+  //   connect(stim_selector, QCOMBOBOX_ACTIVATED, this, &IovPanel::stimEdited);
+  //   }
+  // else
+  //   stim_selector = nullptr;
+  // RowDesc *row_desc = new RowDesc(io, row_layout, name_selector, type_selector, stim_selector);
 
-  RowDesc *row_desc = new RowDesc(io, row_layout, name_selector, type_selector, stim_selector);
+  RowDesc *row_desc = new RowDesc(io, row_layout, name_selector, type_selector);
   
   widgetToRow.insert((QWidget*)name_selector, row_desc);
   widgetToRow.insert((QWidget*)type_selector, row_desc);
-  if ( kind == Iov::IoIn ) 
-    widgetToRow.insert((QWidget*)stim_selector, row_desc);
+  // if ( kind == Iov::IoIn ) 
+  //   widgetToRow.insert((QWidget*)stim_selector, row_desc);
 }
 
 void IovPanel::deleteRowFields(QHBoxLayout *row_layout)
