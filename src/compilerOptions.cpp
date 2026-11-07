@@ -17,6 +17,7 @@
 #include <QLineEdit>
 #include <QDialog>
 #include <QFileDialog>
+#include <QTimer>
 
 #include "compilerOptions.h"
 #include "appFiles.h"
@@ -39,7 +40,11 @@ void CompilerOptions::readSpecFile(QString fname)
 {
   QFile file(fname);
   if ( ! file.open(QIODevice::ReadOnly) ) {
-    QMessageBox::warning(parent, "","Cannot read specification file " + file.fileName());
+    // This is called at startup, before the event loop is running. The warning is deferred because, on macOS,
+    // a modal dialog opened before the event loop starts prevents popup windows from being displayed afterwards.
+    QString msg = "Cannot read specification file " + file.fileName();
+    QWidget *p = parent;
+    QTimer::singleShot(0, p, [p, msg]() { QMessageBox::warning(p, "", msg); });
     return;
   }
   qDebug() << "Reading options from" << fname;

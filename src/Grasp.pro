@@ -89,6 +89,13 @@ SOURCES += transition.cpp \
 
 RESOURCES = resources.qrc
 
+# The options spec file is looked for next to the executable (see AppFiles::optionsSpecFile)
+macx {
+  options_spec.files = options_spec.txt
+  options_spec.path = Contents/MacOS
+  QMAKE_BUNDLE_DATA += options_spec
+}
+
 # install
 target.path = .
 INSTALLS += target

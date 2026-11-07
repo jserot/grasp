@@ -45,8 +45,13 @@ MainWindow::MainWindow()
     // Start compiler server
     Globals::compiler = new Compiler(this);
     connect(Globals::compiler, &Compiler::serverError, this, &MainWindow::serverError);
-    Globals::compiler->startServer();
-    QTimer::singleShot(300, this, [this]() { checkCompilerVersion(); }); // Allow 300ms delay for server to start up
+    // The server is started once the event loop is running, because starting it may open a
+    // (modal) error dialog. On macOS, a modal dialog opened before the event loop starts
+    // prevents popup windows (such as combo box lists) from being displayed afterwards.
+    QTimer::singleShot(0, this, [this]() {
+      Globals::compiler->startServer();
+      QTimer::singleShot(300, this, [this]() { checkCompilerVersion(); }); // Allow 300ms delay for server to start up
+    });
 
     Globals::executor = new CommandExec(); // For other programs (graphviz, ...)
 
