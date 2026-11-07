@@ -18,7 +18,10 @@
 #include "model.h"
 #include <QRegularExpression>
 
-const QString Globals::version = "1.0.1"; 
+#ifndef GRASP_VERSION
+#define GRASP_VERSION "unknown"
+#endif
+const QString Globals::version = GRASP_VERSION; // Set from the top-level VERSION file (see Grasp.pro)
 const QStringList Globals::guiOnlyOpts = { "-dot_external_viewer", "-no_model_check" };
 const bool Globals::modalPropertyDialogs = true; // Set to false to get back non-modal properties dialogs
 CompilerPaths *Globals::compilerPaths = NULL;

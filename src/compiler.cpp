@@ -113,11 +113,19 @@ void Compiler::startServer()
           });
         }
       }
-      else
+      else {
         qDebug() << "compiler: server is not listening";
+        QString msg = "Cannot start the compiler server:\n" + QString::fromUtf8(firstOutput).trimmed();
+        if ( firstOutput.contains("EADDRINUSE") )
+          msg += "\n\nThe socket port " + QString::number(socketPort) + " is already used. "
+            "Another instance of Grasp may be running.";
+        emit serverError(msg);
+        }
       }
-    else
+    else {
       qDebug() << "compiler: server gave no output";
+      emit serverError("Cannot start the compiler server (no answer from " + serverPath + ")");
+      }
 }
 
 void Compiler::connectToServer(const int socketPort)

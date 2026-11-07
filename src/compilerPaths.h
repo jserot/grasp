@@ -41,6 +41,7 @@ signals:
     void compilerPathChanged(QString newPath);
 
 private:
+  void applyEditedPaths(); // Applies (and clears) the edits made in the dialog
     QWidget *parent;
     QDialog *dialog;
     QMap<QString,QString> paths;

@@ -81,7 +81,8 @@ void CompilerOptions::readFromFile(QString fname)
   while ( ! file.atEnd() ) {
     QString line = file.readLine();
     QStringList items = line.split("=");
-    QString name = items.at(0);
+    if ( items.size() != 2 ) continue; // Blank or malformed line
+    QString name = items.at(0).trimmed();
     QString txt = items.at(1).trimmed();
     // qDebug() << "Reading " << name << "=" << txt;
     if ( options.keys().contains(name) ) {
@@ -231,8 +232,10 @@ void CompilerOptions::saveToFile(QString fname)
 {
   QFileInfo fi(fname);
   QFile f(fname);
-  if ( ! f.open(QFile::WriteOnly | QFile::Text) ) 
-    QMessageBox::warning(parent, "","Cannot open file file " + fi.fileName() + " for writing");
+  if ( ! f.open(QFile::WriteOnly | QFile::Text) ) {
+    QMessageBox::warning(parent, "","Cannot open file " + fi.fileName() + " for writing");
+    return;
+    }
   QTextStream os(&f);
   QMapIterator<QString, CompilerOption> i(options);
   while (i.hasNext()) {
@@ -253,8 +256,7 @@ QStringList CompilerOptions::getOptions(QString category)
   QStringList opts;
   foreach ( CompilerOption opt, options) {
     if ( opt.category == category ) {
-      QString v = opt.getValue();
-      if ( ! v.isEmpty() ) opts << v;
+      opts << opt.getArgs();
       }
     }
   return opts;

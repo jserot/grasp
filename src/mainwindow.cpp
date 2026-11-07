@@ -415,7 +415,9 @@ bool MainWindow::checkUnsavedChanges()
 void MainWindow::openFile()
 {
     if ( ! checkUnsavedChanges() ) return;
-    QString fname = QFileDialog::getOpenFileName(this, "Open file", Globals::initDir, "FSD file (*.fsd)");
+    QString dir = Globals::compilerPaths->getPath("INITDIR"); // Read here since it may have been edited
+    if ( dir.isEmpty() ) dir = Globals::initDir;
+    QString fname = QFileDialog::getOpenFileName(this, "Open file", dir, "FSD file (*.fsd)");
     if ( fname.isEmpty() ) return;
     Model *new_model = Model::readFromFile(fname);
     if ( new_model ) {
@@ -912,7 +914,8 @@ void MainWindow::checkCompilerVersion()
       }
     }
   else {
-    QMessageBox::critical(this, "Compiler", "Cannot retrieve compiler version");
+    if ( Globals::compiler->serverAvailable() ) // Otherwise, the user has already been told (see serverError)
+      QMessageBox::critical(this, "Compiler", "Cannot retrieve compiler version");
     exit(1);
   }
 }

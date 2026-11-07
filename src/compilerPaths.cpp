@@ -23,7 +23,6 @@
 
 static const QString defaultCompiler = "rfsmc";  // Fall-back, default values
 static const QString defaultDotProgram = "dot";
-static const QString defaultDotViewer = "graphviz";
 static const QString defaultVcdViewer = "gtkwave";
 static const QString defaultSocketPort = "51000";
 static const int defaultPathLength = 60;
@@ -46,7 +45,7 @@ void CompilerPaths::setDefaults()
   paths.insert("COMPILER", defaultCompiler);
   paths.insert("DOTPROGRAM", defaultDotProgram);
   // paths.insert("DOTVIEWER", defaultDotViewer);
-  paths.insert("VCDVIEWER", defaultDotViewer);
+  paths.insert("VCDVIEWER", defaultVcdViewer);
   paths.insert("INITDIR", "");
   paths.insert("SOCKETPORT", defaultSocketPort);
 }
@@ -77,6 +76,7 @@ void CompilerPaths::readFromFile(QString fname)
 
 void CompilerPaths::edit(QWidget *parent)
 {
+    editedPaths.clear(); // Edits made in a previously cancelled dialog must not be applied
     QDialog *dialog = new QDialog(parent);
     dialog->setWindowTitle("Compiler paths");
 
@@ -113,19 +113,28 @@ void CompilerPaths::edit(QWidget *parent)
 
     QObject::connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
     QObject::connect(buttonBox, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
-    QObject::connect(saveButton, &QPushButton::clicked, this, &CompilerPaths::saveToFile);
+    QObject::connect(saveButton, &QPushButton::clicked, this, [this]() {
+      applyEditedPaths(); // Save what has been typed in the dialog
+      saveToFile();
+      });
 
     if (dialog->exec() == QDialog::Accepted) {
         qDebug() << "Dialog accepted !";
-        QMapIterator<QString, QString> i(editedPaths);
-        while (i.hasNext()) {
-            i.next();
-            qDebug() << i.key() << "<-" << i.value();
-            paths.insert(i.key(), i.value());
-        }
+        applyEditedPaths();
     }
 
     delete dialog;
+}
+
+void CompilerPaths::applyEditedPaths()
+{
+  QMapIterator<QString, QString> i(editedPaths);
+  while (i.hasNext()) {
+    i.next();
+    qDebug() << i.key() << "<-" << i.value();
+    paths.insert(i.key(), i.value());
+    }
+  editedPaths.clear();
 }
 
 void CompilerPaths::valueChanged(const QString& txt)
@@ -145,8 +154,10 @@ void CompilerPaths::saveToFile()
   QString fname = AppFiles::configFile();
   QFileInfo fi(fname);
   QFile f(fname);
-  if ( ! f.open(QFile::WriteOnly | QFile::Text) ) 
-    QMessageBox::warning(parent, "","Cannot open file file " + fi.fileName() + " for writing");
+  if ( ! f.open(QFile::WriteOnly | QFile::Text) ) {
+    QMessageBox::warning(parent, "","Cannot open file " + fi.fileName() + " for writing");
+    return;
+    }
   QTextStream os(&f);
   QMapIterator<QString, QString> i(paths);
   while (i.hasNext()) {
@@ -160,7 +171,10 @@ void CompilerPaths::saveToFile()
 
 QString CompilerPaths::getPath(QString name)
 {
-  return paths.contains(name) ? paths.value(name) : "";
+  QString path = paths.contains(name) ? paths.value(name) : "";
+  if ( path == "~" || path.startsWith("~/") ) // Not expanded by Qt
+    path = QDir::homePath() + path.mid(1);
+  return path;
 }
 
 void CompilerPaths::logMessage(QString msg)

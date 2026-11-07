@@ -43,13 +43,15 @@ CompilerOption::CompilerOption(QString category, QString name, bool val)
 {
 }
 
-QString CompilerOption::getValue()
+QStringList CompilerOption::getArgs()
 {
+  // Note: the name and the value must be passed as separate arguments ("-stop_time 100" is rejected by rfsmc)
   switch ( kind ) {
-  case CompilerOption::UnitOpt: return val.toBool() ? name : "";
-  case CompilerOption::StringOpt: return val.toString().isEmpty() ? "" : name + " " + val.toString();
-  case CompilerOption::IntOpt: return val.toString().isEmpty() ? "" : name + " " +  val.toString();
+  case CompilerOption::UnitOpt: return val.toBool() ? QStringList{name} : QStringList();
+  case CompilerOption::StringOpt:
+  case CompilerOption::IntOpt: return val.toString().isEmpty() ? QStringList() : QStringList{name, val.toString()};
   }
+  return QStringList();
 }
 
 // QString const CompilerOption::toString()

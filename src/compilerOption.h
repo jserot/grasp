@@ -28,7 +28,7 @@ class CompilerOption
   CompilerOption(QString category, QString name, int val);
   CompilerOption(QString category, QString name, bool val);
 
-  QString getValue();
+  QStringList getArgs(); // Command line arguments for this option (name and value, if any, as separate items)
   //QString const toString();
   
  public:

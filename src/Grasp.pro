@@ -5,6 +5,10 @@ QT       += widgets network
 
 QMAKE_CXXFLAGS += -Wno-return-type
 
+# Application version, read from the top-level VERSION file (containing "VERSION=x.y.z")
+GRASP_VERSION = $$section($$list($$cat(../VERSION, lines)), =, 1, 1)
+DEFINES += GRASP_VERSION=\\\"$$GRASP_VERSION\\\"
+
 HEADERS += include/nlohmann_json.h \
            globals.h \
            transition.h  \

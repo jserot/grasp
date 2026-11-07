@@ -27,19 +27,20 @@ bool CommandExec::execute(QString wDir, QString cmd, QStringList args, bool deta
   qDebug() << "CommandExec::execute: wDir=" << wDir << " cmd=" << cmd << " args=" << args;
   outputs.clear();
   errors.clear();
+  if ( detach ) {
+    // Note: the static version must be given the working directory (it ignores the settings of [proc])
+    bool ok = QProcess::startDetached(cmd, args, wDir);
+    if ( ! ok ) qDebug() << "CommandExec: failed to start" << QT_ENDL;
+    return ok;
+    }
   proc.setWorkingDirectory(wDir);
-  if ( detach )
-    proc.startDetached(cmd,args);
-  else
-    proc.start(cmd,args);
-  if ( proc.error() == QProcess::FailedToStart ) {
+  proc.start(cmd,args);
+  if ( ! proc.waitForStarted() ) {
     qDebug() << "CommandExec: failed to start" << QT_ENDL;
     return false;
     }
   qDebug() << "CommandExec: sync process launched. Waiting for termination";
-  if ( detach ) 
-    return true;
-  else {
+  {
     bool r = proc.waitForFinished(); 
     QProcess::ExitStatus s = proc.exitStatus();
     int o = proc.exitCode();
