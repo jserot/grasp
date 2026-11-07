@@ -38,6 +38,11 @@
   current diagram when all diagram tabs are closed, reading a malformed compiler options file
 * Fixed several memory leaks (one diagram view was leaked per closed diagram and per New/Open model)
 * An existing transition is no longer deleted when it is edited while no input event is defined
+* Empty rows in the valuations, guards and actions panels are ignored (they produced invalid RFSM
+  code when model checking was disabled)
+* No `.fsm` file is written (and no compilation is started) when the RFSM code cannot be generated
+  (invalid diagram, missing stimulus), instead of a partially written file
+* Compiling a model which has never been saved now saves it first
 * The application version is now read from the `VERSION` file
 
 # 1.0.3 (Mar 5, 2026)
