@@ -545,10 +545,12 @@ void MainWindow::editDiagram(QAction *action)
 
 QString MainWindow::getCurrentFileName()
 {
-  if ( currentFileName.isEmpty() )
-    return QFileDialog::getSaveFileName( this, "Please save source file before compiling", "", "FSD file (*.fsd)");
-  else
-    return currentFileName;
+  // The generated files are named after the model file : a model which has never been saved must be saved first
+  if ( currentFileName.isEmpty() ) {
+    QMessageBox::information(this, "", "Please save the model before compiling it");
+    if ( ! saveAs() ) return ""; // Cancelled or failed
+    }
+  return currentFileName;
 }
 
 QString changeSuffix(QString fname, QString suffix)
@@ -600,7 +602,7 @@ QString MainWindow::generateRfsm(bool withTestbench ) // TODO : factorize
   QString sFname = getCurrentFileName();
   if ( sFname.isEmpty() ) return "";
   QString rFname = changeSuffix(sFname, ".fsm");
-  model->exportRfsm(rFname, withTestbench);
+  if ( ! model->exportRfsm(rFname, withTestbench) ) return ""; // The user has been told why
   return rFname;
 }
 

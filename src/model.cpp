@@ -413,7 +413,7 @@ QString export_rfsm_stim(Stimulus &st)
   }
   return r;
 }
-void Model::export_rfsm_ios(QTextStream& os)
+bool Model::export_rfsm_ios(QTextStream& os)
 {
     QString ss;
     for ( const auto io : ginps ) {
@@ -424,7 +424,7 @@ void Model::export_rfsm_ios(QTextStream& os)
             }
       else {
             QMessageBox::warning(Globals::mainWindow, "","No stimulus for input " + io->name);
-            return;
+            return false;
             }
       }
     for ( const auto io : goutps ) {
@@ -435,34 +435,43 @@ void Model::export_rfsm_ios(QTextStream& os)
         os << "shared " << io->name << " : " << toString(io->type);
         os << "\n";
       }
+    return true;
 }
 
-void Model::exportRfsm(QString fname, bool withTestbench)
+bool Model::exportRfsm(QString fname, bool withTestbench)
 {
-  QFile file(fname);
-  (void)file.open(QIODevice::WriteOnly | QIODevice::Text);
-  if ( file.error() != QFile::NoError ) {
-    QMessageBox::warning(Globals::mainWindow, "","Cannot open file " + file.fileName());
-    return;
-  }
-  QTextStream os(&file);
+  // The code is first generated in memory, so that no partial file is written if an error occurs
+  QString code;
+  QTextStream os(&code);
   // FSM models (diagrams)
   for ( const auto diagram : diagrams ) {
-    diagram->exportRfsmModel(os);
+    if ( ! diagram->exportRfsmModel(os) ) return false;
     os << "\n";
     }
   if ( withTestbench ) {
     // IOs with stimuli
-    export_rfsm_ios(os);
+    if ( ! export_rfsm_ios(os) ) return false;
     os << "\n";
     // FSM instances
-    if ( withTestbench ) {
-      os << "\n\n";
-      for ( const auto diagram : diagrams )
-        diagram->exportRfsmInstance(os);
-      }
+    os << "\n\n";
+    for ( const auto diagram : diagrams )
+      diagram->exportRfsmInstance(os);
     }
+  os.flush();
+  QFile file(fname);
+  if ( ! file.open(QIODevice::WriteOnly | QIODevice::Text) ) {
+    QMessageBox::warning(Globals::mainWindow, "","Cannot open file " + file.fileName());
+    return false;
+    }
+  QTextStream fs(&file);
+  fs << code;
+  fs.flush();
   file.close();
+  if ( fs.status() != QTextStream::Ok || file.error() != QFile::NoError ) {
+    QMessageBox::warning(Globals::mainWindow, "","Error when writing file " + file.fileName());
+    return false;
+    }
+  return true;
 }
 
 void Model::dump() // For debug only

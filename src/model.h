@@ -80,7 +80,7 @@ public:
 
     QStringList exportDots(QString basename, QStringList options);
     void exportDot(QString fname, QStringList options);
-    void exportRfsm(QString fname, bool withTestbench = false);
+    bool exportRfsm(QString fname, bool withTestbench = false); // Returns false (and writes nothing) on error
 
 protected:
     // QMap<QString,QString> getIovs(IoKind kind);
@@ -89,7 +89,7 @@ protected:
     void removeInput(Iov *inp) { ginps.removeOne(inp); }   // These do _not_ delete the IO (see removeIo)
     void removeOutput(Iov *outp) { goutps.removeOne(outp); }
     void removeGvar(Iov *var) { gvars.removeOne(var); }
-    void export_rfsm_ios(QTextStream& os);
+    bool export_rfsm_ios(QTextStream& os);
     QString exportSingleDot(Diagram *diagram, QString basename, QStringList options);
 
 private:

@@ -54,7 +54,7 @@ QStringList StateValuations::retrieve()
     QLineEdit* ledit = qobject_cast<QLineEdit*>(row->itemAt(0)->widget());
     Q_ASSERT(ledit);
     QString valuation = ledit->text().trimmed();
-    valuations << valuation;
+    if ( ! valuation.isEmpty() ) valuations << valuation; // Empty rows are ignored
     }
   qDebug () << "StateValuationPanel: valuations=" << valuations;
   return valuations;

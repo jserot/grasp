@@ -53,7 +53,7 @@ QStringList TransitionActions::retrieve()
     QLineEdit* ledit = qobject_cast<QLineEdit*>(row->itemAt(0)->widget());
     Q_ASSERT(ledit);
     QString action = ledit->text().trimmed();
-    actions << action;
+    if ( ! action.isEmpty() ) actions << action; // Empty rows are ignored
     }
   qDebug () << "TransitionActions: actions=" << actions;
   return actions;

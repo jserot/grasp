@@ -53,7 +53,7 @@ QStringList TransitionGuards::retrieve()
     QLineEdit* ledit = qobject_cast<QLineEdit*>(row->itemAt(0)->widget());
     Q_ASSERT(ledit);
     QString guard = ledit->text().trimmed();
-    guards << guard;
+    if ( ! guard.isEmpty() ) guards << guard; // Empty rows are ignored
     }
   qDebug () << "TransitionGuards: guards=" << guards;
   return guards;

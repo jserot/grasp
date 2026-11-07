@@ -923,11 +923,11 @@ void exportRfsmModelIo(QMap<QString,QString>& ios, bool& first, QTextStream& os,
         }
 }
 
-void Diagram::exportRfsmModel(QTextStream& os)
+bool Diagram::exportRfsmModel(QTextStream& os)
 {
     QString indent = QString(2, ' ');
     bool first;
-    if ( check() == false ) return;
+    if ( check() == false ) return false;
     QMap<QString,QMap<QString,QString>> ios = actualIos();
     QMap<QString,QString> inps = ios.value("inputs");
     QMap<QString,QString> outps = ios.value("outputs");
@@ -980,6 +980,7 @@ void Diagram::exportRfsmModel(QTextStream& os)
     if ( ! iTransition->getActions().isEmpty() ) os << " with " << iTransition->getActions().join(",");
     os << ";" << "\n";
     os << "}\n";
+    return true;
 }
 
 void Diagram::dump() // For debug only

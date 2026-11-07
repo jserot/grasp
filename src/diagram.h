@@ -85,7 +85,7 @@ public:
     void dump(); // for debug only
 
     void exportDot(QTextStream &os);
-    void exportRfsmModel(QTextStream& os);
+    bool exportRfsmModel(QTextStream& os); // Returns false if the diagram is not valid (the user has been told why)
     void exportRfsmInstance(QTextStream& os);
 
     static Diagram* fromJson(nlohmann::json& json, Model *model, QWidget *parent);
