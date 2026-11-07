@@ -179,6 +179,13 @@ State* Diagram::addPseudoState(QPointF pos)
   return state;
 }
 
+// Shows a warning once the current mouse event has been processed. Showing a modal message box (which runs
+// a nested event loop) while processing a mouse event disturbs the mouse grab (see showPropertiesDialog)
+static void deferredWarning(const QString &msg)
+{
+  QTimer::singleShot(0, Globals::mainWindow, [msg]() { QMessageBox::warning(Globals::mainWindow, "Error", msg); });
+}
+
 // Shows a state, transition or diagram properties dialog.
 // The dialogs are application modal, so that the edited item (state, transition, diagram, variables)
 // cannot be deleted or modified elsewhere while they are opened (they keep raw pointers to it).
@@ -215,15 +222,17 @@ void Diagram::editState(State *state)
   state->setSelected(false);
 }
 
-void Diagram::editTransition(Transition *transition)
+void Diagram::editTransition(Transition *transition, bool justCreated)
 {
   qDebug() << "Editing transition" << transition->toString();
   bool isInitial = transition->isInitial();
   QStringList inpEvents = model->getInputEvents();
   if ( !isInitial && inpEvents.isEmpty() ) {
-      QMessageBox::warning(Globals::mainWindow, "Error", "No input event available to trigger this transition. Please define one.");
-      qDebug() << "No input event. Removing transition" << transition->toString();
-      removeTransition(transition);
+      deferredWarning("No input event available to trigger this transition. Please define one.");
+      if ( justCreated ) { // An existing transition is left unchanged
+        qDebug() << "No input event. Removing transition" << transition->toString();
+        removeTransition(transition);
+        }
       return;
       }
   showPropertiesDialog(new TransitionProperties(transition,this,isInitial,view));
@@ -368,8 +377,7 @@ void Diagram::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             addItem(line);
             }
           else
-            QMessageBox::warning(Globals::mainWindow, "Error",
-                                 "There's already one initial transition !\nDelete it first to add another one");
+            deferredWarning("There's already one initial transition !\nDelete it first to add another one");
           break;
         case Globals::InsertTransition:
           line = new QGraphicsLineItem(QLineF(mouseEvent->scenePos(), mouseEvent->scenePos()));
@@ -384,7 +392,7 @@ void Diagram::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
               State::Location location = state->locateEvent(mouseEvent);
               Transition *transition = addTransition(state, state, "", QStringList(), QStringList(), location);
               transition->updatePosition();
-              editTransition(transition);
+              editTransition(transition, true);
               }
             }
             break;
@@ -534,23 +542,29 @@ void Diagram::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
     if (dstStates.count() && dstStates.first() == line) dstStates.removeFirst();
     removeItem(line);
     delete line;
-    if (srcStates.count() > 0 && dstStates.count() > 0 &&
-        srcStates.first()->type() == State::Type &&
-        dstStates.first()->type() == State::Type) {
-      State *srcState = qgraphicsitem_cast<State *>(srcStates.first());
-      State *dstState = qgraphicsitem_cast<State *>(dstStates.first());
-      if ( srcState != dstState ) {
-        State::Location location = srcState == dstState ? srcState->locateEvent(mouseEvent) : State::None;
-        Transition *transition = addTransition(srcState, dstState, "", QStringList(), QStringList(), location);
-        transition->updatePosition();
-        editTransition(transition);
-        emit modelModified();
-        }
+    State *srcState = srcStates.count() > 0 && srcStates.first()->type() == State::Type ?
+      qgraphicsitem_cast<State *>(srcStates.first()) : nullptr;
+    State *dstState = dstStates.count() > 0 && dstStates.first()->type() == State::Type ?
+      qgraphicsitem_cast<State *>(dstStates.first()) : nullptr;
+    if ( Globals::mode == Globals::InsertPseudoState ) srcState = startState; // The pseudo-state just created
+    // The initial pseudo-state can only be the source of the initial transition
+    bool ok = srcState && dstState && srcState != dstState && ! dstState->isPseudo()
+              && ( Globals::mode == Globals::InsertPseudoState || ! srcState->isPseudo() );
+    if ( ok ) {
+      Transition *transition = addTransition(srcState, dstState, "", QStringList(), QStringList(), State::None);
+      transition->updatePosition();
+      editTransition(transition, true);
+      emit modelModified();
       }
-    else if ( Globals::mode == Globals::InsertPseudoState && startState != NULL ) {
-      // An initial pseudo-state has been created but not connected
-      removeItem(startState);
-      delete startState;
+    else {
+      if ( Globals::mode == Globals::InsertTransition && srcState && dstState && srcState != dstState )
+        // Both ends are states, one of them being the initial pseudo-state
+        deferredWarning("The initial pseudo-state can only be the source of the initial transition");
+      if ( Globals::mode == Globals::InsertPseudoState && startState ) {
+        // The initial pseudo-state has been created but not connected to a state
+        removeItem(startState);
+        delete startState;
+        }
       }
     }
   line = nullptr;

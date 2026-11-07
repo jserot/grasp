@@ -109,7 +109,7 @@ protected:
     void addState(State *state);
     void addTransition(Transition *transition);
     void editState(State *state);
-    void editTransition(Transition *transition);
+    void editTransition(Transition *transition, bool justCreated = false);
     bool check_transition(Transition *t);
 
     QMap<QString,QMap<QString,QString>> actualIos();
