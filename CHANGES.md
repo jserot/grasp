@@ -55,6 +55,8 @@
 * Diagrams are now centered in their view when a model is opened and when the scale is changed. The
   scale list of the diagram properties shows the current scale and has a new "Fit" entry, showing
   the whole diagram
+* The windows showing the compilation results (generated code, DOT graphs) are now sized after their
+  content, within 80% of the screen, with scroll bars beyond (they had a fixed size)
 * The application version is now read from the `VERSION` file
 
 # 1.0.3 (Mar 5, 2026)
