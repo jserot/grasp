@@ -28,6 +28,7 @@ public:
   ~DiagramProperties();
 
 private:
+  static const QString fitScale; // Scale entry for which the whole diagram is visible
   QTabWidget *diagrams;
   Diagram *diagram;
   QLineEdit* name_field;

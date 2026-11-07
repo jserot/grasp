@@ -57,7 +57,6 @@ Diagram::Diagram(
   this->model = model;
   this->parent = parent;
   this->view = new QGraphicsView(this);
-  setSceneRect(QRectF(0, 0, canvas_width, canvas_height));
   foreach ( Iov* var, vars) {
     qDebug () << "Creating diagram: adding var" << var->name << toString(var->type);
       this->vars.append(var);
@@ -71,6 +70,7 @@ Diagram::Diagram(
       addTransition(transition);
       transition->updatePosition();
       }
+    updateSceneRect();
     Q_ASSERT(Globals::mainWindow);
     connect(this, SIGNAL(modelModified()), Globals::mainWindow, SLOT(modelModified()));
     connect(this, SIGNAL(mouseEnter()), Globals::mainWindow, SLOT(updateCursor()));
@@ -161,6 +161,36 @@ void Diagram::addState(State *state)
 {
   state->setBrush(boxColor);
   addItem(state);
+  updateSceneRect();
+}
+
+// The scene covers the default canvas and the diagram items, with a large margin, so that the view can always be
+// centered on the diagram (the view cannot be scrolled beyond the scene rectangle). It only grows (when items are
+// placed beyond it), so that the view does not jump while editing.
+void Diagram::updateSceneRect()
+{
+  static const qreal margin = 1000;
+  QRectF r = QRectF(0, 0, canvas_width, canvas_height).united(itemsBoundingRect()).adjusted(-margin, -margin, margin, margin);
+  if ( ! sceneRect().contains(r) ) setSceneRect(sceneRect().united(r));
+}
+
+void Diagram::fitView(qreal maxScale)
+{
+  if ( ! view ) return;
+  QRectF r = itemsBoundingRect();
+  if ( r.isEmpty() ) return;
+  view->resetTransform();
+  view->fitInView(r.adjusted(-20, -20, 20, 20), Qt::KeepAspectRatio); // Small margin around the diagram
+  if ( view->transform().m11() > maxScale ) // Small diagrams are not magnified too much
+    view->setTransform(QTransform::fromScale(maxScale, maxScale));
+  centerView();
+}
+
+void Diagram::centerView()
+{
+  if ( ! view ) return;
+  QRectF r = itemsBoundingRect();
+  view->centerOn(r.isEmpty() ? QRectF(0, 0, canvas_width, canvas_height).center() : r.center());
 }
 
 State* Diagram::addState(QPointF pos, QString id, QStringList attrs)
@@ -540,7 +570,10 @@ void Diagram::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
     for ( QGraphicsItem *it : selectedItems() )
       if ( pressPositions.contains(it) && pressPositions.value(it) != it->pos() ) moved = true;
     pressPositions.clear();
-    if ( moved ) emit modelModified(); // State positions are saved in the model file
+    if ( moved ) {
+      updateSceneRect();
+      emit modelModified(); // State positions are saved in the model file
+      }
     }
   if ( line != 0 && (Globals::mode == Globals::InsertTransition || Globals::mode == Globals::InsertPseudoState) ) {
     QList<QGraphicsItem *> srcStates = items(line->line().p1());

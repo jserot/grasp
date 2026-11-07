@@ -524,6 +524,8 @@ void MainWindow::addDiagramTab(Diagram* diagram)
   QString name = diagram->getName();
   int index = diagrams->addTab(view, name);
   diagrams->setCurrentIndex(index);
+  // Centered once the view has been laid out (its size is needed)
+  QTimer::singleShot(0, diagram, [diagram]() { diagram->centerView(); });
   qDebug() << "MainWindow::addDiagramTab: view=" << view;
   setUnsavedChanges(true);
 }

@@ -49,9 +49,12 @@ DiagramProperties::DiagramProperties(Diagram *diagram, QWidget *parent)
   QLabel* name_label3 = new QLabel("Scale");
   scaleCombo = new QComboBox;
   QStringList scales;
-  scales << tr("50%") << tr("75%") << tr("100%") << tr("125%") << tr("150%");
+  scales << tr("50%") << tr("75%") << tr("100%") << tr("125%") << tr("150%") << fitScale;
   scaleCombo->addItems(scales);
-  scaleCombo->setCurrentIndex(2);
+  // Show the current scale. If it is not one of the listed values, it has been set by "Fit"
+  int current = qRound(diagram->getView()->transform().m11() * 100);
+  int index = scaleCombo->findText(QString::number(current) + "%");
+  scaleCombo->setCurrentIndex(index >= 0 ? index : scaleCombo->findText(fitScale));
   row_layout3->addWidget(name_label3);
   row_layout3->addWidget(scaleCombo);
   layout->addLayout(row_layout3);
@@ -86,16 +89,20 @@ void DiagramProperties::fill()
     }
 }
 
+const QString DiagramProperties::fitScale = "Fit"; // Scale such that the whole diagram is visible
+
 void DiagramProperties::changeScale(const QString& scale)
 {
   Q_ASSERT(diagram);
   QGraphicsView *view = diagram->getView();
   Q_ASSERT(view);
+  if ( scale == fitScale ) {
+    diagram->fitView(1.5); // Not above the largest listed scale
+    return;
+    }
   double s = scale.left(scale.indexOf(tr("%"))).toDouble() / 100.0;
-  QTransform oldMatrix = view->transform();
-  view->resetTransform();
-  view->translate(oldMatrix.dx(), oldMatrix.dy());
-  view->scale(s, s);
+  view->setTransform(QTransform::fromScale(s, s));
+  diagram->centerView();
 }
 
 void DiagramProperties::accept()
