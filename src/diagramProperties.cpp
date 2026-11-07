@@ -55,7 +55,7 @@ DiagramProperties::DiagramProperties(Diagram *diagram, QWidget *parent)
   layout->addLayout(row_layout3);
 
   IovPanel::Client client = { IovPanel::IcDiagram, { .diagram = this->diagram } }; 
-  vars_panel = new IovPanel(Iov::IoVar, "Local variables", "Local variable", client);
+  vars_panel = new IovPanel(IoKind::IoVar, "Local variables", "Local variable", client);
   fill();
   layout->addWidget(vars_panel);
 

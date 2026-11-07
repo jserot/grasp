@@ -3,7 +3,7 @@
 #include <limits>
 #include <cmath>
 
-StimulusTrack::StimulusTrack(Iov* io)
+StimulusTrack::StimulusTrack(Input* io)
 {
   m_io = io;
   Stimulus st = io->stim;

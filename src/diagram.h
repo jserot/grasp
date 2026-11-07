@@ -49,7 +49,7 @@ public:
 
     void clear(void);
 
-    Iov* addVar(const QString name, const Iov::IoType type);
+    Iov* addVar(const QString name, const IoType type);
     void removeVar(Iov *io);
     QList<Iov*> getVars();
     QStringList getVarNames();

@@ -56,7 +56,7 @@ Diagram::Diagram(
   this->view = new QGraphicsView(this);
   setSceneRect(QRectF(0, 0, canvas_width, canvas_height));
   foreach ( Iov* var, vars) {
-      qDebug () << "Creating diagram: adding var" << var->name << var->type;
+    qDebug () << "Creating diagram: adding var" << var->name << toString(var->type);
       this->vars.append(var);
       }
     foreach ( State *state, states ) {
@@ -110,7 +110,7 @@ Diagram *Diagram::duplicate()
     qDebug() << "Copied transitions" << copied_transitions;
     QList<Iov *> copied_vars;
     for ( Iov *var : this->vars ) {
-      Iov *copied_var = new Iov(var->name, var->kind, var->type, var->stim); 
+      Iov *copied_var = var->clone();
       copied_vars.append(copied_var);
       }
     QString new_name = name + name.last(1); // S0 -> S00 
@@ -134,11 +134,10 @@ Diagram::~Diagram()
   // delete view;  // This crashes the program when the app is closed
 }
 
-
-Iov* Diagram::addVar(const QString name, const Iov::IoType type)
+Iov* Diagram::addVar(const QString name, const IoType type)
 {
-  qDebug () << "Diagram::addVar" << name << type;
-  Iov *var = new Iov(name, Iov::IoVar, type, Stimulus("None"));
+  qDebug () << "Diagram::addVar" << name << toString(type);
+  Variable *var = new Variable(name, type);
   vars.append(var);
   return var;
 }
@@ -207,7 +206,7 @@ void Diagram::editTransition(Transition *transition)
 {
   qDebug() << "Editing transition" << transition->toString();
   bool isInitial = transition->isInitial();
-  QStringList inpEvents = model->getInpEvents();
+  QStringList inpEvents = model->getInputEvents();
   if ( !isInitial && inpEvents.isEmpty() ) {
       QMessageBox::warning(Globals::mainWindow, "Error", "No input event available to trigger this transition. Please define one.");
       qDebug() << "No input event. Removing transition" << transition->toString();
@@ -614,7 +613,7 @@ QMap<QString,QString> Diagram::localVars()
 {
   QMap<QString,QString> r;
   for ( const auto v : vars )
-    r.insert(v->name,Iov::stringOfType(v->type));
+    r.insert(v->name,toString(v->type));
   return r;
 }
 
@@ -679,7 +678,7 @@ Diagram* Diagram::fromJson(nlohmann::json& json, Model *model, QWidget *parent)
         default: location = State::None; break;
         }
       if ( ! states.contains(src_state) || ! states.contains(dst_state) )
-        throw std::invalid_argument("Diagram::fromString: invalid state id");
+        throw std::invalid_argument("Diagram::fromJson: invalid state id");
       State *srcState = states.value(src_state);
       State *dstState = states.value(dst_state);
       Transition *transition = new Transition(NULL, 
@@ -694,13 +693,13 @@ Diagram* Diagram::fromJson(nlohmann::json& json, Model *model, QWidget *parent)
 
     QList<Iov *> vars;
     for ( auto & json_var : json.at("vars") ) {
-      std::string name = json_var.at("name");
-      std::string type = json_var.at("type");
-      Iov *var = new Iov(QString::fromStdString(name),
-                        Iov::IoVar,
-                        Iov::ioTypeOfString(QString::fromStdString(type)),
-                        Stimulus("None"));
-      vars.append(var);
+      QString name = QString::fromStdString(json_var.at("name"));
+      if ( std::optional<IoType> type = ioTypeFromString(QString::fromStdString(json_var.at("type"))) ) {
+        Variable *var = new Variable(name, type.value()); 
+        vars.append(var);
+        }
+      else
+        throw std::invalid_argument("Diagram::fromJson: invalid type");
       }
 
     // ... and, if (and only if) parsing succeeds, we update the model.
@@ -725,7 +724,7 @@ void Diagram::toJson(nlohmann::json& json_top)
         continue;
         }
       json["name"] = io->name.toStdString(); 
-      json["type"] = Iov::stringOfType(io->type).toStdString(); 
+      json["type"] = toString(io->type).toStdString(); 
       json_top["vars"].push_back(json);
       cnt++;
       }
@@ -776,7 +775,7 @@ QString Diagram::qual_id(QString id) { return id + "_" + name; }
 void Diagram::exportDot(QTextStream &os)
 {
   if ( ! vars.isEmpty() ) 
-    os << qual_id("_vars") << " [label=\"" << Iov::stringOfList(vars,false) << "\", shape=rect, style=rounded]\n";
+    os << qual_id("_vars") << " [label=\"" << toString(vars,"\\l") << "\", shape=rect, style=rounded]\n";
   for ( const auto item: items() ) {
     if ( item->type() == State::Type ) {
       State* state = qgraphicsitem_cast<State *>(item);
@@ -805,17 +804,6 @@ void Diagram::exportDot(QTextStream &os)
 
 // RFSM export
 
-QString stringOfVarList(QList<Iov*> vs, QString sep=", ", bool withType=true) 
-{
-  QStringList rs;
-  for (const auto& v : vs) {
-    if ( withType )
-      rs << v->name + ": " + Iov::stringOfType(v->type);
-    else
-      rs << v->name;
-    }
-  return rs.join(sep);
-}
 
 QString stringOfTransition(Transition *t, bool abbrev=false)
 {
@@ -846,16 +834,6 @@ QString stringOfState(State *s)
     ss += " where " + attrs.join(" and ");
   return ss;
 }
-
-QString stringOfIoKind(Iov::IoKind k)
-{
-  switch ( k ) {
-  case Iov::IoIn: return QString("in");
-  case Iov::IoOut: return QString("out");
-  case Iov::IoVar: return QString("inout");
-  }
-}
-
 
 // QList<Iov*> getActualIos(QList<Iov*> global_ios)
 // // Extract, from the list [global_ios] those used in the guards and actions
@@ -932,7 +910,7 @@ void Diagram::exportRfsmModel(QTextStream& os)
     os << ";" << "\n";
 
     if(!vars.isEmpty()) 
-      os << indent << "vars: " << stringOfVarList(vars) <<  ";" << "\n";
+      os << indent << "vars: " << toString(vars) <<  ";" << "\n";
 
     os << indent;
     os << "trans: ";
@@ -962,7 +940,7 @@ void Diagram::dump() // For debug only
   qDebug() << "Diagram " << name;
   qDebug() << "  vars =";
   foreach ( Iov* var, vars )
-    qDebug() << "    " <<  var->toString();
+    qDebug() << "    " <<  var->name;
   qDebug() << "  states =";
   foreach ( State* s, states() )
     qDebug() << "    " << *s;

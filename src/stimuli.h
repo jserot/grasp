@@ -27,7 +27,7 @@ class Stimuli: public QDialog {
     Q_OBJECT
 
 public:
-  explicit Stimuli(Stimulus::Kind kind, Iov* inp, QWidget *parent = Q_NULLPTR);
+  explicit Stimuli(Stimulus::Kind kind, Input* inp, QWidget *parent = Q_NULLPTR);
   ~Stimuli();
 
 private:
@@ -36,7 +36,7 @@ private:
   QHash<QPushButton*, QHBoxLayout*> mButtonToLayoutMap;
   QList<QHBoxLayout*> rows;
   Stimulus::Kind selectedKind;
-  Iov *selectedInp;
+  Input *selectedInp;
 
 private:
   QWidget *centralWidget;

@@ -17,7 +17,7 @@ class StimulusTrack
 public:
     StimulusTrack(const QString &name, TrackStimulusType type)
       : m_name(name), m_type(type), m_io(nullptr) {}
-    StimulusTrack(Iov* io);
+    StimulusTrack(Input* io);
 
     QString name() const { return m_name; }
     void setName(const QString &name) { m_name = name; }
@@ -25,7 +25,7 @@ public:
     TrackStimulusType type() const { return m_type; }
     void setType(TrackStimulusType type) { m_type = type; }
 
-    Iov* io() const { return m_io; }
+    Input* io() const { return m_io; }
 
     /// Supprime tous les stimuli de la piste (utile avant un changement de type)
     void clear() { m_stimuli.clear(); }
@@ -52,7 +52,7 @@ public:
 private:
     QString m_name;
     TrackStimulusType m_type;
-    Iov *m_io;
+    Input *m_io;
     std::vector<std::unique_ptr<TrackStimulus>> m_stimuli; // triés par date
 };
 

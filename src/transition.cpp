@@ -333,7 +333,7 @@ bool Transition::check()
   qDebug() << "Checking transition: " << toString();
   if ( ! isInitial() ) {
     QStringList modelEvents =
-        enclosingDiagram->enclosingModel()->getInpEvents()
+        enclosingDiagram->enclosingModel()->getInputEvents()
       + enclosingDiagram->enclosingModel()->getSharedEvents();
     if ( ! modelEvents.contains(getEvent()) ) {
       Globals::compiler->report_error("Diagram checking",

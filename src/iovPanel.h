@@ -32,7 +32,7 @@ public:
     union { Model *model; Diagram *diagram; } icClient;
     } Client;
 
-  IovPanel(Iov::IoKind kind, QString title, QString rowPrefix, Client client);
+  IovPanel(IoKind kind, QString title, QString rowPrefix, Client client);
   ~IovPanel();
 
   QStringList retrieve(); // Not used here
@@ -41,7 +41,7 @@ signals:
   void modelModified();
   
 private:
-  Iov::IoKind kind; // Input, output or variable
+  IoKind kind; // Input, output or variable
   Client client;
   QHash<QWidget*,RowDesc*> widgetToRow; 
   QString rowPrefix;

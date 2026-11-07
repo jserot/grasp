@@ -38,13 +38,13 @@ ModelProperties::ModelProperties(Model *model, QWidget* parent) : QFrame(parent)
 
     IovPanel::Client client = { IovPanel::IcModel, { .model = this->model } }; 
 
-    inps_panel = new IovPanel(Iov::IoIn, "Inputs", "Input", client);
+    inps_panel = new IovPanel(IoKind::IoIn, "Inputs", "Input", client);
     layout->addWidget(inps_panel);
 
-    outps_panel = new IovPanel(Iov::IoOut, "Outputs", "Output", client);
+    outps_panel = new IovPanel(IoKind::IoOut, "Outputs", "Output", client);
     layout->addWidget(outps_panel);
 
-    vars_panel = new IovPanel(Iov::IoVar, "Global variables", "Global variable", client);
+    vars_panel = new IovPanel(IoKind::IoVar, "Global variables", "Global variable", client);
     layout->addWidget(vars_panel);
     fill();
     this->setLayout(layout);
@@ -63,14 +63,12 @@ ModelProperties::~ModelProperties()
 void ModelProperties::fill()
 {
   Q_ASSERT(model);
-  QList<Iov*> ios = model->getIos();
-  foreach (Iov *io, ios) {
-    switch ( io->kind ) {
-    case Iov::IoIn: inps_panel->addRow((void *)(io)); break;
-    case Iov::IoOut: outps_panel->addRow((void *)(io)); break;
-    case Iov::IoVar: vars_panel->addRow((void *)(io)); break;
-    }
-  }
+  QList<Iov*> inps = model->inputs();
+  foreach (Iov *io, inps) inps_panel->addRow((void *)(io));
+  QList<Iov*> outps = model->outputs();
+  foreach (Iov *io, outps) outps_panel->addRow((void *)(io));
+  QList<Iov*> vars = model->globalVars();
+  foreach (Iov *io, vars) vars_panel->addRow((void *)(io));
 }
 
 void ModelProperties::clear()

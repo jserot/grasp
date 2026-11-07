@@ -35,7 +35,7 @@ EditStimPanel::EditStimPanel(Model *model, QWidget *parent)
   QVBoxLayout *layout = new QVBoxLayout();
 
   IovPanel::Client client = { IovPanel::IcModel, { .model = this->model } }; 
-  stim_panel = new IovPanel(Iov::IoIn, "Inputs", "Inputs", client);
+  stim_panel = new IovPanel(IoKind::IoIn, "Inputs", "Inputs", client);
   fill();
   layout->addWidget(stim_panel);
 
@@ -57,12 +57,9 @@ EditStimPanel::EditStimPanel(Model *model, QWidget *parent)
 void EditStimPanel::fill()
 {
   Q_ASSERT(model);
-  QList<Iov*> ios = model->getIos();
-  foreach (Iov *io, ios) {
-    if ( io->kind == Iov::IoIn ) {
-      stim_panel->addRow((void *)(io));
-      }
-    }
+  QList<Iov*> inps = model->inputs();
+  foreach (Iov *inp, inps)
+      stim_panel->addRow((void *)(inp));
 }
 
 void EditStimPanel::accept()

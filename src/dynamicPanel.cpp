@@ -128,11 +128,9 @@ void DynamicPanel::editStim()
     connect(editor, &ChronogramEditorWidget::cancelRequested, &dialog, &QDialog::reject);
 
     StimulusScenario &scenario = editor->scenario();
-    foreach (Iov *io, model->getIos()) { // TODO: model->getIns()
-      if (io->kind == Iov::IoIn) {
+    foreach (Iov *io, model->inputs()) {
         auto track = std::make_unique<StimulusTrack>(io);
         scenario.addTrack(std::move(track));
-      }
     }
     editor->rebuildPanels();
     if (dialog.exec() == QDialog::Accepted) {
@@ -144,10 +142,11 @@ void DynamicPanel::editStim()
       foreach ( StimulusTrack* track, scenario.tracks() ) {
         qDebug() << track->count() << "stimuli registred in track" << track->name();
         Iov *io = track->io();
-        Q_ASSERT(io->kind == Iov::IoIn);
+        Q_ASSERT(io->kind() == IoKind::IoIn);
         QList<int> dates;
         QList<int> vcs;
-        switch ( io->stim.kind ) {
+        Input *inp = static_cast<Input*>(io);
+        switch ( inp->stim.kind ) {
         case Stimulus::None:
           break;
         case Stimulus::Sporadic:
@@ -159,7 +158,7 @@ void DynamicPanel::editStim()
             if ( st->type() == TrackStimulusType::Event )
               dates.append(st->date());
             }
-          io->stim = Stimulus(Stimulus::Sporadic, dates);
+          inp->stim = Stimulus(Stimulus::Sporadic, dates);
           break;
         case Stimulus::ValueChanges: 
           for ( int i = 0; i<track->count(); i++ ) {
@@ -170,7 +169,7 @@ void DynamicPanel::editStim()
               vcs.append(vc->value().toInt());
               }  
             }
-          io->stim = Stimulus(Stimulus::ValueChanges, vcs);
+          inp->stim = Stimulus(Stimulus::ValueChanges, vcs);
           break;
         }
       }

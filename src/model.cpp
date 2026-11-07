@@ -12,6 +12,7 @@
 
 #include "globals.h"
 #include "model.h"
+#include "iov.h"
 #include "include/nlohmann_json.h"
 #include <QMessageBox>
 #include <QInputDialog>
@@ -21,6 +22,7 @@
 #include <QDebug>
 #include <QPair>
 #include <QGuiApplication>
+#include <optional>
 
 const QString Model::defaultName = "main";
 const QString Model::diagramPrefix = "A";
@@ -28,25 +30,72 @@ const QString Model::diagramPrefix = "A";
 Model::Model()
 {
   name = Model::defaultName;
-  ios.clear();
+  ginps.clear();
+  goutps.clear();
+  gvars.clear();
 }
 
-Iov* Model::addIo(const QString name, const Iov::IoKind kind, const Iov::IoType type, const Stimulus stim)
+Iov* Model::addInput(const QString name, const IoType type, const Stimulus stim)
 {
-  Iov *io = new Iov(name, kind, type, stim);
-  ios.append(io);
+  Iov* io = new Input(name, type, stim);
+  ginps.append(io);
+  return io;
+}
+
+Iov* Model::addOutput(const QString name, const IoType type)
+{
+  Iov* io = new Output(name, type);
+  goutps.append(io);
+  return io;
+}
+
+Iov* Model::addGvar(const QString name, const IoType type)
+{
+  Iov* io = new Variable(name, type);
+  gvars.append(io);
   return io;
 }
 
 void Model::removeIo(Iov *io)
 {
-  ios.removeOne(io);
+  switch ( io->kind() ) {
+  case IoKind::IoIn:
+    removeInput(io);
+    break;
+  case IoKind::IoOut:
+    removeOutput(io);
+    break;
+  case IoKind::IoVar:
+    removeGvar(io);
+    break;
+  }
 }
+
+// Iov* Model::addIo(const QString name, const IoKind kind, const IoType type)
+// {
+//   Iov* io;
+//   switch ( kind ) {
+//   case IoKind::IoIn:
+//     io = new Input(name, type, Stimulus::None);
+//     ginps.append(io);
+//     return io;
+//   case IoKind::IoOut:
+//     io = new Output(name, type);
+//     goutps.append(io);
+//     return io;
+//   case IoKind::IoVar:
+//     io = new Variable(name, type);
+//     gvars.append(io);
+//     return io;
+//   }
+// }
 
 void Model::clear(void)
 {
   name = "";
-  ios.clear();
+  ginps.clear();
+  goutps.clear();
+  gvars.clear();
   for ( Diagram* a: diagrams ) a->clear();
   diagrams.clear();
 }
@@ -70,39 +119,34 @@ void Model::removeDiagram(Diagram *diagram)
   diagrams.removeOne(diagram);
 }
 
-QMap<QString,QString> Model::getIovs(Iov::IoKind kind)
+static QMap<QString,QString> build_io_map(QList<Iov*> ios)
 {
   QMap<QString,QString> r;
   for ( const auto io : ios )
-    if ( io->kind == kind ) r.insert(io->name,Iov::stringOfType(io->type));
+    r.insert(io->name,toString(io->type));
   return r;
 }
 
-QStringList Model::getIovNames(Iov::IoKind kind)
+static QStringList build_io_list(QList<Iov*> ios, bool event_typed = false)
 {
   QStringList r;
   for ( const auto io : ios )
-    if ( io->kind == kind ) r.append(io->name);
+    if ( event_typed && io->type == IoType::TyEvent ) 
+      r.append(io->name);
   return r;
 }
 
-QStringList Model::getEvents(Iov::IoKind kind)
-{
-  QStringList r;
-  for ( const auto io : ios )
-    if ( io->kind == kind && io->type == Iov::TyEvent ) r.append(io->name);
-  return r;
-}
+QMap<QString,QString> Model::getInputs() { return build_io_map(ginps); }
+QMap<QString,QString> Model::getOutputs() { return build_io_map(goutps); }
+QMap<QString,QString> Model::getShared() { return build_io_map(gvars); }
 
-QMap<QString,QString> Model::getInputs() { return getIovs(Iov::IoIn); }
-QMap<QString,QString> Model::getOutputs() { return getIovs(Iov::IoOut); }
-QMap<QString,QString> Model::getShared() { return getIovs(Iov::IoVar); }
-QStringList Model::getInputNames() { return getIovNames(Iov::IoIn); }
-QStringList Model::getOutputNames() { return getIovNames(Iov::IoOut); }
-QStringList Model::getSharedNames() { return getIovNames(Iov::IoVar); }
-QStringList Model::getInpEvents() { return getEvents(Iov::IoIn); }
-QStringList Model::getOutpEvents() { return getEvents(Iov::IoOut); }
-QStringList Model::getSharedEvents() { return getEvents(Iov::IoVar); }
+QStringList Model::getInputNames() { return build_io_list(ginps); }
+QStringList Model::getOutputNames() { return build_io_list(goutps); }
+QStringList Model::getSharedNames() { return build_io_list(gvars); }
+
+QStringList Model::getInputEvents() { return build_io_list(ginps, true); }
+QStringList Model::getOutputEvents() { return build_io_list(goutps, true); }
+QStringList Model::getSharedEvents() { return build_io_list(gvars, true); }
 
 // Basic model checking
 
@@ -117,14 +161,14 @@ bool Model::check(bool withStimuli)
     report_error("No name specified for model");
     return false;
     }
-  QStringList inpEvents = getInpEvents();
+  QStringList inpEvents = getInputEvents();
   if ( inpEvents.length() == 0 ) {
     report_error("There should be at least one input with type event");
     return false;
     }
   if ( withStimuli ) {
-    for( Iov* io : ios ) {
-      if ( io->kind == Iov::IoIn &&  io->stim.kind == Stimulus::None )  {
+    for( Iov* io : ginps ) {
+      if ( static_cast<Input*>(io)->stim.kind == Stimulus::None )  {
         report_error("No stimulus for input " + io->name);
         return false;
         }  
@@ -143,7 +187,7 @@ Model* Model::readFromFile(QString fname)
   try {
     QFile file(fname);
     qDebug() << "Reading model from file" << file.fileName();
-    file.open(QIODevice::ReadOnly);
+    (void)file.open(QIODevice::ReadOnly);
     if ( file.error() != QFile::NoError ) {
       QMessageBox::warning(Globals::mainWindow, "","Cannot open file " + file.fileName());
       return NULL;
@@ -155,19 +199,25 @@ Model* Model::readFromFile(QString fname)
 
     QString name = QString::fromStdString(json.at("name"));
 
-    QList<Iov*>& ios = model->getIos();
     for ( const auto & json_io : json.at("ios") ) {
-      std::string name = json_io.at("name");
-      std::string kind = json_io.at("kind");
-      std::string type = json_io.at("type");
-      std::string stim = json_io.at("stim");
-      Iov *io = new Iov(QString::fromStdString(name),
-                        Iov::ioKindOfString(QString::fromStdString(kind)),
-                        Iov::ioTypeOfString(QString::fromStdString(type)),
-                        Stimulus(QString::fromStdString(stim)));
-      ios.append(io);
+      QString name = QString::fromStdString(json_io.at("name"));
+      std::optional<IoKind> kind = ioKindFromString(QString::fromStdString(json_io.at("kind")));
+      if ( ! kind ) throw std::invalid_argument("Model::readFromFile:: invalid kind");
+      std::optional<IoType> type = ioTypeFromString(QString::fromStdString(json_io.at("type")));
+      if ( ! type ) throw std::invalid_argument("Model::readFromFile:: invalid type");
+      QString stim = QString::fromStdString(json_io.at("stim"));
+      switch ( kind.value() ) {
+      case IoKind::IoIn: 
+        model->addInput(name, type.value(), Stimulus(stim));
+        break;
+      case IoKind::IoOut: 
+        model->addOutput(name, type.value());
+        break;
+      case IoKind::IoVar: 
+        model->addGvar(name, type.value());
+        break;
       }
-
+      }
     QList<Diagram*>& diagrams = model->getDiagrams();
     for ( auto & json_diagram : json.at("diagrams") ) {
       Diagram *a = Diagram::fromJson(json_diagram, model, Globals::mainWindow);
@@ -192,7 +242,7 @@ void Model::saveToFile(QString fname)
 {
     QFile file(fname);
     qDebug() << "Saving model to file" << file.fileName();
-    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    (void)file.open(QIODevice::WriteOnly | QIODevice::Text);
     if ( file.error() != QFile::NoError ) {
       QMessageBox::warning(Globals::mainWindow, "","Cannot open file " + file.fileName());
       return;
@@ -204,6 +254,7 @@ void Model::saveToFile(QString fname)
 
     json_top["ios"] = nlohmann::json::array();
     int cnt = 1;
+    QList<Iov*> ios = ginps + goutps + gvars;
     for ( const Iov* io: ios ) {
       nlohmann::json json;
       if ( io->name == "" ) {
@@ -211,9 +262,9 @@ void Model::saveToFile(QString fname)
         continue;
         }
       json["name"] = io->name.toStdString(); 
-      json["kind"] = Iov::stringOfKind(io->kind).toStdString(); 
-      json["type"] = Iov::stringOfType(io->type).toStdString(); 
-      json["stim"] = io->stim.toString().toStdString(); 
+      json["kind"] = toString(io->kind()).toStdString(); 
+      json["type"] = toString(io->type).toStdString(); 
+      json["stim"] = io->kind() == IoKind::IoIn ? static_cast<const Input*>(io)->stim.toString().toStdString() : "None";  // For backward compatibility
       json_top["ios"].push_back(json);
       cnt++;
       }
@@ -239,7 +290,7 @@ QString Model::exportSingleDot(Diagram *diagram, QString basename, QStringList o
   QString fname = basename + "_" + diagram->getName() + ".dot";
   QFile file(fname);
   qDebug() << "Opening file" << file.fileName() << "for writing";
-  file.open(QIODevice::WriteOnly | QIODevice::Text);
+  (void)file.open(QIODevice::WriteOnly | QIODevice::Text);
   if ( file.error() != QFile::NoError ) {
     QMessageBox::warning(Globals::mainWindow, "","Cannot open file " + file.fileName());
     return QString();
@@ -255,8 +306,9 @@ QString Model::exportSingleDot(Diagram *diagram, QString basename, QStringList o
   os << "fontsize = 14\n";
   os << "mindist=1.0\n";
   bool withIoDesc = options.contains("-dot_captions");
+  QList<Iov*> ios = ginps + goutps + gvars;
   if ( ! ios.isEmpty() && withIoDesc ) 
-    os << "_ios [label=\"" << Iov::stringOfList(ios,false) << "\", shape=rect, style=solid]\n";
+    os << "_ios [label=\"" << toString(ios) << "\", shape=rect, style=solid]\n";
   diagram->exportDot(os);
   os << "}\n";
   file.close();
@@ -276,7 +328,7 @@ QStringList Model::exportDots(QString basename, QStringList options)
 void Model::exportDot(QString fname, QStringList options)
 {
   QFile file(fname);
-  file.open(QIODevice::WriteOnly | QIODevice::Text);
+  (void)file.open(QIODevice::WriteOnly | QIODevice::Text);
   if ( file.error() != QFile::NoError ) {
     QMessageBox::warning(Globals::mainWindow, "","Cannot open file " + file.fileName());
     return;
@@ -294,8 +346,9 @@ void Model::exportDot(QString fname, QStringList options)
   os << "fontsize = 14\n";
   os << "mindist=1.0\n";
   bool withIoDesc = options.contains("-dot_captions");
+  QList<Iov*> ios = ginps + goutps + gvars;
   if ( withIoDesc ) 
-    os << "_ios [label=\"" << Iov::stringOfList(ios,false) << "\", shape=rect, style=solid]\n";
+    os << "_ios [label=\"" << toString(ios) << "\", shape=rect, style=solid]\n";
   foreach ( Diagram *a, diagrams) {
 	os << "subgraph cluster_" << a->getName() << " {\n";
     os << "label = " << a->getName() << "\n";
@@ -343,40 +396,32 @@ QString export_rfsm_stim(Stimulus &st)
 }
 void Model::export_rfsm_ios(QTextStream& os)
 {
-    // QList<Iov*> gios;
     QString ss;
-    for ( const auto io : ios ) {
-      switch ( io->kind ) {
-        case Iov::IoIn:
-          ss = export_rfsm_stim(io->stim);
-          if ( ss != "" )  {
-            os << "input " << io->name << " : " << Iov::stringOfType(io->type) << " = " << ss;;
-            // gios.append(io);
+    for ( const auto io : ginps ) {
+      ss = export_rfsm_stim(static_cast<Input*>(io)->stim);
+      if ( ss != "" )  {
+            os << "input " << io->name << " : " << toString(io->type) << " = " << ss;;
             os << "\n";
             }
-          else {
+      else {
             QMessageBox::warning(Globals::mainWindow, "","No stimulus for input " + io->name);
             return;
             }
-          break;
-      case Iov::IoOut:
-        os << "output " << io->name << " : " << Iov::stringOfType(io->type);
-        // gios.append(io);
-        os << "\n";
-        break;
-      case Iov::IoVar:
-        os << "shared " << io->name << " : " << Iov::stringOfType(io->type);
-        // gios.append(io);
-        os << "\n";
-        break;
       }
-    }
+    for ( const auto io : goutps ) {
+      os << "output " << io->name << " : " << toString(io->type);
+      os << "\n";
+      }
+    for ( const auto io : gvars ) {
+        os << "shared " << io->name << " : " << toString(io->type);
+        os << "\n";
+      }
 }
 
 void Model::exportRfsm(QString fname, bool withTestbench)
 {
   QFile file(fname);
-  file.open(QIODevice::WriteOnly | QIODevice::Text);
+  (void)file.open(QIODevice::WriteOnly | QIODevice::Text);
   if ( file.error() != QFile::NoError ) {
     QMessageBox::warning(Globals::mainWindow, "","Cannot open file " + file.fileName());
     return;
@@ -404,6 +449,7 @@ void Model::exportRfsm(QString fname, bool withTestbench)
 void Model::dump() // For debug only
 {
   qDebug() << "Model " << name;
+  QList<Iov*> ios = ginps + goutps + gvars;
   qDebug() << "  ios =";
   foreach ( Iov* io, ios )
     qDebug() << "    " <<  io->toString();
@@ -414,9 +460,9 @@ void Model::dump() // For debug only
 
 Model::~Model()
 {
-  foreach ( Iov* io, ios )
-    delete io;
-  for ( const auto a: diagrams ) 
-    delete a;
+  foreach ( Iov* io, ginps ) delete io;
+  foreach ( Iov* io, goutps ) delete io;
+  foreach ( Iov* io, gvars ) delete io;
+  for ( const auto a: diagrams ) delete a;
 }
   

@@ -11,54 +11,58 @@
 /***********************************************************************/
 
 #include "iov.h"
+#include <optional>
 
-Iov::IoKind Iov::ioKindOfString(QString s)
-{
-  if ( s == "in" ) return Iov::IoIn;
-  else if ( s == "out" ) return Iov::IoOut;
-  else if ( s == "var" ) return Iov::IoVar;
-  else Q_ASSERT(false);
-}
-
-Iov::IoType Iov::ioTypeOfString(QString s)
-{
-  if ( s == "event" ) return Iov::TyEvent;
-  else if ( s == "int" ) return Iov::TyInt;
-  else if ( s == "bool" ) return Iov::TyBool;
-  else Q_ASSERT(false);
-}
-
-QString Iov::stringOfKind(IoKind k)
+QString toString(IoKind k)
 {
   switch ( k ) {
-  case IoIn: return QString("in");
-  case IoOut: return QString("out");
-  case IoVar: return QString("var");
+  case IoKind::IoIn: return QString("in");
+  case IoKind::IoOut: return QString("out");
+  case IoKind::IoVar: return QString("var");
   }
 }
 
-QString Iov::stringOfType(IoType t)
+std::optional<IoKind> ioKindFromString(const QString &s)
+{
+  if ( s == "in" ) return IoKind::IoIn;
+  else if ( s == "out" ) return IoKind::IoOut;
+  else if ( s == "var" ) return IoKind::IoVar;
+  else return std::nullopt;
+}
+
+QString toString(IoType t)
 {
   switch ( t ) {
-  case TyEvent: return QString("event");
-  case TyInt: return QString("int");
-  case TyBool: return QString("bool");
+  case IoType::TyEvent: return QString("event");
+  case IoType::TyInt: return QString("int");
+  case IoType::TyBool: return QString("bool");
   }
 }
 
-QString Iov::toString(bool withStim)
+std::optional<IoType> ioTypeFromString(QString s)
+{
+  if ( s == "event" ) return IoType::TyEvent;
+  else if ( s == "int" ) return IoType::TyInt;
+  else if ( s == "bool" ) return IoType::TyBool;
+  else return std::nullopt;
+}
+
+QString Iov::toString(void)
 {
   QString r;
-  r = stringOfKind(kind) + " " + name + " : " + stringOfType(type);
-  if ( kind == IoIn && withStim ) r += " = " + stim.toString(); 
+  r = ::toString(this->kind()) + " " + name + " : " + ::toString(type);
   return r;
 }
 
-QString Iov::stringOfList(QList<Iov*> ios, bool withStim)
+QString toString(QList<Iov*> vs, QString sep, bool withType) 
 {
-  QString r;
-  foreach ( Iov* io, ios)
-    r += io->toString(withStim) + "\\l";
-  return r;
+  QStringList rs;
+  for (const auto& v : vs) {
+    if ( withType )
+      rs << v->name + ": " + toString(v->type);
+    else
+      rs << v->name;
+    }
+  return rs.join(sep);
 }
 

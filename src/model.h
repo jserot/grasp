@@ -42,24 +42,28 @@ public:
     void clear(void);
     void update(void);
 
-    Iov* addIo(const QString name, const Iov::IoKind kind, const Iov::IoType type, const Stimulus stim);
+  // Iov* addIo(const QString name, const IoKind kind, const IoType type);
+    Iov* addInput(const QString name, const IoType type, const Stimulus stim = Stimulus(Stimulus::None));
+    Iov* addOutput(const QString name, const IoType type);
+    Iov* addGvar(const QString name, const IoType type);
     void removeIo(Iov *io);
 
     void addDiagram(Diagram *diagram);
     void removeDiagram(Diagram *diagram);
 
-    QList<Iov*>& getIos() { return ios; };
+    QList<Iov*>& inputs() { return ginps; };
+    QList<Iov*>& outputs() { return goutps; };
+    QList<Iov*>& globalVars() { return gvars; };
+
     QMap<QString,QString> getInputs();
     QMap<QString,QString> getOutputs();
     QMap<QString,QString> getShared();
     QStringList getInputNames();
     QStringList getOutputNames();
     QStringList getSharedNames();
-    QStringList getInpEvents();
-    QStringList getOutpEvents();
+    QStringList getInputEvents();
+    QStringList getOutputEvents();
     QStringList getSharedEvents();
-    //QStringList getInpNonEvents();
-    //QStringList getOutpNonEvents();
     QList<Diagram*>& getDiagrams() { return diagrams; };
 
     static Model* readFromFile(QString fname);
@@ -75,15 +79,20 @@ public:
     void exportRfsm(QString fname, bool withTestbench = false);
 
 protected:
-    QMap<QString,QString> getIovs(Iov::IoKind kind);
-    QStringList getIovNames(Iov::IoKind kind);
-    QStringList getEvents(Iov::IoKind kind);
+    // QMap<QString,QString> getIovs(IoKind kind);
+    // QStringList getIovNames(IoKind kind);
+    // QStringList getEvents(IoKind kind);
+    void removeInput(Iov *inp) { ginps.removeOne(inp); }
+    void removeOutput(Iov *outp) { goutps.removeOne(outp); }
+    void removeGvar(Iov *var) { gvars.removeOne(var); }
     void export_rfsm_ios(QTextStream& os);
     QString exportSingleDot(Diagram *diagram, QString basename, QStringList options);
 
 private:
     QString name;
-    QList<Iov*> ios;
+    QList<Iov*> ginps;
+    QList<Iov*> goutps;
+    QList<Iov*> gvars;
     QList<Diagram*> diagrams;
     const static QString diagramPrefix;
     const static QString defaultName;

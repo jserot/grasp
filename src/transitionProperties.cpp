@@ -105,7 +105,7 @@ TransitionProperties::TransitionProperties(
     }
   }
   event_field->clear();
-  QStringList inpEvents = diagram->enclosingModel()->getInpEvents();
+  QStringList inpEvents = diagram->enclosingModel()->getInputEvents();
   QStringList sharedEvents = diagram->enclosingModel()->getSharedEvents();
   for ( auto ev: inpEvents + sharedEvents ) 
     event_field->addItem(ev, QVariant(ev));
