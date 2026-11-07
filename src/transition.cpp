@@ -97,6 +97,19 @@ QPainterPath Transition::shape() const
     return path;
 }
 
+void Transition::setStates(State *src, State *dst)
+{
+  Q_ASSERT(src && dst);
+  if ( src == srcState && dst == dstState ) return;
+  srcState->removeTransition(this);
+  dstState->removeTransition(this);
+  srcState = src;
+  dstState = dst;
+  srcState->addTransition(this);
+  if ( dstState != srcState ) dstState->addTransition(this); // Do _not_ add self-transitions twice (see Diagram::addTransition)
+  updatePosition();
+}
+
 void Transition::updatePosition()
 {
   QPolygonF p;

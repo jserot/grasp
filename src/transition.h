@@ -45,8 +45,7 @@ public:
     QStringList getGuards() const { return guards; }
     QStringList getActions() const { return actions; }
     QString getLabel();
-    void setSrcState(State *s) { srcState = s; }
-    void setDstState(State *s) { dstState = s; }
+    void setStates(State *src, State *dst); // Also updates the transition lists of the old and new states
     void setEvent(QString s) { event = s; }
     void setGuards(QStringList ss) { guards = ss; }
     void setActions(QStringList ss) { actions = ss; }

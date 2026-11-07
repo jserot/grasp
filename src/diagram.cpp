@@ -475,13 +475,12 @@ void Diagram::removeTransition(Transition *transition)
   State *srcState = transition->getSrcState();
   State *dstState = transition->getDstState();
   if ( transition->isInitial() ) {
-    srcState->removeTransitions();
+    // Removing the initial pseudo-state also removes and deletes its (only) transition
     removeState(srcState);
+    return;
     }
-  else {
-    srcState->removeTransition(transition);
-    dstState->removeTransition(transition);
-    }
+  srcState->removeTransition(transition);
+  dstState->removeTransition(transition);
   removeItem(transition);
   emit modelModified();
   delete transition;
@@ -528,7 +527,8 @@ void Diagram::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
       delete startState;
       }
     }
-  line = 0;
+  line = nullptr;
+  startState = nullptr;
   QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
 

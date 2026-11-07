@@ -129,8 +129,8 @@ private:
     QGraphicsView *view; 
     QList<Iov*> vars; // Local variables (IOs and global vars are part of the enclosing model)
     
-    QGraphicsLineItem *line;  // Line being drawn
-    State *startState;
+    QGraphicsLineItem *line = nullptr;  // Line being drawn
+    State *startState = nullptr;  // Initial pseudo-state being connected (between mouse press and release)
 
     QWidget *parent;
 

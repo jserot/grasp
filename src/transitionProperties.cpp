@@ -162,10 +162,9 @@ void TransitionProperties::accept()
     ok = true;
 
   if ( ok  ) {
-    transition->setDstState(dstState);
+    transition->setStates(isInitial ? transition->getSrcState() : srcState, dstState);
     transition->setActions(actions);
     if ( ! isInitial ) {
-      transition->setSrcState(srcState);
       transition->setEvent(event);
       transition->setGuards(guards);
     }

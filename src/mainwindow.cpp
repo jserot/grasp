@@ -118,7 +118,7 @@ MainWindow::~MainWindow()
 Diagram *MainWindow::currentDiagram()
 {
   int index = diagrams->currentIndex();
-  Q_ASSERT(index >= 0);  // TO CHECK : this fn cannot be called if there's no diagram
+  if ( index < 0 ) return nullptr; // All diagram tabs have been closed
   QGraphicsView *view = qobject_cast<QGraphicsView*>(diagrams->widget(index));
   Q_ASSERT(view);
   return qobject_cast<Diagram*>(view->scene());
@@ -439,7 +439,10 @@ bool MainWindow::checkDiagram()
 { 
   Q_ASSERT(model); 
   Diagram *diagram = currentDiagram();
-  Q_ASSERT(diagram);
+  if ( ! diagram ) {
+    QMessageBox::warning(this, "", "No diagram to check");
+    return false;
+    }
   qDebug() << "Checking diagram" << diagram->getName();
   return diagram->check();
 }
@@ -522,7 +525,7 @@ void MainWindow::duplicateDiagram()
 {
   Q_ASSERT(model); 
   Diagram *diagram = currentDiagram();
-  Q_ASSERT(diagram);
+  if ( ! diagram ) return; // No diagram to duplicate
   Diagram *diagram2 = diagram->duplicate();
   model->addDiagram(diagram2);
   addDiagramTab(diagram2);
