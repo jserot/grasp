@@ -13,6 +13,7 @@
 
 #include <QtWidgets>
 #include "imageViewer.h"
+#include "viewerSize.h"
 
 #include <QtGui>
 #include <QPainter>
@@ -31,7 +32,10 @@ ImageViewer::ImageViewer(QString fname, QWidget *parent) : QScrollArea(parent)
   image->setPixmap(QPixmap::fromImage(img));
   image->setScaledContents(true);
   setBackgroundRole(QPalette::Dark);
+  image->adjustSize(); // Image shown at its actual size
   setWidget(image);
+  // The window is sized after the image, within limits (scroll bars are shown beyond)
+  resize(boundedViewerSize(image->size() + QSize(2 * frameWidth(), 2 * frameWidth())));
   setWindowFlag(Qt::Window, true);  // Required to make the window toplevel
   setAttribute(::Qt::WA_DeleteOnClose);
   setContextMenuPolicy(Qt::CustomContextMenu);

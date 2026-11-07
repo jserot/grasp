@@ -25,6 +25,7 @@ public:
   static QFont defaultFont;
   void setFont(QFont font);
   QFont getFont();
+  QSize contentSize(); // Size needed to show the whole text (without scroll bars)
 
 protected:
   // virtual QSize sizeHint () const override;

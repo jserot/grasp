@@ -14,6 +14,7 @@
 #include <QtWidgets>
 #include "textViewer.h"
 #include "textProperties.h"
+#include "viewerSize.h"
 
 QFont createDefaultFont(void)
 {
@@ -53,21 +54,24 @@ TextViewer::TextViewer(QString fname, QWidget *parent) : QPlainTextEdit(parent)
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenu()));
 
-    // Ajuste la largeur au contenu
-    QFontMetrics fm(font());
-    QStringList lines = toPlainText().split('\n');
-    int maxWidth = 0;
-    for (const QString &line : lines) {
-        maxWidth = std::max(maxWidth, fm.horizontalAdvance(line));
-    }
-    maxWidth += 20;
-
-    // Largeur auto, hauteur variable (scroll activé si nécessaire)
-    setMinimumWidth(maxWidth);
-    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
-
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    // The window is sized after its content, within limits (scroll bars are shown beyond)
+    setLineWrapMode(QPlainTextEdit::NoWrap);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    resize(boundedViewerSize(contentSize()));
+}
+
+QSize TextViewer::contentSize()
+{
+    QFontMetrics fm(font());
+    int maxWidth = 0;
+    for ( const QString &line : toPlainText().split('\n') )
+      maxWidth = std::max(maxWidth, fm.horizontalAdvance(line));
+    int margins = 2 * int(document()->documentMargin()) + 2 * frameWidth();
+    // Room is left for the scroll bars, which may be needed when the size is bounded
+    int width = maxWidth + margins + verticalScrollBar()->sizeHint().width() + fm.averageCharWidth();
+    int height = document()->blockCount() * fm.lineSpacing() + margins + horizontalScrollBar()->sizeHint().height();
+    return QSize(width, height);
 }
 
 void TextViewer::contextMenu()
