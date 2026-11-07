@@ -13,6 +13,32 @@
 * Fixed IO names being lost when the model was saved before the name field lost focus
 * Fixed the check for duplicate IO names, which never fired
 * Fixed type lists not being displayed on macOS when a warning was issued at startup
+* Stimuli editor: fixed double-clicks being handled twice (duplicate dialogs) and edit/remove dialogs
+  acting on the wrong stimulus when the track was modified while they were opened
+* The state, transition and diagram properties dialogs are now modal
+* Deleting an input event, or changing its type, is refused when it triggers transitions. Renaming an
+  input event renames it in the transitions it triggers
+* State names are now unique in each diagram (new states could get the name of an existing state
+  after a file was read, and one of them was then lost when the file was read back). Renaming a
+  state or a diagram rejects empty, invalid or already used names. Diagram names are kept unique
+* The initial pseudo-state can no longer be edited, nor used as the source or destination of a
+  regular transition
+* Unsaved changes: cancelling the save prompt now actually cancels New, Open and Quit, closing the
+  window asks to save the changes, a failed save is reported, and moving states or renaming a
+  diagram marks the model as modified
+* Fixed general compiler options (such as `-synchronous_actions`) never being passed to the compiler,
+  and compiler options with a value (such as `-stop_time`) making the compilation fail
+* More robust communication with the compiler server (answers arriving in several parts or after
+  their timeout, longer timeout for compilation and simulation, server not running). The reason why
+  the server cannot be started (e.g. port already used by another instance) is now reported
+* Compiler paths dialog: the Save button saves what has been typed, the default VCD viewer is
+  `gtkwave`, and a leading `~` is expanded in paths
+* Fixed several crashes: deleting the initial transition, deleting a state after changing the end
+  state of one of its transitions, adding transitions in a new diagram, checking or duplicating the
+  current diagram when all diagram tabs are closed, reading a malformed compiler options file
+* Fixed several memory leaks (one diagram view was leaked per closed diagram and per New/Open model)
+* An existing transition is no longer deleted when it is edited while no input event is defined
+* The application version is now read from the `VERSION` file
 
 # 1.0.3 (Mar 5, 2026)
 
