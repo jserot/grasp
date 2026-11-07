@@ -226,6 +226,7 @@ void IovPanel::updateTypeChoices(RowDesc *row_desc)
 
 void IovPanel::updateStimChoices(RowDesc *row_desc) // For inputs only
 {
+  if ( ! row_desc->stim_selector ) return; // Row built without a stimulus selector
   bool enabled = row_desc->name_selector->text().trimmed() != "";
   setStimSelector(row_desc->stim_selector, enabled, row_desc->io);
 }
