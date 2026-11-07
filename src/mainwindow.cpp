@@ -55,7 +55,7 @@ MainWindow::MainWindow()
 
     Globals::executor = new CommandExec(); // For other programs (graphviz, ...)
 
-    model = NULL;
+    model = nullptr;
 
     // GUI setup
 
@@ -286,7 +286,7 @@ void MainWindow::createActions()
 
 void MainWindow::updateActions()
 {
-    bool enabled = model;
+    bool enabled = model != nullptr;
     saveFileAction->setEnabled(enabled);
     saveFileAsAction->setEnabled(enabled);
     checkDiagramAction->setEnabled(enabled && Globals::check_model);
@@ -421,11 +421,10 @@ void MainWindow::openFile()
     if ( new_model ) {
       qDebug() << "MainWindow::openFile: read model completed";
       new_model->dump();
-      if ( model ) delete model; // This also deletes the enclosed diagrams
-      model = new_model;
+      model.reset(new_model); // This also deletes the diagrams of the previous model
       closeDiagramTabs();
       addDiagramTabs();
-      createDockWindow(model);
+      createDockWindow(model.get());
       currentFileName = fname;
       setUnsavedChanges(false);
       updateActions();
@@ -467,10 +466,9 @@ bool MainWindow::checkModelWithStimuli()
 void MainWindow::newModel()
 {
   if ( ! checkUnsavedChanges() ) return;
-  if ( model ) delete model; // This will delete all the enclosed diagrams
-  model = new Model;
+  model = std::make_unique<Model>(); // This also deletes the diagrams of the previous model
   closeDiagramTabs();
-  createDockWindow(model);
+  createDockWindow(model.get());
   newDiagram();
   currentFileName.clear();
   setUnsavedChanges(false);
@@ -518,7 +516,7 @@ void MainWindow::newDiagram()
 {
   Q_ASSERT(model); 
   QString name = "A" + QString::number(diagrams->count()+1);
-  Diagram *diagram = new Diagram(model, name, diagrams);
+  Diagram *diagram = new Diagram(model.get(), name, diagrams);
   model->addDiagram(diagram);
   addDiagramTab(diagram);
   setUnsavedChanges(true);

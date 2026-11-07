@@ -12,6 +12,7 @@
 
 #include "globals.h"
 #include "model.h"
+#include <memory>
 #include "iov.h"
 #include "include/nlohmann_json.h"
 #include <QMessageBox>
@@ -69,6 +70,7 @@ void Model::removeIo(Iov *io)
     removeGvar(io);
     break;
   }
+  delete io;
 }
 
 // Iov* Model::addIo(const QString name, const IoKind kind, const IoType type)
@@ -93,10 +95,13 @@ void Model::removeIo(Iov *io)
 void Model::clear(void)
 {
   name = "";
+  qDeleteAll(ginps);
   ginps.clear();
+  qDeleteAll(goutps);
   goutps.clear();
+  qDeleteAll(gvars);
   gvars.clear();
-  for ( Diagram* a: diagrams ) a->clear();
+  qDeleteAll(diagrams);
   diagrams.clear();
 }
 
@@ -183,14 +188,15 @@ bool Model::check(bool withStimuli)
 
 Model* Model::readFromFile(QString fname)
 {
-  Model *model = new Model();
+  // Deleted (with the diagrams already read) if reading fails
+  std::unique_ptr<Model> model = std::make_unique<Model>();
   try {
     QFile file(fname);
     qDebug() << "Reading model from file" << file.fileName();
     (void)file.open(QIODevice::ReadOnly);
     if ( file.error() != QFile::NoError ) {
       QMessageBox::warning(Globals::mainWindow, "","Cannot open file " + file.fileName());
-      return NULL;
+      return nullptr;
       }
     QTextStream is(&file);
     QString txt = is.readAll();
@@ -220,7 +226,7 @@ Model* Model::readFromFile(QString fname)
       }
     QList<Diagram*>& diagrams = model->getDiagrams();
     for ( auto & json_diagram : json.at("diagrams") ) {
-      Diagram *a = Diagram::fromJson(json_diagram, model, Globals::mainWindow);
+      Diagram *a = Diagram::fromJson(json_diagram, model.get(), Globals::mainWindow);
       qDebug() << "Read diagram from JSON";
       a->dump();
       diagrams.append(a);
@@ -229,12 +235,11 @@ Model* Model::readFromFile(QString fname)
     model->setName(name);
 
     qDebug() << "Done";
-    return model;
+    return model.release();
     }
   catch(const std::exception& e) {
     QMessageBox::warning(Globals::mainWindow, "Error", "Error when reading file " + fname + ": " + QString(e.what()));
-    delete model;
-    return NULL;
+    return nullptr;
   }
 }
 

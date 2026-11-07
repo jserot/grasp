@@ -30,6 +30,9 @@
 #include <QDebug>
 #include <QGuiApplication>
 #include <QTimer>
+#include <map>
+#include <memory>
+#include <vector>
 
 #define QEVENT_LEAVE QEvent::GraphicsSceneLeave
 #define SKIP_EMPTY_PARTS Qt::SkipEmptyParts
@@ -129,10 +132,8 @@ Diagram::~Diagram()
 {
   qDebug() << "Diagram::delete:" << this;
   for ( Iov* var: vars ) delete var;
-  // for ( State* state: states.values() ) delete state; // States and transitions, being GraphicsItem will be deleted when the ...
-  // for ( Transition* transition: transitions ) delete transition; // ... QGraphicsScene destructor, as a parent, will be called (?)
-  // Q_ASSERT(view);
-  // delete view;  // This crashes the program when the app is closed
+  // States and transitions, being QGraphicsItems, are deleted by the QGraphicsScene destructor
+  delete view; // Null if the view has already been destroyed (by the tab widget, when the app is closed)
 }
 
 Iov* Diagram::addVar(const QString name, const IoType type)
@@ -146,11 +147,13 @@ Iov* Diagram::addVar(const QString name, const IoType type)
 void Diagram::removeVar(Iov *var)
 {
   vars.removeOne(var);
+  delete var;
 }
 
 void Diagram::clear(void)
 {
   name = "";
+  qDeleteAll(vars);
   vars.clear();
   stateCounter = 0;
   QGraphicsScene::clear();
@@ -445,7 +448,13 @@ void Diagram::editItem(QGraphicsItem *item)
 
 void Diagram::edit()
 {
-  showPropertiesDialog(new DiagramProperties(this, this->view));
+  if ( propertiesDialog ) { // Only one dialog per diagram (they would share the diagram variables)
+    propertiesDialog->raise();
+    propertiesDialog->activateWindow();
+    return;
+    }
+  propertiesDialog = new DiagramProperties(this, this->view);
+  showPropertiesDialog(propertiesDialog);
 }
 
 // void Diagram::contextMenuEvent(QGraphicsSceneContextMenuEvent *contextMenuEvent)
@@ -654,25 +663,27 @@ Diagram* Diagram::fromJson(nlohmann::json& json, Model *model, QWidget *parent)
 
     QString name = QString::fromStdString(json.at("name"));
 
-    QMap<std::string, State*> states;
+    // The states, transitions and variables read are owned by these temporary containers until the diagram
+    // is built, so that they are deleted if reading fails (exception)
+    std::map<std::string, std::unique_ptr<State>> states;
     for ( auto & json_state : json.at("states") ) {
       std::string id = json_state.at("id");
       std::string attrs = json_state.at("attr");
       qreal x =  json_state.at("x");
       qreal y =  json_state.at("y");
-      State* state;
+      std::unique_ptr<State> state;
       if ( id == State::initPseudoId.toStdString() )
-        state = new State(NULL, QPointF(x,y));
+        state = std::make_unique<State>(nullptr, QPointF(x,y));
       // Note: the enclosing diagram is set to NULL here since it does not exists yet. It will be updated later
       else 
-        state = new State(NULL, QString::fromStdString(id),
+        state = std::make_unique<State>(nullptr, QString::fromStdString(id),
                           QString::fromStdString(attrs).split(",",SKIP_EMPTY_PARTS),
                           QPointF(x,y));
       // Note: the enclosing diagram is set to NULL here since it does not exists yet. It will be updated later
-      states.insert(id, state);
+      states[id] = std::move(state); // Note: if the id is duplicated, the last state read is kept
       }   
 
-    QList<Transition *> transitions;
+    std::vector<std::unique_ptr<Transition>> transitions;
     for ( auto & json_transition : json.at("transitions") ) {
       std::string src_state = json_transition.at("src_state");
       std::string dst_state = json_transition.at("dst_state");
@@ -687,36 +698,41 @@ Diagram* Diagram::fromJson(nlohmann::json& json, Model *model, QWidget *parent)
         case 4: location = State::West; break;
         default: location = State::None; break;
         }
-      if ( ! states.contains(src_state) || ! states.contains(dst_state) )
+      if ( states.count(src_state) == 0 || states.count(dst_state) == 0 )
         throw std::invalid_argument("Diagram::fromJson: invalid state id");
-      State *srcState = states.value(src_state);
-      State *dstState = states.value(dst_state);
-      Transition *transition = new Transition(NULL, 
+      State *srcState = states.at(src_state).get();
+      State *dstState = states.at(dst_state).get();
+      auto transition = std::make_unique<Transition>(nullptr, 
       // Note: the enclosing diagram is set to NULL here since it does not exists yet. It will be updated later
                                               srcState, dstState,
                                               QString::fromStdString(event),
                                               QString::fromStdString(guards).split(",",SKIP_EMPTY_PARTS),
                                               QString::fromStdString(actions).split(",",SKIP_EMPTY_PARTS),
                                               location);
-      transitions.append(transition);
+      transitions.push_back(std::move(transition));
       }
 
-    QList<Iov *> vars;
+    std::vector<std::unique_ptr<Iov>> vars;
     for ( auto & json_var : json.at("vars") ) {
       QString name = QString::fromStdString(json_var.at("name"));
       if ( std::optional<IoType> type = ioTypeFromString(QString::fromStdString(json_var.at("type"))) ) {
-        Variable *var = new Variable(name, type.value()); 
-        vars.append(var);
+        vars.push_back(std::make_unique<Variable>(name, type.value()));
         }
       else
         throw std::invalid_argument("Diagram::fromJson: invalid type");
       }
 
-    // ... and, if (and only if) parsing succeeds, we update the model.
-    Diagram *diagram = new Diagram(model, name, vars, states.values(), transitions, parent);
-    for ( State *s : states.values() ) // We now can update the enclosing diagram of the read states 
+    // ... and, if (and only if) parsing succeeds, we build the diagram, which takes ownership of them
+    QList<State*> diagram_states;
+    for ( auto & s : states ) diagram_states.append(s.second.release());
+    QList<Transition*> diagram_transitions;
+    for ( auto & t : transitions ) diagram_transitions.append(t.release());
+    QList<Iov*> diagram_vars;
+    for ( auto & v : vars ) diagram_vars.append(v.release());
+    Diagram *diagram = new Diagram(model, name, diagram_vars, diagram_states, diagram_transitions, parent);
+    for ( State *s : diagram_states ) // We now can update the enclosing diagram of the read states 
       s->setDiagram(diagram);
-    for ( Transition *t : transitions) // We now can update the enclosing diagram of the read transition 
+    for ( Transition *t : diagram_transitions) // We now can update the enclosing diagram of the read transition 
       t->setDiagram(diagram);
     return diagram;
 }

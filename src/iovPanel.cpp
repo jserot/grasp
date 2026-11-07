@@ -19,6 +19,7 @@
 #include <QStandardItemModel>
 #include <QRegularExpressionValidator>
 #include <QtDebug>
+#include <algorithm>
 
 #include "model.h"
 #include "iov.h"
@@ -42,7 +43,7 @@ IovPanel::IovPanel(IoKind kind, QString title, QString rowPrefix, Client client)
   this->client = client;
   this->rowPrefix = rowPrefix;
 
-  name_validator = new QRegularExpressionValidator(Globals::re_lid);
+  name_validator = new QRegularExpressionValidator(Globals::re_lid, this);
 
   Q_ASSERT(Globals::mainWindow);
   connect(this, SIGNAL(modelModified()), Globals::mainWindow, SLOT(modelModified()));
@@ -141,7 +142,8 @@ void IovPanel::addRowFields(QHBoxLayout *row_layout, void *row_data)
   row_layout->addWidget(type_selector);
   connect(type_selector, QCOMBOBOX_INDEX_CHANGED, this, &IovPanel::typeEdited);
 
-  RowDesc *row_desc = new RowDesc(io, row_layout, name_selector, type_selector);
+  rows.push_back(std::make_unique<RowDesc>(io, row_layout, name_selector, type_selector));
+  RowDesc *row_desc = rows.back().get();
   
   widgetToRow.insert((QWidget*)name_selector, row_desc);
   widgetToRow.insert((QWidget*)type_selector, row_desc);
@@ -173,6 +175,9 @@ void IovPanel::deleteRowFields(QHBoxLayout *row_layout)
     }
   widgetToRow.remove(name_selector);
   widgetToRow.remove(type_selector);
+  rows.erase(std::remove_if(rows.begin(), rows.end(),
+                            [row_desc](const std::unique_ptr<RowDesc> &r) { return r.get() == row_desc; }),
+             rows.end()); // Deletes the row descriptor
   emit modelModified();
 }
 

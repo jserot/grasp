@@ -147,9 +147,9 @@ void CompilerOptions::addTab(QString title, QString category, QTabWidget *tabs, 
     QMapIterator<QString, CompilerOption> i(options);
     while (i.hasNext()) {
       i.next();
-      QLabel *name = new QLabel(i.key());
       CompilerOption opt = i.value();
       if ( opt.category != category ) continue;
+      QLabel *name = new QLabel(i.key());
       name->setToolTip(opt.desc);
       switch ( opt.kind ) {
         case CompilerOption::UnitOpt:

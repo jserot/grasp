@@ -15,6 +15,8 @@
 #include "dynamicPanel.h"
 #include "iov.h"
 #include "rowDesc.h"
+#include <memory>
+#include <vector>
 
 class Model;
 class Diagram;
@@ -40,6 +42,7 @@ public:
 private:
   IoKind kind; // Input, output or variable
   Client client;
+  std::vector<std::unique_ptr<RowDesc>> rows; // Owns the row descriptors
   QHash<QWidget*,RowDesc*> widgetToRow; 
   QString rowPrefix;
 

@@ -31,6 +31,8 @@ QT_END_NAMESPACE
 
 class Model
 {
+    Q_DISABLE_COPY(Model) // Owns its IOs and diagrams
+
 public:
     explicit Model();
 
@@ -82,7 +84,7 @@ protected:
     // QMap<QString,QString> getIovs(IoKind kind);
     // QStringList getIovNames(IoKind kind);
     // QStringList getEvents(IoKind kind);
-    void removeInput(Iov *inp) { ginps.removeOne(inp); }
+    void removeInput(Iov *inp) { ginps.removeOne(inp); }   // These do _not_ delete the IO (see removeIo)
     void removeOutput(Iov *outp) { goutps.removeOne(outp); }
     void removeGvar(Iov *var) { gvars.removeOne(var); }
     void export_rfsm_ios(QTextStream& os);

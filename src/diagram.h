@@ -16,6 +16,7 @@
 #include <QTextStream>
 #include <QGraphicsScene>
 #include <QPointer>
+#include <QGraphicsView>
 #include <QDialog>
 
 #include "state.h"
@@ -121,6 +122,7 @@ protected:
 private:
     void showPropertiesDialog(QDialog *dialog);
     QPointer<QDialog> pendingDialog; // Modal dialog waiting for the mouse button to be released (see showPropertiesDialog)
+    QPointer<QDialog> propertiesDialog; // Diagram properties dialog, if opened (only one at a time)
     bool isItemChange(int type);
     State* addState(QPointF pos, QString id, QStringList attrs);
     State* addPseudoState(QPointF pos);
@@ -130,7 +132,7 @@ private:
 
     QString name;
     Model *model; 
-    QGraphicsView *view; 
+    QPointer<QGraphicsView> view; // Owned by the diagram (deleted with it); may have been destroyed by the tab widget at exit
     QList<Iov*> vars; // Local variables (IOs and global vars are part of the enclosing model)
     
     QGraphicsLineItem *line = nullptr;  // Line being drawn

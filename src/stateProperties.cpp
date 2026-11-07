@@ -40,7 +40,7 @@ StateProperties::StateProperties(State *state, Diagram *diagram, QWidget *parent
   state_name_field = new QLineEdit();
   // state_name_field->setPlaceholderText("State identifier");
   state_name_field->setText(id);
-  QRegularExpressionValidator *state_name_validator = new QRegularExpressionValidator(re_uid);
+  QRegularExpressionValidator *state_name_validator = new QRegularExpressionValidator(re_uid, this);
   state_name_field->setValidator(state_name_validator);
   row_layout1->addWidget(name_label);
   row_layout1->addWidget(state_name_field);

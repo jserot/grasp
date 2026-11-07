@@ -19,6 +19,7 @@
 #include "compiler.h"
 
 #include <QMainWindow>
+#include <memory>
 #include <QFileInfo>
 #include <QFrame>
 #include <QStatusBar>
@@ -54,7 +55,7 @@ public:
    MainWindow();
   ~MainWindow();
 
-  Model *getModel() { return model; }
+  Model *getModel() { return model.get(); }
   QTabWidget *getDiagrams() { return diagrams; }
 
 protected:
@@ -118,7 +119,7 @@ private:
     Diagram *currentDiagram();
     void checkCompilerVersion();
     
-    Model* model; // The model (ios + diagrams)
+    std::unique_ptr<Model> model; // The model (ios + diagrams)
     ModelProperties *model_panel; // For editing model IOs
     QDockWidget* dock; // Holding the model_panel
     QTabWidget *diagrams; // The tabs holding the graphical representations of the model diagrams
