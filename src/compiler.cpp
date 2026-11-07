@@ -158,8 +158,10 @@ void Compiler::sendAsyncRequest(const QString &text)
 {
     if (socket.state() == QTcpSocket::ConnectedState) {
         // The protocol does not number the requests : an answer arriving after its timeout would be taken as
-        // the answer to the next request. Any such stale data (already buffered by the event loop, which runs
-        // between requests) is discarded before sending a new request.
+        // the answer to the next request. Any such stale data is discarded before sending a new request.
+        // Note: requests may be sent without running the event loop in between (when checking a model) :
+        // pending data is first read from the system buffers.
+        while ( socket.waitForReadyRead(0) ) ;
         if ( socket.bytesAvailable() > 0 )
           qDebug() << "compiler: discarding stale data:" << socket.readAll();
         QByteArray data = text.trimmed().toUtf8() + '\n';
@@ -235,7 +237,8 @@ void Compiler::onDisconnected() {
   qDebug() << "compiler: disconnected from server";
 }
 
-void Compiler::onErrorOccurred(QTcpSocket::SocketError) {
+void Compiler::onErrorOccurred(QTcpSocket::SocketError socketError) {
+    if ( socketError == QAbstractSocket::SocketTimeoutError ) return; // Timeouts are handled (and logged) by readAnswer
     qDebug() << "compiler: got error:" << socket.errorString();
     //emit serverError(socket.errorString());
 }

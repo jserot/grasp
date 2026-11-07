@@ -47,6 +47,7 @@ public:
     // Sends a request and waits (at most [timeoutMs]) for the answer. Returns false if no answer could be obtained
     bool sendRequest(const QString &text, QString &answer, int timeoutMs = CheckTimeOutMs);
     bool serverAvailable(); // true if the server is running and connected
+    void resetReports() { unavailableReported = false; } // To be called at the start of each user operation
 
     // High-level requests
     Response getVersion(void);

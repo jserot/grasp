@@ -195,10 +195,8 @@ void IovPanel::nameChanged()
   Q_ASSERT(name_selector);
   RowDesc *row_desc = widgetToRow.value(name_selector);
   Q_ASSERT(row_desc);
-  // Update the name at each keystroke so that the model is up to date even if
-  // it is saved/checked/exported before the name field loses focus.
-  // The check for duplicate names is done in nameEdited.
-  row_desc->io->name = name_selector->text().trimmed();
+  // Note: the IO name itself is only updated when the edition is finished (see nameEdited). Operations using the
+  // model (save, check, export, ...) validate the pending edition first (see MainWindow::beginUserOperation)
   updateTypeChoices(row_desc);
 }
 

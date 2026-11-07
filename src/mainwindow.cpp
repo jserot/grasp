@@ -398,8 +398,18 @@ void MainWindow::setUnsavedChanges(bool unsaved_changes)
     setWindowTitle(unsaved_changes ? title + " (Unsaved changes)" : title);
 }
 
+void MainWindow::beginUserOperation()
+{
+  // A name being edited in a field (an IO name for ex.) is only taken into account when the field loses focus
+  // (editingFinished). Menu and toolbar actions do not take the focus : the pending edit is validated here, so
+  // that the model is complete and consistent (transitions renamed with their triggering event, ...)
+  if ( QWidget *w = QApplication::focusWidget() ) w->clearFocus();
+  if ( Globals::compiler ) Globals::compiler->resetReports();
+}
+
 bool MainWindow::checkUnsavedChanges()
 {
+    beginUserOperation();
     if ( ! unsaved_changes ) return true;
     QMessageBox save_message;
     save_message.setText("Do you want to save your changes?");
@@ -440,6 +450,7 @@ void MainWindow::openFile()
 bool MainWindow::checkDiagram()
 { 
   Q_ASSERT(model); 
+  beginUserOperation();
   Diagram *diagram = currentDiagram();
   if ( ! diagram ) {
     QMessageBox::warning(this, "", "No diagram to check");
@@ -452,6 +463,7 @@ bool MainWindow::checkDiagram()
 bool MainWindow::checkModel()
 { 
   Q_ASSERT(model);
+  beginUserOperation();
   bool r = Globals::check_model ? model->check(false) : true;
   qDebug() << "Checking model: " << r;
   return r;
@@ -460,6 +472,7 @@ bool MainWindow::checkModel()
 bool MainWindow::checkModelWithStimuli()
 { 
   Q_ASSERT(model); 
+  beginUserOperation();
   bool r = Globals::check_model ? model->check(true) : true;
   qDebug() << "Checking model with stimuli: " << r;
   return r;
@@ -488,12 +501,14 @@ bool MainWindow::saveToFile(QString fname)
 
 bool MainWindow::save()
 {
+  beginUserOperation();
   if ( currentFileName.isEmpty() ) return saveAs();
   else return saveToFile(currentFileName);
 }
 
 bool MainWindow::saveAs()
 {
+  beginUserOperation();
   QString fname = QFileDialog::getSaveFileName( this, "Save to file", "", "FSM file (*.fsd)");
   if ( fname.isEmpty() ) return false;
   if ( ! saveToFile(fname) ) return false;
@@ -568,6 +583,7 @@ QString removeSuffix(QString fname)
 void MainWindow::renderDots()
 {
     Q_ASSERT(model); 
+    beginUserOperation();
     QString sFname = getCurrentFileName();
     qDebug() << "renderDots" << sFname;
     if ( sFname.isEmpty() ) return;
@@ -583,6 +599,7 @@ void MainWindow::renderDots()
 void MainWindow::renderDot()
 {
     Q_ASSERT(model); 
+    beginUserOperation();
     QString sFname = getCurrentFileName();
     if ( sFname.isEmpty() ) return;
     QString rFname = changeSuffix(sFname, ".dot");
@@ -595,6 +612,7 @@ void MainWindow::renderDot()
 QString MainWindow::generateRfsm(bool withTestbench ) // TODO : factorize
 {
   Q_ASSERT(model); 
+  beginUserOperation();
   if ( Globals::check_model ) {
     if ( withTestbench && ! checkModelWithStimuli() ) return "";
     if ( ! withTestbench && ! checkModel() ) return "";
@@ -912,12 +930,14 @@ void MainWindow::checkCompilerVersion()
     QVersionNumber mv = Compiler::minimalVersion();
     if ( QVersionNumber::fromString(v) < mv ) {
       QMessageBox::critical(this, "Compiler", "Invalid RFSM compiler version (" + v + ") (must be >= " + mv.toString() + ")"); 
+      Globals::compiler->stopServer(); // exit() does not run the destructors
       exit(1);
       }
     }
   else {
     if ( Globals::compiler->serverAvailable() ) // Otherwise, the user has already been told (see serverError)
       QMessageBox::critical(this, "Compiler", "Cannot retrieve compiler version");
+    Globals::compiler->stopServer(); // exit() does not run the destructors
     exit(1);
   }
 }

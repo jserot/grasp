@@ -184,6 +184,7 @@ void DynamicPanel::editStim()
     Q_ASSERT(model);
     Q_ASSERT(Globals::mainWindow);
     qDebug() << "DynamicPanel:: editing stimuli";
+    if ( QWidget *w = QApplication::focusWidget() ) w->clearFocus(); // Validates a pending IO name edition
 
     QDialog dialog(Globals::mainWindow);
     dialog.setWindowTitle(tr("Stimuli editor"));

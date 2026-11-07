@@ -74,6 +74,7 @@ StateProperties::StateProperties(State *state, Diagram *diagram, QWidget *parent
 void StateProperties::accept()
 {
   qDebug() << "StateProperties::accept";
+  Globals::compiler->resetReports();
   QString id = state_name_field->text().trimmed();
   // The state is left unchanged (and the dialog opened) if its new name or valuations are invalid
   if ( id.isEmpty() || ! re_uid.match(id).hasMatch() || re_uid.match(id).capturedLength() != id.length() ) {

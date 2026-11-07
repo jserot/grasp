@@ -30,5 +30,5 @@ public:
   QHBoxLayout *row_layout;
   QLineEdit* name_selector;
   QComboBox* type_selector;
-  QString committedName; // Name of the IO when last validated. The IO name itself is updated at each keystroke
+  QString committedName; // Name of the IO when last validated (and used by the transitions it triggers)
 };

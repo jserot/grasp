@@ -38,11 +38,15 @@ private:
   QComboBox* event_field;
   TransitionGuards *guards_panel;
   TransitionActions *actions_panel;
+  QString pendingWarning; // Shown when the dialog is shown (see showEvent)
+
+protected:
+  void showEvent(QShowEvent *event) override;
 
 signals:
     void modelModified(void);
     
 protected slots:
-  void accept();
+  void accept() override;
   void cancel();
 };

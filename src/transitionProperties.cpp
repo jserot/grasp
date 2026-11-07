@@ -17,6 +17,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QMessageBox>
+#include <QTimer>
 
 #include "globals.h"
 #include "transition.h"
@@ -118,7 +119,8 @@ TransitionProperties::TransitionProperties(
     if ( inpEvents.contains(event) || sharedEvents.contains(event) ) 
       event_field->setCurrentText(event);
     else
-      QMessageBox::warning( this, "Error", "The triggering event for this transition is not listed in the model inputs");
+      // Not shown here : the dialog may be built while processing a mouse event (see Diagram::showPropertiesDialog)
+      pendingWarning = "The triggering event for this transition is not listed in the model inputs";
       }
 
   setLayout(layout);
@@ -133,8 +135,19 @@ TransitionProperties::TransitionProperties(
   this->diagram = diagram;
 }
 
+void TransitionProperties::showEvent(QShowEvent *event)
+{
+  QDialog::showEvent(event);
+  if ( ! pendingWarning.isEmpty() ) {
+    QString msg = pendingWarning;
+    pendingWarning.clear();
+    QTimer::singleShot(0, this, [this, msg]() { QMessageBox::warning(this, "Error", msg); });
+    }
+}
+
 void TransitionProperties::accept()
 {
+  Globals::compiler->resetReports();
   State *srcState, *dstState;
   QString event;
   bool isInitial = transition->isInitial();

@@ -107,6 +107,7 @@ private:
     void createDockWindow(Model *model);
 
     bool checkUnsavedChanges(); // Returns false if the current operation must be cancelled
+    void beginUserOperation(); // To be called at the start of operations using the model (save, check, export, ...)
     QString getCurrentFileName();
     bool saveToFile(QString fname);
     QString generateRfsm(bool withTestbench);
