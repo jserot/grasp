@@ -52,6 +52,9 @@
   head or near their line (a right click next to a transition often opened the diagram properties)
 * The editing cursors now act where they point: the delete cross deletes the item under its center
   (clicks were taken up-left of it), and new states are created under the state cursor
+* Diagrams are now centered in their view when a model is opened and when the scale is changed. The
+  scale list of the diagram properties shows the current scale and has a new "Fit" entry, showing
+  the whole diagram
 * The application version is now read from the `VERSION` file
 
 # 1.0.3 (Mar 5, 2026)
