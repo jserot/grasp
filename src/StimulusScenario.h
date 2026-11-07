@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 #include "StimulusTrack.h"
-#include "../iov.h"
+#include "iov.h"
 
 /**
  * @brief Ensemble de pistes (signaux) formant un scénario de stimuli complet.

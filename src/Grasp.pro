@@ -29,12 +29,12 @@ HEADERS += include/nlohmann_json.h \
            transitionActions.h \
            transitionProperties.h \
            iovPanel.h \
-           aux/ChronogramEditorWidget.h \
-           aux/MultiTrackChronogramView.h \
-           aux/TrackStimulus.h \
-           aux/StimulusEditorDialog.h \
-           aux/StimulusScenario.h \
-           aux/StimulusTrack.h \
+           ChronogramEditorWidget.h \
+           MultiTrackChronogramView.h \
+           TrackStimulus.h \
+           StimulusEditorDialog.h \
+           StimulusScenario.h \
+           StimulusTrack.h \
            modelProperties.h \
            stimulus.h \
            command.h \
@@ -67,11 +67,11 @@ SOURCES += transition.cpp \
            transitionActions.cpp \
            transitionProperties.cpp \
            iovPanel.cpp \
-           aux/ChronogramEditorWidget.cpp \
-           aux/MultiTrackChronogramView.cpp \
-           aux/StimulusEditorDialog.cpp \
-           aux/StimulusScenario.cpp \
-           aux/StimulusTrack.cpp \
+           ChronogramEditorWidget.cpp \
+           MultiTrackChronogramView.cpp \
+           StimulusEditorDialog.cpp \
+           StimulusScenario.cpp \
+           StimulusTrack.cpp \
            modelProperties.cpp \
            stimulus.cpp \
            command.cpp \

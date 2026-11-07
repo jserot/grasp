@@ -21,7 +21,7 @@
 #include <QMessageBox>
 #include "globals.h"
 #include "model.h"
-#include "aux/ChronogramEditorWidget.h"
+#include "ChronogramEditorWidget.h"
 #include <QDialog>
 #include <QVBoxLayout>
 

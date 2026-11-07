@@ -1,6 +1,6 @@
 #include "StimulusScenario.h"
 #include <algorithm>
-#include "../iov.h"
+#include "iov.h"
 
 StimulusTrack *StimulusScenario::addTrack(const QString &name, TrackStimulusType type)
 {
