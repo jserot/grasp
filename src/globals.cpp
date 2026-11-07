@@ -20,6 +20,7 @@
 
 const QString Globals::version = "1.0.1"; 
 const QStringList Globals::guiOnlyOpts = { "-dot_external_viewer", "-no_model_check" };
+const bool Globals::modalPropertyDialogs = true; // Set to false to get back non-modal properties dialogs
 CompilerPaths *Globals::compilerPaths = NULL;
 CompilerOptions *Globals::compilerOptions = NULL;
 Compiler *Globals::compiler = NULL;

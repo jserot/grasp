@@ -44,6 +44,7 @@ public:
     static QString initDir;
     const static QString version;
     const static QStringList guiOnlyOpts;
+    const static bool modalPropertyDialogs; // See Diagram::showPropertiesDialog
     static QWidget *mainWindow;
     static QTabWidget* diagrams; 
     static const QRegularExpression re_lid;

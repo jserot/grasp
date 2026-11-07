@@ -29,6 +29,7 @@
 #include <QTextStream>
 #include <QDebug>
 #include <QGuiApplication>
+#include <QTimer>
 
 #define QEVENT_LEAVE QEvent::GraphicsSceneLeave
 #define SKIP_EMPTY_PARTS Qt::SkipEmptyParts
@@ -177,28 +178,38 @@ State* Diagram::addPseudoState(QPointF pos)
   return state;
 }
 
+// Shows a state, transition or diagram properties dialog.
+// The dialogs are application modal, so that the edited item (state, transition, diagram, variables)
+// cannot be deleted or modified elsewhere while they are opened (they keep raw pointers to it).
+// NOTE: these dialogs are opened from the scene mouse event handlers, some of them on a mouse _press_.
+// A modal dialog shown at this point blocks the corresponding mouse _release_, which then never reaches
+// the view : Qt keeps considering that the button is down in the view, and sends it all subsequent
+// mouse events, so that the toolbar and the other windows become unresponsive when the dialog is closed.
+// (Running a nested event loop with [exec] has the same effect).
+// Hence, when a mouse button is down, the dialog is only shown once it has been released (see
+// mouseReleaseEvent).
+// Setting [Globals::modalPropertyDialogs] to false gets back the previous, non-modal, behavior.
+void Diagram::showPropertiesDialog(QDialog *dialog)
+{
+  dialog->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  if ( ! Globals::modalPropertyDialogs ) {
+    dialog->show();
+    return;
+    }
+  dialog->setWindowModality(Qt::ApplicationModal);
+  if ( QGuiApplication::mouseButtons() != Qt::NoButton ) {
+    if ( pendingDialog ) pendingDialog->deleteLater(); // Should not happen
+    pendingDialog = dialog; // Will be shown when the button is released
+    }
+  else
+    dialog->show();
+}
+
 void Diagram::editState(State *state)
 {
   qDebug() << "Editing state" << state->getId() << "[" << state << "]";
-  StateProperties *dialog = new StateProperties(state, this, view);
-  dialog->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint);
-  dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->show();
-  // NOTE : the following _modal_ formulation seems not to work correctly
-  //        When returning from the dialog the main GUI loop sometimes becomes partially unresponsive
-  // StateProperties dialog(state, this, view);
-  // int r = dialog.exec();
-  // qDebug() << "state properties dialog returned" << r;
-  // switch ( r ) {
-  //   case QDialog::Accepted:
-  //     qDebug() << "state" << state->getId() << "updated";
-  //     update();
-  //     emit modelModified(); To main window
-  //     break;
-  //   case QDialog::Rejected:
-  //     qDebug() << "state" << state->getId() << "unchanged";
-  //     break;
-  //  }
+  showPropertiesDialog(new StateProperties(state, this, view));
   state->setSelected(false);
 }
 
@@ -213,18 +224,7 @@ void Diagram::editTransition(Transition *transition)
       removeTransition(transition);
       return;
       }
-  TransitionProperties *dialog = new TransitionProperties(transition,this,isInitial,view);
-  dialog->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint);
-  dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->show();
-  // NOTE : the following _modal_ formulation seems not to work correctly
-  //        When returning from the dialog the main GUI loop sometimes becomes partially unresponsive
-  // TransitionProperties dialog(transition,this,isInitial,view);
-  // if ( dialog.exec() == QDialog::Accepted ) {
-  //   qDebug() << "Transition" << transition->toString() << "updated";
-  //   update();
-  //   emit modelModified(); // To main window
-  //   }
+  showPropertiesDialog(new TransitionProperties(transition,this,isInitial,view));
 }
 
 QList<State*> Diagram::states()
@@ -445,10 +445,7 @@ void Diagram::editItem(QGraphicsItem *item)
 
 void Diagram::edit()
 {
-  DiagramProperties *dialog = new DiagramProperties(this, this->view);
-  dialog->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint);
-  dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->show();  // Non-modal diagram
+  showPropertiesDialog(new DiagramProperties(this, this->view));
 }
 
 // void Diagram::contextMenuEvent(QGraphicsSceneContextMenuEvent *contextMenuEvent)
@@ -502,6 +499,12 @@ void Diagram::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 void Diagram::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+  if ( pendingDialog ) {
+    // Show the dialog once the release event has been completely processed (see showPropertiesDialog)
+    QDialog *dialog = pendingDialog;
+    pendingDialog = nullptr;
+    QTimer::singleShot(0, dialog, [dialog]() { dialog->show(); });
+    }
   Qt::MouseButton buttonPressed = mouseEvent->button();
   if ( buttonPressed != Qt::LeftButton ) return;
   if ( itemsMoved ) {

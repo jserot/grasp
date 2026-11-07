@@ -15,6 +15,8 @@
 #include <QStringListModel>
 #include <QTextStream>
 #include <QGraphicsScene>
+#include <QPointer>
+#include <QDialog>
 
 #include "state.h"
 #include "iov.h"
@@ -117,6 +119,8 @@ protected:
     static QString statePrefix;
 
 private:
+    void showPropertiesDialog(QDialog *dialog);
+    QPointer<QDialog> pendingDialog; // Modal dialog waiting for the mouse button to be released (see showPropertiesDialog)
     bool isItemChange(int type);
     State* addState(QPointF pos, QString id, QStringList attrs);
     State* addPseudoState(QPointF pos);
