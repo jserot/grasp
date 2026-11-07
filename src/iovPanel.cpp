@@ -129,7 +129,17 @@ void IovPanel::addRowFields(QHBoxLayout *row_layout, void *row_data)
     case IcModel: 
       model = client.icClient.model;
       Q_ASSERT(model);
-      io = model->addInput("", IoType::TyEvent);
+      switch ( kind ) {
+      case IoKind::IoIn:
+        io = model->addInput("", IoType::TyEvent);
+        break;
+      case IoKind::IoOut:
+        io = model->addOutput("", IoType::TyEvent);
+        break;
+      case IoKind::IoVar:
+        io = model->addGvar("", IoType::TyInt); // No event type for variables
+        break;
+      }
       break;
     case IcDiagram: 
       diagram = client.icClient.diagram;
@@ -237,6 +247,10 @@ void IovPanel::nameChanged()
   Q_ASSERT(name_selector);
   RowDesc *row_desc = widgetToRow.value(name_selector);
   Q_ASSERT(row_desc);
+  // Update the name at each keystroke so that the model is up to date even if
+  // it is saved/checked/exported before the name field loses focus.
+  // The check for duplicate names is done in nameEdited.
+  row_desc->io->name = name_selector->text().trimmed();
   updateTypeChoices(row_desc);
   if ( row_desc->io->kind() == IoKind::IoIn ) 
     updateStimChoices(row_desc); 
@@ -254,20 +268,23 @@ void IovPanel::nameEdited()
   Iov* io = row_desc->io;
   qDebug() << "IovPanel: setting name for IOV" << io->name;
   QString name = name_selector->text().trimmed();
-  QStringList defined;
+  QList<Iov*> others;
   switch ( client.icKind ) {
     case IcModel:
       model = client.icClient.model;
       Q_ASSERT(model);
-      defined = model->getInputNames() + model->getOutputNames() + model->getSharedNames();
+      others = model->inputs() + model->outputs() + model->globalVars();
       break;
     case IcDiagram:
       diagram = client.icClient.diagram;
       Q_ASSERT(diagram);
-      defined = diagram->getVarNames();
+      others = diagram->getVars();
       break;
     }
-  if ( defined.contains(name) ) {
+  bool already_used = false;
+  for ( const Iov* other: others )
+    if ( other != io && other->name == name ) already_used = true;
+  if ( name != "" && already_used ) {
     QMessageBox::warning( this, "Error", "The name " + name + " is already used. Please choose another none");
     //name_selector->setText("");
     }
