@@ -4,8 +4,10 @@
 #include <cmath>
 
 StimulusTrack::StimulusTrack(Input* io)
+  : m_name(io->name),
+    m_type(io->type == IoType::TyEvent ? TrackStimulusType::Event : TrackStimulusType::ValueChange),
+    m_io(io)
 {
-  m_io = io;
   Stimulus st = io->stim;
   qDebug() << "StimulusTrack: adding" << st.toString() << "to track" << io->name;
   switch ( st.kind ) {

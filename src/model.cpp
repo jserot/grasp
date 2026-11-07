@@ -131,7 +131,7 @@ static QStringList build_io_list(QList<Iov*> ios, bool event_typed = false)
 {
   QStringList r;
   for ( const auto io : ios )
-    if ( event_typed && io->type == IoType::TyEvent ) 
+    if ( ! event_typed || io->type == IoType::TyEvent )
       r.append(io->name);
   return r;
 }
