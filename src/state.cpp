@@ -133,7 +133,7 @@ void State::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *
 
 QVariant State::itemChange(GraphicsItemChange change, const QVariant &value)
 {
-    if (change == QGraphicsItem::ItemPositionChange) {
+    if (change == QGraphicsItem::ItemPositionHasChanged) { // The new position must be used
         foreach (Transition *transition, transitions) {
             transition->updatePosition();
         }

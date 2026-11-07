@@ -321,6 +321,7 @@ void Diagram::addTransition(Transition *transition)
   if ( dstState != srcState ) dstState->addTransition(transition); // Do _not_ add self-transitions twice !
   transition->setZValue(-1000.0);
   addItem(transition);
+  transition->updateSiblings(); // The offsets of the transitions between the same states depend on their number
 }
 
 Transition* Diagram::addTransition(State* srcState,
@@ -506,6 +507,9 @@ void Diagram::removeTransition(Transition *transition)
   srcState->removeTransition(transition);
   dstState->removeTransition(transition);
   removeItem(transition);
+  // The offsets of the remaining transitions between the same states depend on their number
+  for ( Transition *t : remove_duplicates(srcState->getTransitionsTo(dstState) + dstState->getTransitionsTo(srcState)) )
+    t->updatePosition();
   emit modelModified();
   delete transition;
 }

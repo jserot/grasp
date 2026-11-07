@@ -31,6 +31,7 @@ const qreal Pi = 3.141592654;
 QColor Transition::selectedColor = Qt::darkCyan;
 QColor Transition::unSelectedColor = Qt::black;
 double Transition::arrowSize = 20.0;
+double Transition::hitWidth = 12.0;
 
 Transition::Transition(Diagram *d,
                        State *_srcState,
@@ -51,6 +52,7 @@ Transition::Transition(Diagram *d,
     actions = _actions;
     label = new QGraphicsSimpleTextItem(getLabel(), this);
     label->setFlag(QGraphicsItem::ItemIsSelectable, false);
+    label->setFlag(QGraphicsItem::ItemStacksBehindParent, true); // A click on the label selects the transition (see shape)
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setPen(QPen(unSelectedColor, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 }
@@ -90,57 +92,56 @@ bool Transition::isInitial()
 //         .adjusted(-extra, -extra, extra, extra);
 // }
 
+QRectF Transition::boundingRect() const
+{
+    return QGraphicsPolygonItem::boundingRect().united(hitShape.boundingRect());
+}
+
 QPainterPath Transition::shape() const
 {
-    QPainterPath path = QGraphicsPolygonItem::shape();
-    path.addPolygon(arrowHead);
-    return path;
+    // The "active" (clickable) zone of the transition : the drawn line (with a tolerance), the arrow head and the label
+    return hitShape.isEmpty() ? QGraphicsPolygonItem::shape() : hitShape;
+}
+
+// Updates the geometry of all the transitions between [a] and [b], whose positions depend on each other (see computeGeometry)
+static void updateTransitionsBetween(State *a, State *b)
+{
+  QList<Transition*> ts = remove_duplicates(a->getTransitionsTo(b) + b->getTransitionsTo(a));
+  for ( Transition *t : ts ) t->updatePosition();
 }
 
 void Transition::setStates(State *src, State *dst)
 {
   Q_ASSERT(src && dst);
   if ( src == srcState && dst == dstState ) return;
+  State *oldSrc = srcState, *oldDst = dstState;
   srcState->removeTransition(this);
   dstState->removeTransition(this);
   srcState = src;
   dstState = dst;
   srcState->addTransition(this);
   if ( dstState != srcState ) dstState->addTransition(this); // Do _not_ add self-transitions twice (see Diagram::addTransition)
-  updatePosition();
+  updateTransitionsBetween(oldSrc, oldDst); // The remaining ones
+  updateTransitionsBetween(srcState, dstState); // Including this one
 }
 
-void Transition::updatePosition()
+void Transition::updateSiblings()
 {
-  QPolygonF p;
-  if ( srcState == dstState ) {
-    float w = State::boxSize.width();
-    float h = State::boxSize.height();
-    p << mapFromItem(srcState, 0, -0.25*h)
-      << mapFromItem(srcState, 0, 0.25*h)
-      << mapFromItem(srcState, w, 0.25*h)
-      << mapFromItem(srcState, w, -0.25*h);
-    }
-  else
-    p << mapFromItem(srcState, 0, 0)
-      << mapFromItem(dstState, 0, 0);
-  setPolygon(p);
+  updateTransitionsBetween(srcState, dstState);
 }
 
-void Transition::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+// Computes the drawn line, the arrow head and the label position.
+// Note: when there are several transitions between two states, they are drawn with an offset, depending on their rank.
+void Transition::computeGeometry()
 {
-    // qDebug() << "------------- Transition::paint";
-    // qDebug() << "Drawing transition between state " << mySrcState->getId() << " and " << myDstState->getId();
+    drawnPoints.clear();
+    arrowHead.clear();
 
-    QPen myPen = pen();
-    myPen.setColor(isSelected() ? selectedColor : unSelectedColor);
-    painter->setPen(myPen);
-    painter->setBrush(isSelected() ? selectedColor : unSelectedColor);
-
-    QPolygonF points; // Drawing points
     double angle=0.0; // Of the last segment; for drawing the arrow head
     QPointF endPoint; // For anchoring the arrow head
     QPointF midPoint; // For drawing the caption
+
+    QPolygonF points; // Drawing points
 
     float w = State::boxSize.width();
     float h = State::boxSize.height();
@@ -185,7 +186,7 @@ void Transition::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWid
 
     else { // Normal transition
 
-      if (srcState->collidesWithItem(dstState)) return; // Do not draw if start and end statees collide
+      if (srcState->collidesWithItem(dstState)) return; // Nothing is drawn if the start and end states collide
 
       // Find the position where to draw the arrow head
       // This is where the line and the end state intersect
@@ -216,7 +217,7 @@ void Transition::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWid
       int rank = -1;
       for ( int i=0; i<transitions.length() && rank<0; i++ )
         if ( transitions.at(i) == this ) rank = i;
-      if ( rank == -1 ) throw std::invalid_argument(std::string("Transition::paint:compute_rank"));
+      if ( rank == -1 ) rank = 0; // Should not happen (the transition lists of the states are inconsistent)
 
       int n = transitions.length();
       QPointF offset;
@@ -238,32 +239,54 @@ void Transition::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWid
       midPoint = (line.p1() + line.p2())/2;
     }
 
-    // setPolygon(points);  
-    
     // Build arrow head  
 
     QPointF arrowP1 = endPoint + QPointF(sin(angle + Pi/3) * arrowSize, cos(angle + Pi/3) * arrowSize);
     QPointF arrowP2 = endPoint + QPointF(sin(angle + Pi - Pi/3) * arrowSize, cos(angle + Pi - Pi/3) * arrowSize);
-    arrowHead.clear();
     arrowHead << endPoint << arrowP1 << arrowP2;
+    drawnPoints = points;
+    labelPos = midPoint;
+}
 
-    setPolygon(points + arrowHead); // The recorded polygon now includes the arrow head
-    // QRectF box = boundingRect();
-    // QPen pen = painter->pen();
-    // QBrush brush = painter->brush();
-    // painter->setPen(QPen(Qt::blue));
-    // painter->setBrush(Qt::NoBrush);
-    // painter->drawRect(box);
-    // painter->setPen(pen);
-    // painter->setBrush(brush);
+void Transition::updatePosition()
+{
+  prepareGeometryChange();
+  computeGeometry();
+  setPolygon(drawnPoints + arrowHead);
+  label->setText(getLabel());
+  label->setPos(labelPos);
+  // Active zone
+  hitShape = QPainterPath();
+  if ( drawnPoints.isEmpty() ) return;
+  QPainterPath line;
+  line.addPolygon(drawnPoints); // Open polyline
+  QPainterPathStroker stroker;
+  stroker.setWidth(hitWidth);
+  stroker.setCapStyle(Qt::RoundCap);
+  stroker.setJoinStyle(Qt::RoundJoin);
+  // Note: the parts must be united. Simply adding them to the same path leaves holes where they overlap
+  // (the arrow head and the line, for ex.), whatever the fill rule
+  QPainterPath arrow;
+  arrow.addPolygon(arrowHead);
+  arrow.closeSubpath();
+  hitShape = stroker.createStroke(line).united(arrow);
+  if ( ! label->text().isEmpty() ) {
+    QPainterPath labelZone;
+    labelZone.addRect(label->mapRectToParent(label->boundingRect()));
+    hitShape = hitShape.united(labelZone);
+    }
+}
 
-    // Draw all
-    
-    painter->drawPolyline(points);
+void Transition::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+{
+    // Note: the geometry is computed by [updatePosition], not here
+    if ( drawnPoints.isEmpty() ) return; // Start and end states collide
+    QPen myPen = pen();
+    myPen.setColor(isSelected() ? selectedColor : unSelectedColor);
+    painter->setPen(myPen);
+    painter->setBrush(isSelected() ? selectedColor : unSelectedColor);
+    painter->drawPolyline(drawnPoints);
     painter->drawPolygon(arrowHead);
-
-    label->setText(getLabel());
-    label->setPos(midPoint);
 }
 
 QString Transition::toString()

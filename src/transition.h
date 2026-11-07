@@ -37,7 +37,7 @@ public:
     ~Transition();
 
     int type() const override { return Type; }
-    //QRectF boundingRect() const override;
+    QRectF boundingRect() const override;
     QPainterPath shape() const override;
     State *getSrcState() const { return srcState; }
     State *getDstState() const { return dstState; }
@@ -46,14 +46,15 @@ public:
     QStringList getActions() const { return actions; }
     QString getLabel();
     void setStates(State *src, State *dst); // Also updates the transition lists of the old and new states
-    void setEvent(QString s) { event = s; }
-    void setGuards(QStringList ss) { guards = ss; }
-    void setActions(QStringList ss) { actions = ss; }
+    void setEvent(QString s) { event = s; updatePosition(); } // The label (part of the geometry) changes
+    void setGuards(QStringList ss) { guards = ss; updatePosition(); }
+    void setActions(QStringList ss) { actions = ss; updatePosition(); }
     void setDiagram(Diagram *diagram) { this->enclosingDiagram = diagram; }
     State::Location getLocation() const { return location; }
     bool isInitial();
 
-    void updatePosition();
+    void updatePosition(); // Computes the geometry (drawn line, arrow head, label and active zone)
+    void updateSiblings(); // Updates the geometry of all the transitions between the same states
 
     QString toString();
     
@@ -68,6 +69,7 @@ public:
     static QColor selectedColor;
     static QColor unSelectedColor;
     static double arrowSize;
+    static double hitWidth; // Width of the active (clickable) zone along the drawn line
 
     friend QDebug operator<<(QDebug d, Transition& t);
 
@@ -84,7 +86,11 @@ private:
     QString event;
     QStringList guards;
     QStringList actions;
+    void computeGeometry();
+    QPolygonF drawnPoints; // Drawn line
     QPolygonF arrowHead;
+    QPointF labelPos;
+    QPainterPath hitShape; // Active zone (see shape)
     QGraphicsSimpleTextItem *label;
     State::Location location;
 };
