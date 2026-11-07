@@ -238,14 +238,14 @@ Model* Model::readFromFile(QString fname)
   }
 }
 
-void Model::saveToFile(QString fname)
+bool Model::saveToFile(QString fname)
 {
     QFile file(fname);
     qDebug() << "Saving model to file" << file.fileName();
     (void)file.open(QIODevice::WriteOnly | QIODevice::Text);
     if ( file.error() != QFile::NoError ) {
       QMessageBox::warning(Globals::mainWindow, "","Cannot open file " + file.fileName());
-      return;
+      return false;
       }
 
     nlohmann::json json_top;
@@ -279,8 +279,14 @@ void Model::saveToFile(QString fname)
 
     QTextStream os(&file);
     os << QString::fromStdString(json_top.dump(2));
+    os.flush();
     file.close();
+    if ( os.status() != QTextStream::Ok || file.error() != QFile::NoError ) {
+      QMessageBox::warning(Globals::mainWindow, "","Error when writing file " + file.fileName());
+      return false;
+      }
     qDebug () << "Done";
+    return true;
 }
 
 // DOT export

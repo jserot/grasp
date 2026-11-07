@@ -347,6 +347,7 @@ void Diagram::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
       switch ( Globals::mode ) {
         case Globals::InsertState:
           state = addState(mouseEvent->scenePos(), statePrefix + QString::number(stateCounter++), QStringList());
+          emit modelModified(); // The state is kept even if its properties dialog is cancelled
           editState(state);
           break;
         case Globals::InsertPseudoState:
@@ -494,6 +495,8 @@ void Diagram::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
     }
   else if (Globals::mode == Globals::SelectItem) {
     QGraphicsScene::mouseMoveEvent(mouseEvent);
+    if ( (mouseEvent->buttons() & Qt::LeftButton) && ! selectedItems().isEmpty() )
+      itemsMoved = true; // Selected (movable) items are being dragged
     }
 }
 
@@ -501,6 +504,10 @@ void Diagram::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
   Qt::MouseButton buttonPressed = mouseEvent->button();
   if ( buttonPressed != Qt::LeftButton ) return;
+  if ( itemsMoved ) {
+    itemsMoved = false;
+    emit modelModified(); // State positions are saved in the model file
+    }
   if ( line != 0 && (Globals::mode == Globals::InsertTransition || Globals::mode == Globals::InsertPseudoState) ) {
     QList<QGraphicsItem *> srcStates = items(line->line().p1());
     if (srcStates.count() && srcStates.first() == line) srcStates.removeFirst();

@@ -67,7 +67,7 @@ public:
     QList<Diagram*>& getDiagrams() { return diagrams; };
 
     static Model* readFromFile(QString fname);
-    void saveToFile(QString fname);
+    bool saveToFile(QString fname); // Returns false (after warning the user) if the file could not be written
 
     void report_error(QString msg);
     bool check(bool withStimuli);

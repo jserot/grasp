@@ -15,6 +15,7 @@
 #include "state.h"
 #include "model.h"
 #include "mainwindow.h"
+#include <QCloseEvent>
 #include "imageViewer.h"
 #include "textViewer.h"
 #include "textsViewer.h"
@@ -397,23 +398,23 @@ void MainWindow::setUnsavedChanges(bool unsaved_changes)
     setWindowTitle(unsaved_changes ? title + " (Unsaved changes)" : title);
 }
 
-void MainWindow::checkUnsavedChanges()
+bool MainWindow::checkUnsavedChanges()
 {
-    if ( unsaved_changes ) {
-        QMessageBox save_message;
-        save_message.setText("Do you want to save your changes?");
-        save_message.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        save_message.setDefaultButton(QMessageBox::Save);
-        switch( save_message.exec() ) {
-            case QMessageBox::Cancel: return;
-            case QMessageBox::Save: save();
-            }
+    if ( ! unsaved_changes ) return true;
+    QMessageBox save_message;
+    save_message.setText("Do you want to save your changes?");
+    save_message.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    save_message.setDefaultButton(QMessageBox::Save);
+    switch( save_message.exec() ) {
+        case QMessageBox::Save: return save(); // Cancel the operation if the model could not be saved
+        case QMessageBox::Discard: return true;
+        default: return false; // Cancel
         }
 }
 
 void MainWindow::openFile()
 {
-    checkUnsavedChanges();
+    if ( ! checkUnsavedChanges() ) return;
     QString fname = QFileDialog::getOpenFileName(this, "Open file", Globals::initDir, "FSD file (*.fsd)");
     if ( fname.isEmpty() ) return;
     Model *new_model = Model::readFromFile(fname);
@@ -465,7 +466,7 @@ bool MainWindow::checkModelWithStimuli()
 
 void MainWindow::newModel()
 {
-  checkUnsavedChanges();
+  if ( ! checkUnsavedChanges() ) return;
   if ( model ) delete model; // This will delete all the enclosed diagrams
   model = new Model;
   closeDiagramTabs();
@@ -476,26 +477,28 @@ void MainWindow::newModel()
   updateActions();
 }
 
-void MainWindow::saveToFile(QString fname)
+bool MainWindow::saveToFile(QString fname)
 {
   Q_ASSERT(model); 
-  model->saveToFile(fname);
+  if ( ! model->saveToFile(fname) ) return false; // The user has already been warned
   logMessage("Saved file " + fname);
   setUnsavedChanges(false);
+  return true;
 }
 
-void MainWindow::save()
+bool MainWindow::save()
 {
-  if ( currentFileName.isEmpty() ) saveAs();
-  else saveToFile(currentFileName);
+  if ( currentFileName.isEmpty() ) return saveAs();
+  else return saveToFile(currentFileName);
 }
 
-void MainWindow::saveAs()
+bool MainWindow::saveAs()
 {
   QString fname = QFileDialog::getSaveFileName( this, "Save to file", "", "FSM file (*.fsd)");
-  if ( fname.isEmpty() ) return;
-  saveToFile(fname);
+  if ( fname.isEmpty() ) return false;
+  if ( ! saveToFile(fname) ) return false;
   currentFileName = fname;
+  return true;
 }
 
 // Model and diagram editing
@@ -773,8 +776,8 @@ void MainWindow::generate(QString target, bool withTestbench)
       QDir().mkdir(targetPath);
       }
     }
-  foreach ( QString opt, genOpts)
-    if ( genOpts.contains(opt) ) genOpts.removeOne(opt);
+  for ( const QString &opt : Globals::guiOnlyOpts ) // These options are not understood by the compiler
+    genOpts.removeAll(opt);
   QString mainName = model->getName();
   if ( mainName.isEmpty() ) mainName = "main";
   QStringList args =
@@ -920,6 +923,14 @@ void MainWindow::checkCompilerVersion()
 
 void MainWindow::quit()
 {
-    checkUnsavedChanges();
-    close();
+    close(); // Unsaved changes are checked by closeEvent
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    // Called when quitting from the menu, closing the window or quitting the application (Cmd-Q on macOS)
+    if ( checkUnsavedChanges() )
+      event->accept();
+    else
+      event->ignore();
 }

@@ -57,11 +57,14 @@ public:
   Model *getModel() { return model; }
   QTabWidget *getDiagrams() { return diagrams; }
 
+protected:
+  void closeEvent(QCloseEvent *event) override;
+
 public slots:
     void modelModified();
 private slots:
-    void save();
-    void saveAs();
+    bool save();   // Returns false if the model has not been saved (cancelled or failed)
+    bool saveAs(); // Idem
     void openFile();
     void newModel();
     Diagram* diagramOf(int index);
@@ -102,9 +105,9 @@ private:
     void createToolbar();
     void createDockWindow(Model *model);
 
-    void checkUnsavedChanges();
+    bool checkUnsavedChanges(); // Returns false if the current operation must be cancelled
     QString getCurrentFileName();
-    void saveToFile(QString fname);
+    bool saveToFile(QString fname);
     QString generateRfsm(bool withTestbench);
     void openTextFile(QString fname);
     void openTextFiles(QString title, QStringList fname);

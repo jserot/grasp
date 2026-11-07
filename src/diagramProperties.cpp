@@ -100,8 +100,13 @@ void DiagramProperties::accept()
 {
   QString id = name_field->text();
   qDebug() << "DiagramProperties::accept";
-  diagram->setName(id);
-  Globals::diagrams->setTabText(Globals::diagrams->currentIndex(), id);
+  if ( id != diagram->getName() ) {
+    diagram->setName(id);
+    // The dialog is not modal: the current tab may not be the one of this diagram anymore
+    int index = Globals::diagrams->indexOf(diagram->getView());
+    if ( index >= 0 ) Globals::diagrams->setTabText(index, id);
+    emit diagram->modelModified(); // To main window
+    }
   QDialog::done(Accepted);
 }
 

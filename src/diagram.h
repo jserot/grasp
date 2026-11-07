@@ -131,6 +131,7 @@ private:
     
     QGraphicsLineItem *line = nullptr;  // Line being drawn
     State *startState = nullptr;  // Initial pseudo-state being connected (between mouse press and release)
+    bool itemsMoved = false;      // Set when items are dragged in SelectItem mode (between mouse press and release)
 
     QWidget *parent;
 
