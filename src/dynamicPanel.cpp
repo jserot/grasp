@@ -106,6 +106,65 @@ void DynamicPanel::clear()
   }
 }
 
+// Builds the model stimulus corresponding to an edited track.
+// Dates are rounded to the nearest integer (model stimuli are integer-timed), events falling at the same
+// date are merged, and values of boolean inputs are normalized to 0/1. Each adjustment is described in
+// [adjustments].
+// A periodic stimulus is kept as such if the track still holds exactly the events it generates.
+static Stimulus trackToStimulus(const StimulusTrack *track, const Input *inp, QStringList &adjustments)
+{
+  if ( track->count() == 0 ) return Stimulus(Stimulus::None);
+  QString name = inp->name;
+  bool rounded = false;
+  if ( track->type() == TrackStimulusType::Event ) {
+    QList<int> dates;
+    for ( int i = 0; i<track->count(); i++ ) {
+      const TrackStimulus *st = track->at(i);
+      if ( st->type() != TrackStimulusType::Event ) continue;
+      int t = qRound(st->date());
+      if ( t != st->date() ) rounded = true;
+      if ( dates.isEmpty() || dates.last() != t ) // Track is sorted by date
+        dates.append(t);
+      else
+        adjustments.append(name + QString(": events at t=%1 merged").arg(t));
+      }
+    if ( rounded ) adjustments.append(name + ": event dates rounded to integers");
+    if ( dates.isEmpty() ) return Stimulus(Stimulus::None);
+    if ( inp->stim.kind == Stimulus::Periodic ) {
+      const Periodic_stim &p = inp->stim.desc.periodic;
+      QList<int> expected;
+      for ( int t=p.start_time; t<=p.end_time && p.period > 0; t += p.period ) expected.append(t);
+      if ( dates == expected ) return inp->stim; // Unchanged
+      }
+    return Stimulus(Stimulus::Sporadic, dates);
+    }
+  else { // ValueChange
+    QList<QPair<int,int>> vcs;
+    bool normalized = false;
+    for ( int i = 0; i<track->count(); i++ ) {
+      const TrackStimulus *st = track->at(i);
+      if ( st->type() != TrackStimulusType::ValueChange ) continue;
+      const ValueChangeStimulus *vc = static_cast<const ValueChangeStimulus *>(st);
+      int t = qRound(vc->date());
+      if ( t != vc->date() ) rounded = true;
+      int v = vc->value().toInt();
+      if ( inp->type == IoType::TyBool && v != 0 && v != 1 ) { v = 1; normalized = true; }
+      if ( ! vcs.isEmpty() && vcs.last().first == t ) { // Track is sorted by date: keep the last value
+        vcs.last().second = v;
+        adjustments.append(name + QString(": value changes at t=%1 merged (last value kept)").arg(t));
+        }
+      else
+        vcs.append(QPair<int,int>(t, v));
+      }
+    if ( rounded ) adjustments.append(name + ": value change dates rounded to integers");
+    if ( normalized ) adjustments.append(name + ": non-zero boolean values set to 1");
+    if ( vcs.isEmpty() ) return Stimulus(Stimulus::None);
+    QList<int> params;
+    for ( const auto &vc : vcs ) params << vc.first << vc.second;
+    return Stimulus(Stimulus::ValueChanges, params);
+    }
+}
+
 void DynamicPanel::editStim()
 // TODO : this should not be in DynamicPanel but in function defined in the StimEditor class and
 // passed as a parameter to the DynamicPanel class (and called when the "Custom" button is clicked
@@ -135,45 +194,25 @@ void DynamicPanel::editStim()
     }
     editor->rebuildPanels();
     if (dialog.exec() == QDialog::Accepted) {
-    // --- 2) Report des modifications de "scenario" vers "model" ---
-    // TODO : relire scenario.tracks() et mettre à jour les signaux de "model"
+      // Report the edited tracks back to the model inputs
+      // TODO : get rid of all this forth-and-back conversion work by directly storing _tracks_ in model inputs !
       qDebug() << "DynamicPanel:: updating model with edited stimuli";
-      // !!!!!!!!!!!!!! TODO : get rid of all this forth-and-back conversion work by directly storing _tracks_ in
-      // models inputs !
+      bool modified = false;
+      QStringList adjustments;
       foreach ( StimulusTrack* track, scenario.tracks() ) {
         qDebug() << track->count() << "stimuli registred in track" << track->name();
-        Iov *io = track->io();
-        Q_ASSERT(io->kind() == IoKind::IoIn);
-        QList<int> dates;
-        QList<int> vcs;
-        Input *inp = static_cast<Input*>(io);
-        switch ( inp->stim.kind ) {
-        case Stimulus::None:
-          break;
-        case Stimulus::Sporadic:
-        case Stimulus::Periodic:
-          // Note : since events may have been added manually on the track, it may no longer be periodic.
-          // and hence, all periodic stimuli are automatically turned to sporadic ones
-          for ( int i = 0; i<track->count(); i++ ) {
-            const TrackStimulus *st = track->at(i);
-            if ( st->type() == TrackStimulusType::Event )
-              dates.append(st->date());
-            }
-          inp->stim = Stimulus(Stimulus::Sporadic, dates);
-          break;
-        case Stimulus::ValueChanges: 
-          for ( int i = 0; i<track->count(); i++ ) {
-            const TrackStimulus *st = track->at(i);
-            if ( st->type() == TrackStimulusType::ValueChange ) {
-              const ValueChangeStimulus *vc = static_cast<const ValueChangeStimulus *>(st);
-              vcs.append(vc->date());
-              vcs.append(vc->value().toInt());
-              }  
-            }
-          inp->stim = Stimulus(Stimulus::ValueChanges, vcs);
-          break;
+        Input *inp = track->io();
+        Q_ASSERT(inp);
+        Stimulus new_stim = trackToStimulus(track, inp, adjustments);
+        if ( new_stim.toString() != inp->stim.toString() ) {
+          inp->stim = new_stim;
+          modified = true;
+          }
         }
-      }
+      if ( ! adjustments.isEmpty() )
+        QMessageBox::warning(Globals::mainWindow, tr("Stimuli editor"),
+                             tr("Some stimuli have been adjusted:\n") + adjustments.join("\n"));
+      if ( modified ) emit modelModified();
    }
 }
 

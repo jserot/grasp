@@ -56,7 +56,8 @@ public slots:
   QHBoxLayout *addRow(void *row_data);
 
 signals:
-    
+  void modelModified();
+
 protected slots:
   void addNewRow();
   void deleteRow();

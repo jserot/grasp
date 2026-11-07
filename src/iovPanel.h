@@ -37,9 +37,6 @@ public:
 
   QStringList retrieve(); // Not used here
 
-signals:
-  void modelModified();
-  
 private:
   IoKind kind; // Input, output or variable
   Client client;
