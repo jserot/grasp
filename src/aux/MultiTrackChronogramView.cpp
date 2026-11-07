@@ -246,5 +246,9 @@ void MultiTrackChronogramView::mousePressEvent(QMouseEvent *event)
 
 void MultiTrackChronogramView::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    mousePressEvent(event);
+    // Qt envoie appui, relâchement, double-clic, relâchement : le premier appui a déjà été
+    // traité par mousePressEvent, et le double-clic n'est émis que si le second clic est
+    // tout près du premier (il vise donc la même chose). Le retraiter ouvrirait un second
+    // dialogue (doublons à l'ajout, suppression du mauvais stimulus...). On l'ignore donc.
+    event->accept();
 }

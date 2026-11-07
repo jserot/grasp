@@ -41,6 +41,9 @@ public:
 
     void removeAt(int index);
 
+    /// Index du stimulus d'identifiant 'id' (voir TrackStimulus::id), -1 s'il n'est plus dans la piste
+    int indexOfId(quint64 id) const;
+
     /// Index du stimulus le plus proche de 'date' à 'tolerance' près (-1 si aucun)
     int indexNear(double date, double tolerance) const;
 

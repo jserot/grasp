@@ -298,11 +298,15 @@ void ChronogramEditorWidget::onEditStimulusRequested(StimulusTrack *track, int i
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     dlg->setModal(false);
 
-    connect(dlg, &QDialog::finished, this, [this, track, index, dlg](int result) {
+    // Le dialogue étant non modal, la piste peut être modifiée pendant l'édition (ajouts,
+    // suppressions...) : son index n'est alors plus valable. On mémorise donc l'identifiant
+    // du stimulus et on retrouve son index à la validation.
+    const quint64 id = existing->id();
+    connect(dlg, &QDialog::finished, this, [this, track, id, dlg](int result) {
         if (result == QDialog::Accepted) {
-            // replace() vérifie déjà les bornes en interne (sécurité si l'index
-            // est devenu invalide entre-temps, la piste n'étant plus verrouillée
-            // pendant l'édition avec un dialogue non modal).
+            const int index = track->indexOfId(id);
+            if (index < 0)
+                return; // Le stimulus a été supprimé entre-temps
             track->replace(index, dlg->buildStimulus());
             m_multiView->update();
         }
@@ -316,15 +320,24 @@ void ChronogramEditorWidget::onRemoveStimulusRequested(StimulusTrack *track, int
     if (!track)
         return;
 
+    const TrackStimulus *existing = track->at(index);
+    if (!existing)
+        return;
+    // Voir onEditStimulusRequested : l'index peut changer avant la confirmation
+    const quint64 id = existing->id();
+
     auto *box = new QMessageBox(QMessageBox::Question, tr("Confirmer"),
                                  tr("Supprimer ce stimulus ?"),
                                  QMessageBox::Yes | QMessageBox::No, this);
     box->setAttribute(Qt::WA_DeleteOnClose);
     box->setModal(false);
 
-    connect(box, &QMessageBox::finished, this, [this, track, index](int result) {
+    connect(box, &QMessageBox::finished, this, [this, track, id](int result) {
         if (result == QMessageBox::Yes) {
-            track->removeAt(index); // vérifie déjà les bornes en interne
+            const int index = track->indexOfId(id);
+            if (index < 0)
+                return; // Le stimulus a déjà été supprimé entre-temps
+            track->removeAt(index);
             m_multiView->update();
         }
     });

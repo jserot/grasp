@@ -57,6 +57,14 @@ void StimulusTrack::removeAt(int index)
     m_stimuli.erase(m_stimuli.begin() + index);
 }
 
+int StimulusTrack::indexOfId(quint64 id) const
+{
+    for (int i = 0; i < static_cast<int>(m_stimuli.size()); ++i)
+        if (m_stimuli[static_cast<size_t>(i)]->id() == id)
+            return i;
+    return -1;
+}
+
 int StimulusTrack::indexNear(double date, double tolerance) const
 {
     int best = -1;

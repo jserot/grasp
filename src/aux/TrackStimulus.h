@@ -25,10 +25,15 @@ enum class TrackStimulusType {
 class TrackStimulus
 {
 public:
-    explicit TrackStimulus(double date) : m_date(date) {}
+    explicit TrackStimulus(double date) : m_date(date), m_id(nextId()) {}
     virtual ~TrackStimulus() = default;
 
     double date() const { return m_date; }
+
+    /// Identifiant unique du stimulus, stable tant qu'il existe (contrairement à son
+    /// index dans la piste, qui change quand on ajoute ou supprime d'autres stimuli).
+    /// Sert aux dialogues non modaux pour retrouver le stimulus à la validation.
+    quint64 id() const { return m_id; }
     virtual TrackStimulusType type() const = 0;
 
     /// Description lisible, utile pour le debug ou l'affichage dans l'UI
@@ -38,6 +43,10 @@ public:
 
 protected:
     double m_date;
+
+private:
+    quint64 m_id;
+    static quint64 nextId() { static quint64 n = 0; return ++n; }
 };
 
 /**
