@@ -31,7 +31,7 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext &, const QStri
       case QtCriticalMsg: txt = QString("Critical: %1").arg(msg); break;
       case QtFatalMsg: txt = QString("Fatal: %1").arg(msg); break;
       }
-    if ( Globals::traceFile ) {
+    if ( Globals::traceFile && Globals::traceFile->isOpen() ) {
       QTextStream ts(Globals::traceFile);
       ts << "[" << QDateTime::currentDateTime().toString("hh:mm:ss.zzz") << "]" << txt << QT_ENDL;
       }

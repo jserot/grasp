@@ -30,10 +30,18 @@ int main(int argv, char *args[])
     qInstallMessageHandler(debugMessageHandler); 
 
     QApplication app(argv, args);
-    MainWindow mainWindow;
-    mainWindow.setGeometry(100, 100, 900, 700);
-    
-    mainWindow.show();
+    int result;
+    {
+      MainWindow mainWindow;
+      mainWindow.setGeometry(100, 100, 900, 700);
+      mainWindow.show();
+      result = app.exec();
+    } // The main window (and the model) are deleted here, possibly emitting trace messages
 
-    return app.exec();
+    if ( Globals::traceFile ) {
+      Globals::traceFile->close();
+      delete Globals::traceFile;
+      Globals::traceFile = nullptr; // Later messages, if any, go to stderr
+      }
+    return result;
 }

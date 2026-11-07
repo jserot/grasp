@@ -112,8 +112,7 @@ MainWindow::~MainWindow()
     Globals::compiler->close();
     delete Globals::compiler; // This will shutdown the compiler server
     }
-  if ( Globals::traceFile ) 
-    Globals::traceFile->close();
+  // Note: the trace file is closed in main(), since messages are still emitted after this (when deleting the model)
 }
 
 Diagram *MainWindow::currentDiagram()
