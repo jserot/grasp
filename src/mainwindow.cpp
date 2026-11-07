@@ -867,11 +867,14 @@ bool MainWindow::dotTransform(QFileInfo f, QString wDir)
 void MainWindow::initCursors()
 {
   default_cursor = Qt::ArrowCursor;
-  cursors[Globals::InsertState] = QCursor(QPixmap(":cursors/state.png"),0,0);
-  cursors[Globals::InsertPseudoState] = QCursor(QPixmap(":cursors/initstate.png"),0,0);
-  cursors[Globals::InsertTransition] = QCursor(QPixmap(":cursors/transition.png"),0,0);
-  cursors[Globals::InsertLoopTransition] = QCursor(QPixmap(":cursors/loop.png"),0,0);
-  cursors[Globals::DeleteItem] = QCursor(QPixmap(":cursors/delete.png"),0,0);
+  // The hot spot (the point actually clicked) is placed where the user aims : the center of the image (32x32),
+  // except for the initial state, whose image shows the pseudo-state (disk) in its upper left corner.
+  // (With a (0,0) hot spot, the click was taken ~16 pixels up-left of the delete cross, for ex.)
+  cursors[Globals::InsertState] = QCursor(QPixmap(":cursors/state.png"),16,16);
+  cursors[Globals::InsertPseudoState] = QCursor(QPixmap(":cursors/initstate.png"),7,7);
+  cursors[Globals::InsertTransition] = QCursor(QPixmap(":cursors/transition.png"),16,16);
+  cursors[Globals::InsertLoopTransition] = QCursor(QPixmap(":cursors/loop.png"),16,16);
+  cursors[Globals::DeleteItem] = QCursor(QPixmap(":cursors/delete.png"),16,16);
 }
 
 void MainWindow::updateCursor()
