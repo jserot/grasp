@@ -12,11 +12,6 @@ StimulusTrack::StimulusTrack(Input* io)
   qDebug() << "StimulusTrack: adding" << st.toString() << "to track" << io->name;
   switch ( st.kind ) {
   case Stimulus::None: return;
-  case Stimulus::Periodic:
-    m_type = TrackStimulusType::Event;
-    for ( int t=st.desc.periodic.start_time; t<=st.desc.periodic.end_time; t += st.desc.periodic.period ) 
-      add(std::make_unique<EventStimulus>(t, io->name));
-    break;
   case Stimulus::Sporadic:
     m_type = TrackStimulusType::Event;
     for ( int t: st.desc.sporadic.dates )

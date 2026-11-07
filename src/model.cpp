@@ -367,12 +367,6 @@ QString export_rfsm_stim(Stimulus &st)
   QString r;
   switch ( st.kind ) {
   case Stimulus::None: return "";
-  case Stimulus::Periodic:
-    r = "periodic(";
-    r +=      QString::number(st.desc.periodic.period);
-    r += "," + QString::number(st.desc.periodic.start_time);
-    r += "," + QString::number(st.desc.periodic.end_time) + ")";
-    break;
   case Stimulus::Sporadic:
     r = "sporadic(";
     for ( const auto t: st.desc.sporadic.dates ) {

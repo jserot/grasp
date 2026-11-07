@@ -14,15 +14,6 @@
 
 #include <QList>
 
-struct Periodic_stim
-{
-  Periodic_stim() : period(0), start_time(0), end_time(0) { };
-  Periodic_stim(int p, int t1, int t2) : period(p), start_time(t1), end_time(t2) { };
-  int period;
-  int start_time;
-  int end_time;
-};
-
 struct Sporadic_stim
 {
   Sporadic_stim() : dates(QList<int>()) { };
@@ -40,10 +31,11 @@ struct ValueChanges_stim
 class Stimulus
 {
 public:
-  enum Kind { None=0, Periodic, Sporadic, ValueChanges };
+  enum Kind { None=0, Sporadic, ValueChanges };
+  // Note: periodic stimuli ("Periodic <period> <start> <end>"), found in files created by previous versions,
+  // are converted to sporadic ones when read
   Kind kind;
   struct Desc {  // TO FIX: this should really be a _union_ 
-      Periodic_stim periodic;
       Sporadic_stim sporadic;  
       ValueChanges_stim valueChanges;
       };

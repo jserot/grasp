@@ -19,7 +19,6 @@
 #include <QHBoxLayout>
 #include <QtDebug>
 #include <QMessageBox>
-#include "editStimPanel.h"
 #include "globals.h"
 #include "model.h"
 #include "aux/ChronogramEditorWidget.h"
@@ -110,7 +109,6 @@ void DynamicPanel::clear()
 // Dates are rounded to the nearest integer (model stimuli are integer-timed), events falling at the same
 // date are merged, and values of boolean inputs are normalized to 0/1. Each adjustment is described in
 // [adjustments].
-// A periodic stimulus is kept as such if the track still holds exactly the events it generates.
 static Stimulus trackToStimulus(const StimulusTrack *track, const Input *inp, QStringList &adjustments)
 {
   if ( track->count() == 0 ) return Stimulus(Stimulus::None);
@@ -130,12 +128,6 @@ static Stimulus trackToStimulus(const StimulusTrack *track, const Input *inp, QS
       }
     if ( rounded ) adjustments.append(name + ": event dates rounded to integers");
     if ( dates.isEmpty() ) return Stimulus(Stimulus::None);
-    if ( inp->stim.kind == Stimulus::Periodic ) {
-      const Periodic_stim &p = inp->stim.desc.periodic;
-      QList<int> expected;
-      for ( int t=p.start_time; t<=p.end_time && p.period > 0; t += p.period ) expected.append(t);
-      if ( dates == expected ) return inp->stim; // Unchanged
-      }
     return Stimulus(Stimulus::Sporadic, dates);
     }
   else { // ValueChange

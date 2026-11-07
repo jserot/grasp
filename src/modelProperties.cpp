@@ -14,7 +14,6 @@
 #include "mainwindow.h"
 #include "model.h"
 #include "iovPanel.h"
-#include "stimuli.h"
 #include "compilerPaths.h"
 
 #include <QFrame>

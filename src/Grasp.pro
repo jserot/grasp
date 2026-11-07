@@ -33,8 +33,6 @@ HEADERS += include/nlohmann_json.h \
            aux/StimulusTrack.h \
            modelProperties.h \
            stimulus.h \
-           stimuli.h \
-           editStimPanel.h \
            command.h \
            imageViewer.h \
            textViewer.h \
@@ -72,8 +70,6 @@ SOURCES += transition.cpp \
            aux/StimulusTrack.cpp \
            modelProperties.cpp \
            stimulus.cpp \
-           stimuli.cpp \
-           editStimPanel.cpp \
            command.cpp \
            syntaxHighlighters.cpp \
            compilerPaths.cpp \

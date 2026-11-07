@@ -19,9 +19,6 @@ Stimulus::Stimulus(Kind kind, QList<int> params)
   switch ( kind ) {
   case None:
     break;
-  case Periodic:
-    desc.periodic = Periodic_stim(params.at(0), params.at(1), params.at(2));
-    break;
   case Sporadic:
     desc.sporadic = Sporadic_stim(params);
     break;
@@ -44,12 +41,15 @@ Stimulus::Stimulus(QString txt)
   if ( l.at(0).trimmed() == "None" ) {
     kind = None;
     }
-  else if ( l.at(0).trimmed() == "Periodic" ) {
+  else if ( l.at(0).trimmed() == "Periodic" ) { // Previous versions only: converted to a sporadic stimulus
     Q_ASSERT(l.length() == 4 );
-    kind = Periodic;
-    desc.periodic.period = l.at(1).trimmed().toInt();
-    desc.periodic.start_time = l.at(2).trimmed().toInt();
-    desc.periodic.end_time = l.at(3).trimmed().toInt();
+    kind = Sporadic;
+    int period = l.at(1).trimmed().toInt();
+    int start_time = l.at(2).trimmed().toInt();
+    int end_time = l.at(3).trimmed().toInt();
+    desc.sporadic.dates.clear();
+    for ( int t=start_time; t<=end_time && period > 0; t += period )
+      desc.sporadic.dates.append(t);
     }
   else if ( l.at(0).trimmed() == "Sporadic" ) {
     kind = Sporadic;
@@ -73,12 +73,6 @@ QString Stimulus::toString() const
   QString r;
   switch ( kind ) {
   case None: return "None";
-  case Periodic:
-    r = "Periodic";
-    r += " " + QString::number(desc.periodic.period);
-    r += " " + QString::number(desc.periodic.start_time);
-    r += " " + QString::number(desc.periodic.end_time);
-    break;
   case Sporadic:
     r = "Sporadic";
     for ( const auto t: desc.sporadic.dates ) 

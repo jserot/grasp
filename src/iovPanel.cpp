@@ -23,11 +23,9 @@
 #include "model.h"
 #include "iov.h"
 #include "rowDesc.h"
-#include "stimuli.h"
 #include "globals.h"
 
 #define QCOMBOBOX_INDEX_CHANGED (&QComboBox::currentIndexChanged)
-#define QCOMBOBOX_ACTIVATED (&QComboBox::activated)
 
 static DynamicPanel::Client mkCustomData(IoKind kind, IovPanel::Client client) 
 {
@@ -87,35 +85,6 @@ void setTypeSelector(QComboBox *type_selector, bool enabled, Iov* io)
   }
 }
 
-void setStimSelector(QComboBox *stim_selector, bool enabled, Iov* io)
-{
-  if ( enabled ) {
-    switch ( io->type ) {
-      case IoType::TyEvent: 
-        setComboBoxItemEnabled(stim_selector, 0, true); // None
-        setComboBoxItemEnabled(stim_selector, 1, true); // Periodic
-        setComboBoxItemEnabled(stim_selector, 2, true); // Sporadic
-        setComboBoxItemEnabled(stim_selector, 3, false); // ValueChanges
-        break;
-      case IoType::TyInt: 
-      case IoType::TyBool: 
-        setComboBoxItemEnabled(stim_selector, 0, true); // None
-        setComboBoxItemEnabled(stim_selector, 1, false); // Periodic
-        setComboBoxItemEnabled(stim_selector, 2, false); // Sporadic
-        setComboBoxItemEnabled(stim_selector, 3, true); // ValueChanges
-        break;
-      }
-    stim_selector->setCurrentIndex(static_cast<int>(static_cast<Input*>(io)->stim.kind));
-    }
-  else {
-    setComboBoxItemEnabled(stim_selector, 0, false); // None
-    setComboBoxItemEnabled(stim_selector, 1, false); // Periodic
-    setComboBoxItemEnabled(stim_selector, 2, false); // Sporadic
-    setComboBoxItemEnabled(stim_selector, 3, false); // ValueChanges
-    stim_selector->setCurrentIndex(-1);
-  }
-}
-
 void IovPanel::addRowFields(QHBoxLayout *row_layout, void *row_data)
 {
   Iov *io;
@@ -172,27 +141,10 @@ void IovPanel::addRowFields(QHBoxLayout *row_layout, void *row_data)
   row_layout->addWidget(type_selector);
   connect(type_selector, QCOMBOBOX_INDEX_CHANGED, this, &IovPanel::typeEdited);
 
-  // QComboBox *stim_selector;
-  // if ( client.icKind == IcModel && kind == Iov::IoIn ) {
-  //   stim_selector = new QComboBox();
-  //   stim_selector->addItem("None", QVariant(Stimulus::None));
-  //   stim_selector->addItem("Periodic", QVariant(Stimulus::Periodic));
-  //   stim_selector->addItem("Sporadic", QVariant(Stimulus::Sporadic));
-  //   stim_selector->addItem("ValueChanges", QVariant(Stimulus::ValueChanges));
-  //   setStimSelector(stim_selector, io->name != "", io);
-  //   row_layout->addWidget(stim_selector);
-  //   connect(stim_selector, QCOMBOBOX_ACTIVATED, this, &IovPanel::stimEdited);
-  //   }
-  // else
-  //   stim_selector = nullptr;
-  // RowDesc *row_desc = new RowDesc(io, row_layout, name_selector, type_selector, stim_selector);
-
   RowDesc *row_desc = new RowDesc(io, row_layout, name_selector, type_selector);
   
   widgetToRow.insert((QWidget*)name_selector, row_desc);
   widgetToRow.insert((QWidget*)type_selector, row_desc);
-  // if ( kind == Iov::IoIn ) 
-  //   widgetToRow.insert((QWidget*)stim_selector, row_desc);
 }
 
 void IovPanel::deleteRowFields(QHBoxLayout *row_layout)
@@ -203,8 +155,6 @@ void IovPanel::deleteRowFields(QHBoxLayout *row_layout)
   Q_ASSERT(name_selector);
   QComboBox *type_selector = qobject_cast<QComboBox*>(row_layout->itemAt(1)->widget());
   Q_ASSERT(type_selector);
-  QComboBox *stim_selector;
-  stim_selector = qobject_cast<QComboBox*>(row_layout->itemAt(2)->widget()); // Will be NULL for inputs
   RowDesc *row_desc = widgetToRow.value(name_selector);
   Q_ASSERT(row_desc);
   Iov* io = row_desc->io;
@@ -223,8 +173,6 @@ void IovPanel::deleteRowFields(QHBoxLayout *row_layout)
     }
   widgetToRow.remove(name_selector);
   widgetToRow.remove(type_selector);
-  if ( stim_selector ) 
-    widgetToRow.remove(stim_selector);
   emit modelModified();
 }
 
@@ -232,13 +180,6 @@ void IovPanel::updateTypeChoices(RowDesc *row_desc)
 {
   bool enabled = row_desc->name_selector->text().trimmed() != "";
   setTypeSelector(row_desc->type_selector, enabled, row_desc->io);
-}
-
-void IovPanel::updateStimChoices(RowDesc *row_desc) // For inputs only
-{
-  if ( ! row_desc->stim_selector ) return; // Row built without a stimulus selector
-  bool enabled = row_desc->name_selector->text().trimmed() != "";
-  setStimSelector(row_desc->stim_selector, enabled, row_desc->io);
 }
 
 void IovPanel::nameChanged()
@@ -252,8 +193,6 @@ void IovPanel::nameChanged()
   // The check for duplicate names is done in nameEdited.
   row_desc->io->name = name_selector->text().trimmed();
   updateTypeChoices(row_desc);
-  if ( row_desc->io->kind() == IoKind::IoIn ) 
-    updateStimChoices(row_desc); 
 }
 
 void IovPanel::nameEdited()
@@ -304,38 +243,7 @@ void IovPanel::typeEdited()
   qDebug() << "IovPanel: setting type for IOV" << io->name;
   io->type = static_cast<IoType>(type_selector->currentIndex());
   qDebug () << "Setting IO type: " << toString(io->type);
-  if ( client.icKind == IcModel && row_desc->io->kind() == IoKind::IoIn ) 
-    updateStimChoices(row_desc);
   qDebug() << "IovPanel: updated IOV:" << io->name;
-  emit modelModified();
-}
-
-void IovPanel::stimEdited()
-{
-  //qDebug() << "IovPanel::typeEdited called by" << sender();
-  QComboBox* stim_selector = qobject_cast<QComboBox*>(sender());
-  Q_ASSERT(stim_selector);
-  RowDesc *row_desc = widgetToRow.value(stim_selector);
-  Q_ASSERT(row_desc);
-  Iov *io = row_desc->io;
-  Q_ASSERT(io);
-  Q_ASSERT(io->kind() == IoKind::IoIn);
-  Input* inp = static_cast<Input*>(io);
-  qDebug() << "IovPanel: setting stimuli for IOV" << inp->name;
-  QString io_name = inp->name;
-  Stimulus::Kind kind = (Stimulus::Kind)(stim_selector->currentIndex()); 
-  switch ( kind ) {
-  case Stimulus::None:
-    inp->stim = Stimulus(Stimulus::None);
-    break;
-  default:
-    Stimuli* stimDialog = new Stimuli(kind,inp,this);
-    stimDialog->exec();
-    //fillIoList();
-    delete stimDialog;
-    break;
-    }
-  qDebug() << "IovPanel: updated IOV:" << inp->toString();
   emit modelModified();
 }
 

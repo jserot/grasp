@@ -21,7 +21,6 @@ class QBoxLayout;
 class QVBoxLayout;
 class QHBoxLayout;
 class Model;
-class EditStimPanel;
 
 class DynamicPanel : public QGroupBox
 {
@@ -42,7 +41,6 @@ protected:
   QPushButton *clear_button;
   QPushButton *custom_button;
   QHash<QPushButton*, QBoxLayout*> mButtonToLayoutMap;
-  EditStimPanel *editStimPanel;
   Client client;
 
   void delete_row(QHBoxLayout *row_layout);

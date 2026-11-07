@@ -44,7 +44,6 @@ private:
   QString rowPrefix;
 
   void updateTypeChoices(RowDesc *row_desc);
-  void updateStimChoices(RowDesc *row_desc);  // For model inputs only
 
 protected slots:
   void addRowFields(QHBoxLayout *row_layout, void *data);
@@ -52,7 +51,6 @@ protected slots:
   void nameChanged();
   void nameEdited();
   void typeEdited();
-  void stimEdited();
 
 private:
   QRegularExpressionValidator *name_validator;

@@ -23,7 +23,6 @@
 #include "commandExec.h"
 #include "compiler.h"
 #include "debug.h"
-#include "stimuli.h"
 #include "modelProperties.h"
 
 #include <QtWidgets>
