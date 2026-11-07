@@ -48,6 +48,10 @@
   write a file where the input and the transitions it triggers had different names)
 * Clicking a state without moving it no longer marks the model as modified
 * When the compiler server is not running, each check now reports it (only the first one did)
+* Transitions are much easier to select (or delete): they can be clicked on their label, their arrow
+  head or near their line (a right click next to a transition often opened the diagram properties)
+* The editing cursors now act where they point: the delete cross deletes the item under its center
+  (clicks were taken up-left of it), and new states are created under the state cursor
 * The application version is now read from the `VERSION` file
 
 # 1.0.3 (Mar 5, 2026)
