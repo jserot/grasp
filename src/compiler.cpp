@@ -27,6 +27,7 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QMessageBox>
+#include <QElapsedTimer>
 #include "request.h"
 #include "response.h"
 #include "globals.h"
@@ -140,9 +141,19 @@ void Compiler::connectToServer(const int socketPort)
       }
 }
 
+bool Compiler::serverAvailable()
+{
+  return socket.state() == QTcpSocket::ConnectedState && serverProcess.state() == QProcess::Running;
+}
+
 void Compiler::sendAsyncRequest(const QString &text)
 {
     if (socket.state() == QTcpSocket::ConnectedState) {
+        // The protocol does not number the requests : an answer arriving after its timeout would be taken as
+        // the answer to the next request. Any such stale data (already buffered by the event loop, which runs
+        // between requests) is discarded before sending a new request.
+        if ( socket.bytesAvailable() > 0 )
+          qDebug() << "compiler: discarding stale data:" << socket.readAll();
         QByteArray data = text.trimmed().toUtf8() + '\n';
         if ( logClientServerMessages ) qDebug() << "compiler: sending: " << data;
         socket.write(data);
@@ -154,27 +165,43 @@ void Compiler::sendAsyncRequest(const QString &text)
         }
 }
 
-QString Compiler::sendRequest(const QString &text)
+bool Compiler::sendRequest(const QString &text, QString &answer, int timeoutMs)
 {
+  if ( ! serverAvailable() ) {
+    qDebug() << "compiler: server not available";
+    return false;
+    }
   sendAsyncRequest(text);
-  QString response = readAnswer();
-  if ( logClientServerMessages ) qDebug() << "compiler: received: " << response;
-  return response;
+  bool ok = readAnswer(timeoutMs, answer);
+  if ( logClientServerMessages ) qDebug() << "compiler: received: " << answer;
+  return ok;
 }
 
-QString Compiler::readAnswer()
+bool Compiler::readAnswer(int timeoutMs, QString &answer)
 {
-  if (socket.waitForReadyRead(3000)) {
-    QByteArray line = socket.readLine();   // expects '\n'
-    return QString::fromUtf8(line).trimmed();
-    // QByteArray line = socket.readAll();
-    // line.chop(1);
-    // return line;
+  // An answer is a single line, which may arrive in several parts
+  QElapsedTimer timer;
+  timer.start();
+  while ( ! socket.canReadLine() ) {
+    qint64 remaining = timeoutMs - timer.elapsed();
+    if ( remaining <= 0 || socket.state() != QTcpSocket::ConnectedState ) {
+      qDebug() << "compiler: timeout or disconnection when waiting for response";
+      return false;
+      }
+    socket.waitForReadyRead(static_cast<int>(remaining));
     }
-  else {
-    qDebug() << "compiler: timeout when waiting for response";
-    return "<no response>";
-    }
+  answer = QString::fromUtf8(socket.readLine()).trimmed();
+  return true;
+}
+
+Response Compiler::request(const QString &text, int timeoutMs)
+{
+  if ( ! serverAvailable() )
+    return Response::Error("The compiler server is not running (please restart the application)");
+  QString answer;
+  if ( ! sendRequest(text, answer, timeoutMs) )
+    return Response::Error("No response from the compiler server");
+  return Response::fromString(answer);
 }
 
 void Compiler::stopServer() {
@@ -210,25 +237,20 @@ void Compiler::onErrorOccurred(QTcpSocket::SocketError) {
 Response Compiler::getVersion(void)
 {
   Request q = Request::GetVersion();
-  QString r = sendRequest(q.toString());
-  Response s = Response::fromString(r);
+  Response s = request(q.toString(), CheckTimeOutMs);
   return s.kind() == Response::Kind::Version ? s : Response::Error("Invalid response from compiler");
 }
 
 Response Compiler::compile(const QStringList &args)
 {
   Request q = Request::Compile(args);
-  QString r = sendRequest(q.toString());
-  Response s = Response::fromString(r);
-  return s;
+  return request(q.toString(), CompileTimeOutMs);
 }
 
 Response Compiler::checkFragment(const Fragment &fragment)
 {
   Request q = Request::CheckFragment(fragment);
-  QString r = sendRequest(q.toString());
-  Response s = Response::fromString(r);
-  return s;
+  return request(q.toString(), CheckTimeOutMs);
 }
 
 void Compiler::report_error(QString ctx, QString loc, QString msg)
@@ -249,6 +271,11 @@ bool Compiler::handle_response(QString ctx, QString loc, Response r)
     }
   else {
     qDebug() << "compiler: wrong response to check_fragment request: " << r.message();
+    if ( ! serverAvailable() ) {
+      // A model check sends many requests : the user is only told once that the server is not available
+      if ( unavailableReported ) return false;
+      unavailableReported = true;
+      }
     QMessageBox::critical(Globals::mainWindow, tr("Diagram checking"), r.message());
     return false;
     }
@@ -257,5 +284,6 @@ bool Compiler::handle_response(QString ctx, QString loc, Response r)
 void Compiler::close(void)
 {
   Request q = Request::Close();
-  sendRequest(q.toString());
+  QString answer;
+  sendRequest(q.toString(), answer); // Ignored (the server may already be gone)
 }

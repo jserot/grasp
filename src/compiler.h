@@ -44,7 +44,9 @@ public:
 
     // Low-level requests
     void sendAsyncRequest(const QString &text);
-    QString sendRequest(const QString &text);
+    // Sends a request and waits (at most [timeoutMs]) for the answer. Returns false if no answer could be obtained
+    bool sendRequest(const QString &text, QString &answer, int timeoutMs = CheckTimeOutMs);
+    bool serverAvailable(); // true if the server is running and connected
 
     // High-level requests
     Response getVersion(void);
@@ -67,8 +69,12 @@ private slots:
 
 private:
     QWidget *parent;
-    static const int TimeOutMs = 2000;  // Timeout when waiting for a response after sending a request (synchronous mode)
-    QString readAnswer();
+    // Timeouts when waiting for a response after sending a request (synchronous mode)
+    static const int CheckTimeOutMs = 3000;    // For fragment checks and version requests
+    static const int CompileTimeOutMs = 60000; // For compilation and simulation requests, which may take longer
+    bool readAnswer(int timeoutMs, QString &answer);
+    Response request(const QString &text, int timeoutMs);
+    bool unavailableReported = false; // Set once the user has been told that the server is not available
     void connectToServer(const int socketPort);
     bool serverReady;
     QProcess serverProcess;
