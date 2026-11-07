@@ -43,6 +43,11 @@
 * No `.fsm` file is written (and no compilation is started) when the RFSM code cannot be generated
   (invalid diagram, missing stimulus), instead of a partially written file
 * Compiling a model which has never been saved now saves it first
+* A name being typed (an input name, for example) is now taken into account when saving, checking,
+  exporting or quitting without leaving the field first (renaming an input event while saving could
+  write a file where the input and the transitions it triggers had different names)
+* Clicking a state without moving it no longer marks the model as modified
+* When the compiler server is not running, each check now reports it (only the first one did)
 * The application version is now read from the `VERSION` file
 
 # 1.0.3 (Mar 5, 2026)
