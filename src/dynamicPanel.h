@@ -66,6 +66,8 @@ protected:
     // Fields shown _before_ the [Delete] button on the row
     // [row_data] must point to the data used to populate the added row fields
   virtual void deleteRowFields(QHBoxLayout *row_layout) = 0; 
+  // Returns a non-empty explanation if the row cannot be deleted (default: always possible)
+  virtual QString rowDeletionError(QHBoxLayout *) { return QString(); }
 public:
   virtual QStringList retrieve() = 0;
 };

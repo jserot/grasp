@@ -22,7 +22,7 @@ class QComboBox;
 class RowDesc {
 public:
   RowDesc( Iov* io, QHBoxLayout *row_layout, QLineEdit* name_selector, QComboBox* type_selector) :
-    io(io), row_layout(row_layout), name_selector(name_selector), type_selector(type_selector)
+    io(io), row_layout(row_layout), name_selector(name_selector), type_selector(type_selector), committedName(io->name)
     {}
   ~RowDesc() {}
     
@@ -30,4 +30,5 @@ public:
   QHBoxLayout *row_layout;
   QLineEdit* name_selector;
   QComboBox* type_selector;
+  QString committedName; // Name of the IO when last validated. The IO name itself is updated at each keystroke
 };

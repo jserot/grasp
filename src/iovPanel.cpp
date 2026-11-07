@@ -22,6 +22,8 @@
 #include <algorithm>
 
 #include "model.h"
+#include "diagram.h"
+#include "transition.h"
 #include "iov.h"
 #include "rowDesc.h"
 #include "globals.h"
@@ -200,6 +202,34 @@ void IovPanel::nameChanged()
   updateTypeChoices(row_desc);
 }
 
+QStringList IovPanel::transitionsTriggeredBy(const QString &event)
+{
+  QStringList r;
+  if ( client.icKind != IcModel || event.isEmpty() ) return r;
+  for ( Diagram *d : client.icClient.model->getDiagrams() )
+    for ( Transition *t : d->transitions() )
+      if ( ! t->isInitial() && t->getEvent() == event )
+        r.append(d->getName() + ": " + t->toString());
+  return r;
+}
+
+// Returns a non-empty explanation if [event] triggers some transitions
+QString IovPanel::usedEventError(const QString &event, const QString &what)
+{
+  QStringList uses = transitionsTriggeredBy(event);
+  if ( uses.isEmpty() ) return QString();
+  return "Cannot " + what + " " + event + ", which triggers the following transition(s):\n  "
+    + uses.join("\n  ") + "\nPlease modify or delete these transitions first.";
+}
+
+QString IovPanel::rowDeletionError(QHBoxLayout *row_layout)
+{
+  QWidget *name_selector = row_layout->itemAt(0)->widget();
+  RowDesc *row_desc = widgetToRow.value(name_selector);
+  if ( ! row_desc || row_desc->io->type != IoType::TyEvent ) return QString();
+  return usedEventError(row_desc->committedName, "delete");
+}
+
 void IovPanel::nameEdited()
 {
   Model *model;
@@ -233,6 +263,21 @@ void IovPanel::nameEdited()
     //name_selector->setText("");
     }
   io->name = name;
+  // When an event is renamed, the transitions it triggers are updated accordingly
+  QString old_name = row_desc->committedName;
+  if ( ! name.isEmpty() && ! already_used ) {
+    if ( io->type == IoType::TyEvent && ! old_name.isEmpty() && old_name != name && client.icKind == IcModel ) {
+      for ( Diagram *d : client.icClient.model->getDiagrams() ) {
+        for ( Transition *t : d->transitions() )
+          if ( ! t->isInitial() && t->getEvent() == old_name ) {
+            qDebug() << "IovPanel: renaming event of transition" << t->toString() << "to" << name;
+            t->setEvent(name);
+            t->update();
+            }
+        }
+      }
+    row_desc->committedName = name;
+    }
   qDebug() << "IovPanel: updated IOV" << io->name;
   emit modelModified();
 }
@@ -245,8 +290,20 @@ void IovPanel::typeEdited()
   RowDesc *row_desc = widgetToRow.value(type_selector);
   Q_ASSERT(row_desc);
   Iov* io = row_desc->io;
+  int index = type_selector->currentIndex();
+  if ( index < 0 ) return; // No type selected (the name has been cleared) : the IO type is left unchanged
+  IoType new_type = static_cast<IoType>(index);
+  if ( io->type == IoType::TyEvent && new_type != IoType::TyEvent ) {
+    QString error = usedEventError(row_desc->committedName, "change the type of");
+    if ( ! error.isEmpty() ) {
+      QMessageBox::warning(this, "Error", error);
+      const QSignalBlocker blocker(type_selector);
+      type_selector->setCurrentIndex(static_cast<int>(IoType::TyEvent));
+      return;
+      }
+    }
   qDebug() << "IovPanel: setting type for IOV" << io->name;
-  io->type = static_cast<IoType>(type_selector->currentIndex());
+  io->type = new_type;
   qDebug () << "Setting IO type: " << toString(io->type);
   qDebug() << "IovPanel: updated IOV:" << io->name;
   emit modelModified();

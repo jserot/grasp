@@ -80,6 +80,8 @@ void DynamicPanel::addNewRow()
 void DynamicPanel::delete_row(QHBoxLayout *row_layout)
 {
   deleteRowFields(row_layout);
+  for ( auto it = mButtonToLayoutMap.begin(); it != mButtonToLayoutMap.end(); )
+    if ( it.value() == row_layout ) it = mButtonToLayoutMap.erase(it); else ++it;
   while (row_layout->count() != 0) {
     QLayoutItem* item = row_layout->takeAt(0);
     delete item->widget();
@@ -91,12 +93,29 @@ void DynamicPanel::delete_row(QHBoxLayout *row_layout)
 void DynamicPanel::deleteRow()
 {
   QPushButton* button = qobject_cast<QPushButton*>(sender());
-  QHBoxLayout* row_layout = static_cast<QHBoxLayout*>(mButtonToLayoutMap.take(button));
+  QHBoxLayout* row_layout = static_cast<QHBoxLayout*>(mButtonToLayoutMap.value(button));
+  Q_ASSERT(row_layout);
+  QString error = rowDeletionError(row_layout);
+  if ( ! error.isEmpty() ) {
+    QMessageBox::warning(this, "Error", error);
+    return;
+    }
   DynamicPanel::delete_row(row_layout);
 }
 
 void DynamicPanel::clear()
 {
+  // Nothing is deleted if any of the rows cannot be
+  QStringList errors;
+  for ( int i = 1; i < layout->count(); i++ ) { // First row holds the buttons
+    QHBoxLayout* row = static_cast<QHBoxLayout*>(layout->itemAt(i)->layout());
+    QString error = row ? rowDeletionError(row) : QString();
+    if ( ! error.isEmpty() ) errors.append(error);
+    }
+  if ( ! errors.isEmpty() ) {
+    QMessageBox::warning(this, "Error", errors.join("\n\n"));
+    return;
+    }
   while ( layout->count() > 1 ) { // Do not erase first row !
     QHBoxLayout* row = static_cast<QHBoxLayout*>(layout->takeAt(1));
     Q_ASSERT(row);

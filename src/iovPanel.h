@@ -37,7 +37,10 @@ public:
   IovPanel(IoKind kind, QString title, QString rowPrefix, Client client);
   ~IovPanel();
 
-  QStringList retrieve(); // Not used here
+  QStringList retrieve() override; // Not used here
+
+protected:
+  QString rowDeletionError(QHBoxLayout *row_layout) override;
 
 private:
   IoKind kind; // Input, output or variable
@@ -47,10 +50,12 @@ private:
   QString rowPrefix;
 
   void updateTypeChoices(RowDesc *row_desc);
+  QStringList transitionsTriggeredBy(const QString &event); // In all the diagrams of the model
+  QString usedEventError(const QString &event, const QString &what);
 
 protected slots:
-  void addRowFields(QHBoxLayout *row_layout, void *data);
-  void deleteRowFields(QHBoxLayout *row_layout);
+  void addRowFields(QHBoxLayout *row_layout, void *data) override;
+  void deleteRowFields(QHBoxLayout *row_layout) override;
   void nameChanged();
   void nameEdited();
   void typeEdited();
