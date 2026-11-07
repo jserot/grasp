@@ -69,6 +69,7 @@ public:
     Transition* initTransition();
 
     State* getState(QString id);
+    QString freshStateId(); // First identifier "S<n>" not used in this diagram
     bool hasPseudoState();
 
     void removeState(State *state);
@@ -116,7 +117,6 @@ protected:
     void export_rfsm_model(QTextStream& os);
     void export_rfsm_testbench(QTextStream& os);
     
-    static int stateCounter;
     static QString statePrefix;
 
 private:

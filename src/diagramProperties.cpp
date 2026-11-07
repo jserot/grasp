@@ -25,6 +25,8 @@
 #include "iov.h"
 #include "iovPanel.h"
 #include "globals.h"
+#include "model.h"
+#include <QRegularExpression>
 
 DiagramProperties::DiagramProperties(Diagram *diagram, QWidget *parent)
   : QDialog(parent)
@@ -98,8 +100,18 @@ void DiagramProperties::changeScale(const QString& scale)
 
 void DiagramProperties::accept()
 {
-  QString id = name_field->text();
+  QString id = name_field->text().trimmed();
   qDebug() << "DiagramProperties::accept";
+  // Diagram names are used as identifiers in the generated RFSM and DOT code
+  static const QRegularExpression re_id("^[A-Za-z][A-Za-z0-9_]*$");
+  if ( ! re_id.match(id).hasMatch() ) {
+    QMessageBox::warning(this, "Error", "Invalid diagram name. It must start with a letter, followed by letters, digits or _");
+    return; // Leave the dialog opened
+    }
+  if ( diagram->enclosingModel()->isDiagramNameUsed(id, diagram) ) {
+    QMessageBox::warning(this, "Error", "The name " + id + " is already used by another diagram");
+    return;
+    }
   if ( id != diagram->getName() ) {
     diagram->setName(id);
     // The dialog is not modal: the current tab may not be the one of this diagram anymore

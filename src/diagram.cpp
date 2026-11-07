@@ -38,7 +38,6 @@
 #define SKIP_EMPTY_PARTS Qt::SkipEmptyParts
 
 QString Diagram::statePrefix = "S";
-int Diagram::stateCounter = 1;
 QColor Diagram::lineColor = Qt::lightGray;
 QColor Diagram::boxColor = Qt::black;
 
@@ -117,7 +116,7 @@ Diagram *Diagram::duplicate()
       Iov *copied_var = var->clone();
       copied_vars.append(copied_var);
       }
-    QString new_name = name + name.last(1); // S0 -> S00 
+    QString new_name = model->freshDiagramName(name + "_"); // A1 -> A1_1, A1_2, ...
     Diagram *copied_diagram =
       new Diagram(this->model, new_name, copied_vars, copied_states.values(), copied_transitions, parent); 
     // We now can update the enclosing diagram of the copied states and transitions
@@ -155,7 +154,6 @@ void Diagram::clear(void)
   name = "";
   qDeleteAll(vars);
   vars.clear();
-  stateCounter = 0;
   QGraphicsScene::clear();
 }
 
@@ -211,6 +209,7 @@ void Diagram::showPropertiesDialog(QDialog *dialog)
 
 void Diagram::editState(State *state)
 {
+  if ( state->isPseudo() ) return; // The initial pseudo-state has no editable property (and must keep its id)
   qDebug() << "Editing state" << state->getId() << "[" << state << "]";
   showPropertiesDialog(new StateProperties(state, this, view));
   state->setSelected(false);
@@ -275,6 +274,14 @@ State* Diagram::getState(QString id)
   foreach ( State* s, states() )
     if ( s->getId() == id ) return s;
   return NULL;
+}
+
+QString Diagram::freshStateId()
+{
+  // Note: a global counter cannot be used here since diagrams may have been read from files
+  int n = 1;
+  while ( getState(statePrefix + QString::number(n)) ) n++;
+  return statePrefix + QString::number(n);
 }
 
 QList<Iov*> Diagram::getVars()
@@ -349,7 +356,7 @@ void Diagram::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
     case Qt::LeftButton:
       switch ( Globals::mode ) {
         case Globals::InsertState:
-          state = addState(mouseEvent->scenePos(), statePrefix + QString::number(stateCounter++), QStringList());
+          state = addState(mouseEvent->scenePos(), freshStateId(), QStringList());
           emit modelModified(); // The state is kept even if its properties dialog is cancelled
           editState(state);
           break;

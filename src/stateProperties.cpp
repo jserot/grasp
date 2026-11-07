@@ -74,11 +74,21 @@ StateProperties::StateProperties(State *state, Diagram *diagram, QWidget *parent
 void StateProperties::accept()
 {
   qDebug() << "StateProperties::accept";
-  QString id = state_name_field->text();
-  state->setId(id);
+  QString id = state_name_field->text().trimmed();
+  // The state is left unchanged (and the dialog opened) if its new name or valuations are invalid
+  if ( id.isEmpty() || ! re_uid.match(id).hasMatch() || re_uid.match(id).capturedLength() != id.length() ) {
+    QMessageBox::warning(this, "Error", "Invalid state name. It must start with an uppercase letter, followed by letters, digits or _");
+    return;
+    }
+  State *other = diagram->getState(id);
+  if ( other && other != state ) {
+    QMessageBox::warning(this, "Error", "The name " + id + " is already used by another state of this diagram");
+    return;
+    }
   QStringList valuations = valuations_panel->retrieve();
   bool ok = Globals::check_model ? state->check_valuations(valuations) : true;
   if ( ok ) {
+    state->setId(id);
     state->setAttrs(valuations);
     qDebug() << "StateProperties::accept(ok)";
     update();

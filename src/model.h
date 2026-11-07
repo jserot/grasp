@@ -51,6 +51,8 @@ public:
     void removeIo(Iov *io);
 
     void addDiagram(Diagram *diagram);
+    bool isDiagramNameUsed(const QString &name, const Diagram *except = nullptr) const;
+    QString freshDiagramName(const QString &prefix = diagramPrefix) const; // First name "<prefix><n>" not used by a diagram
     void removeDiagram(Diagram *diagram);
 
     QList<Iov*>& inputs() { return ginps; };

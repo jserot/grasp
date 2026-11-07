@@ -113,9 +113,23 @@ void Model::update(void)
 void Model::addDiagram(Diagram *diagram)
 {
   if ( diagram->getName().isEmpty() )
-    diagram->setName(diagramPrefix + QString::number(diagrams.length()));
+    diagram->setName(freshDiagramName(diagramPrefix));
   qDebug () << "Model::addDiagram" << diagram->getName();
   diagrams.append(diagram);
+}
+
+bool Model::isDiagramNameUsed(const QString &name, const Diagram *except) const
+{
+  for ( const Diagram *d : diagrams )
+    if ( d != except && d->getName() == name ) return true;
+  return false;
+}
+
+QString Model::freshDiagramName(const QString &prefix) const
+{
+  int n = 1;
+  while ( isDiagramNameUsed(prefix + QString::number(n)) ) n++;
+  return prefix + QString::number(n);
 }
 
 void Model::removeDiagram(Diagram *diagram)
