@@ -1,5 +1,19 @@
 ## Changes
 
+# 1.1.0 (unreleased)
+
+* Stimuli are now either sporadic (for event inputs) or value changes (for `int` and `bool` inputs).
+  Periodic stimuli found in files created by previous versions are converted to sporadic ones when
+  read, and saved as such. Files written by this version can still be read by previous versions
+* Stimuli editor: inputs with no stimulus can now be given one, dates are rounded to the nearest
+  integer instead of being truncated, values of `bool` inputs are restricted to 0/1, and the model
+  is marked as modified after editing
+* Fixed crash when typing the name of a new input
+* Fixed outputs and global variables being created as inputs
+* Fixed IO names being lost when the model was saved before the name field lost focus
+* Fixed the check for duplicate IO names, which never fired
+* Fixed type lists not being displayed on macOS when a warning was issued at startup
+
 # 1.0.3 (Mar 5, 2026)
 
 * Fixed bug in the handling of the `rfsm` server responses (removed `\n` in phrases)
