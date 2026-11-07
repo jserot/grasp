@@ -38,8 +38,7 @@ CompilerOptions::CompilerOptions(QWidget *parent)
 void CompilerOptions::readSpecFile(QString fname)
 {
   QFile file(fname);
-  file.open(QIODevice::ReadOnly);
-  if ( file.error() != QFile::NoError ) {
+  if ( ! file.open(QIODevice::ReadOnly) ) {
     QMessageBox::warning(parent, "","Cannot read specification file " + file.fileName());
     return;
   }
@@ -70,8 +69,7 @@ void CompilerOptions::readSpecFile(QString fname)
 void CompilerOptions::readFromFile(QString fname)
 {
   QFile file(fname);
-  file.open(QIODevice::ReadOnly);
-  if ( file.error() != QFile::NoError ) {
+  if ( ! file.open(QIODevice::ReadOnly) ) {
     QMessageBox::warning(parent, "","Cannot read file " + file.fileName());
     return;
     }

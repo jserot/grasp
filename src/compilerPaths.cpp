@@ -55,8 +55,7 @@ void CompilerPaths::readFromFile(QString fname)
 {
   qDebug() << "Reading paths from file " << fname;
   QFile file(fname);
-  file.open(QIODevice::ReadOnly);
-  if ( file.error() != QFile::NoError ) {
+  if ( ! file.open(QIODevice::ReadOnly) ) {
     logMessage("Cannot read file " + file.fileName() + ". Using default values for compiler paths");
     return;
     }

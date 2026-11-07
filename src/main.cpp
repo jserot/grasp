@@ -22,7 +22,11 @@ int main(int argv, char *args[])
     QCoreApplication::setApplicationName("grasp");
     Globals::traceFile = new QFile(AppFiles::logFile());
     //fprintf(stderr, "logFile=%s\n", AppFiles::logFile().toStdString().c_str());
-    Globals::traceFile->open(QIODevice::WriteOnly);
+    if ( ! Globals::traceFile->open(QIODevice::WriteOnly) ) {
+      fprintf(stderr, "Cannot open log file %s. Logging to stderr\n", AppFiles::logFile().toStdString().c_str());
+      delete Globals::traceFile;
+      Globals::traceFile = nullptr;
+      }
     qInstallMessageHandler(debugMessageHandler); 
 
     QApplication app(argv, args);

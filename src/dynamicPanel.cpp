@@ -129,7 +129,8 @@ void DynamicPanel::editStim()
 
     StimulusScenario &scenario = editor->scenario();
     foreach (Iov *io, model->inputs()) {
-        auto track = std::make_unique<StimulusTrack>(io);
+        Q_ASSERT(io->kind() == IoKind::IoIn);
+        auto track = std::make_unique<StimulusTrack>(static_cast<Input*>(io));
         scenario.addTrack(std::move(track));
     }
     editor->rebuildPanels();
