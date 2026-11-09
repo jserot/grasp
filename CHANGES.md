@@ -15,7 +15,7 @@
 * Fixed type lists not being displayed on macOS when a warning was issued at startup
 * Stimuli editor: fixed double-clicks being handled twice (duplicate dialogs) and edit/remove dialogs
   acting on the wrong stimulus when the track was modified while they were opened
-* The state, transition and diagram properties dialogs are now modal
+* The state and transition properties dialogs are now modal
 * Deleting an input event, or changing its type, is refused when it triggers transitions. Renaming an
   input event renames it in the transitions it triggers
 * State names are now unique in each diagram (new states could get the name of an existing state
@@ -52,9 +52,8 @@
   head or near their line (a right click next to a transition often opened the diagram properties)
 * The editing cursors now act where they point: the delete cross deletes the item under its center
   (clicks were taken up-left of it), and new states are created under the state cursor
-* Diagrams are now centered in their view when a model is opened and when the scale is changed. The
-  scale list of the diagram properties shows the current scale and has a new "Fit" entry, showing
-  the whole diagram
+* Diagrams are now centered in their view when a model is opened and when the zoom is changed. The
+  zoom menu of a diagram shows the current scale and has a new "Fit" entry, showing the whole diagram
 * The windows showing the compilation results (generated code, DOT graphs) are now sized after their
   content, within 80% of the screen, with scroll bars beyond (they had a fixed size)
 * The stimuli editor window is now sized after the number of model inputs (one band per input) and
@@ -74,6 +73,10 @@
   state selected in the dialog
 * A comma is no longer accepted in a guard, an action or a valuation (they are saved as comma-separated
   lists in .fsd files: an item containing a comma was split in two when the model was read again)
+* The properties of the current diagram (name, local variables) are now shown in a "Diagram" panel, next
+  to the model panel (renamed from "Model IOs" to "Model"), instead of a dialog opened by right-clicking
+  on the diagram. Right-clicking on the background of a diagram now shows this panel and opens a context
+  menu (zoom, new, duplicate, delete and check diagram)
 * The application version is now read from the `VERSION` file
 
 # 1.0.3 (Mar 5, 2026)
