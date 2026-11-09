@@ -343,6 +343,27 @@ void IovPanel::typeEdited()
       return;
       }
     }
+  if ( new_type == io->type ) return;
+  // The stimulus of an input is only meaningful for its type (event dates, integer or boolean values): it is
+  // cleared when the type changes, after confirmation
+  if ( row_desc->stim_button ) {
+    Input *inp = static_cast<Input*>(io);
+    int n = stimItemCount(inp->stim);
+    if ( n > 0 ) {
+      QString what = QString(inp->stim.kind == Stimulus::Sporadic ? "%1 event(s)" : "%1 value change(s)").arg(n);
+      QMessageBox::StandardButton answer = QMessageBox::question(
+        this, "Change input type",
+        "Changing the type of input " + row_desc->committedName + " will delete its stimuli (" + what + ").\n"
+        "Continue?");
+      if ( answer != QMessageBox::Yes ) {
+        const QSignalBlocker blocker(type_selector);
+        type_selector->setCurrentIndex(static_cast<int>(io->type));
+        return;
+        }
+      inp->stim = Stimulus(Stimulus::None);
+      updateStimButton(row_desc);
+      }
+    }
   qDebug() << "IovPanel: setting type for IOV" << io->name;
   io->type = new_type;
   qDebug () << "Setting IO type: " << toString(io->type);
