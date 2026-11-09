@@ -1,6 +1,7 @@
 # Makefile to build the MacOS distribution
 
 include config
+include VERSION # After config, whose VERSION may be outdated (it is only updated by ./configure)
 
 .PHONY: build install installer
 
