@@ -64,6 +64,10 @@
   replaces the global STIM button
 * Changing the type of an input which has stimuli now deletes them, after confirmation (they were kept
   unchanged, a sequence of events attached to an int input for instance)
+* The names of states, diagrams, IOs and variables, and the periodic fill parameters of the stimuli
+  editor, are now checked as they are typed: an invalid field gets a red frame, the error is displayed
+  under it and the dialog cannot be accepted (errors were reported by message boxes)
+* A name already used by another IO or variable is no longer applied: the previous name is restored
 * The application version is now read from the `VERSION` file
 
 # 1.0.3 (Mar 5, 2026)
