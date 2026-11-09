@@ -62,6 +62,8 @@
 * In the Inputs panel of the model properties, each input row has a "Stim" button ("-" when no stimulus
   is attached to the input), opening the stimuli editor with the track of this input highlighted. It
   replaces the global STIM button
+* Changing the type of an input which has stimuli now deletes them, after confirmation (they were kept
+  unchanged, a sequence of events attached to an int input for instance)
 * The application version is now read from the `VERSION` file
 
 # 1.0.3 (Mar 5, 2026)
