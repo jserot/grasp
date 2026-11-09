@@ -28,6 +28,7 @@
 #include "iov.h"
 #include "rowDesc.h"
 #include "globals.h"
+#include "fieldValidation.h"
 
 #define QCOMBOBOX_INDEX_CHANGED (&QComboBox::currentIndexChanged)
 
@@ -241,6 +242,32 @@ void IovPanel::nameChanged()
   // Note: the IO name itself is only updated when the edition is finished (see nameEdited). Operations using the
   // model (save, check, export, ...) validate the pending edition first (see MainWindow::beginUserOperation)
   updateTypeChoices(row_desc);
+  QString name = name_selector->text().trimmed();
+  QString error;
+  if ( ! name.isEmpty() && isNameUsedByOther(row_desc->io, name) )
+    error = "The name " + name + " is already used. Choose another one, or "
+      + (row_desc->committedName.isEmpty() ? QString("the name will be cleared")
+                                           : "the previous name (" + row_desc->committedName + ") will be restored");
+  showFieldError(name_selector, error_label, error);
+}
+
+// Whether [name] is the name of an IO (model) or variable (diagram) other than [io]
+bool IovPanel::isNameUsedByOther(const Iov *io, const QString &name) const
+{
+  QList<Iov*> others;
+  switch ( client.icKind ) {
+    case IcModel:
+      Q_ASSERT(client.icClient.model);
+      others = client.icClient.model->inputs() + client.icClient.model->outputs() + client.icClient.model->globalVars();
+      break;
+    case IcDiagram:
+      Q_ASSERT(client.icClient.diagram);
+      others = client.icClient.diagram->getVars();
+      break;
+    }
+  for ( const Iov* other: others )
+    if ( other != io && other->name == name ) return true;
+  return false;
 }
 
 QStringList IovPanel::transitionsTriggeredBy(const QString &event)
@@ -273,8 +300,6 @@ QString IovPanel::rowDeletionError(QHBoxLayout *row_layout)
 
 void IovPanel::nameEdited()
 {
-  Model *model;
-  Diagram *diagram;
   //qDebug() << "IovPanel::nameEdited called by" << sender();
   QLineEdit* name_selector = qobject_cast<QLineEdit*>(sender());
   Q_ASSERT(name_selector);
@@ -283,30 +308,20 @@ void IovPanel::nameEdited()
   Iov* io = row_desc->io;
   qDebug() << "IovPanel: setting name for IOV" << io->name;
   QString name = name_selector->text().trimmed();
-  QList<Iov*> others;
-  switch ( client.icKind ) {
-    case IcModel:
-      model = client.icClient.model;
-      Q_ASSERT(model);
-      others = model->inputs() + model->outputs() + model->globalVars();
-      break;
-    case IcDiagram:
-      diagram = client.icClient.diagram;
-      Q_ASSERT(diagram);
-      others = diagram->getVars();
-      break;
-    }
-  bool already_used = false;
-  for ( const Iov* other: others )
-    if ( other != io && other->name == name ) already_used = true;
-  if ( name != "" && already_used ) {
-    QMessageBox::warning( this, "Error", "The name " + name + " is already used. Please choose another none");
-    //name_selector->setText("");
+  showFieldError(name_selector, error_label, QString());
+  if ( ! name.isEmpty() && isNameUsedByOther(io, name) ) {
+    // A name already used is not applied: the previous one is restored (as announced while it was typed)
+    qDebug() << "IovPanel: name" << name << "already used; restoring" << row_desc->committedName;
+    name_selector->setText(row_desc->committedName);
+    name_selector->setCursorPosition(0);
+    updateTypeChoices(row_desc);
+    if ( io->name == row_desc->committedName ) return; // Nothing changed
+    name = row_desc->committedName;
     }
   io->name = name;
   // When an event is renamed, the transitions it triggers are updated accordingly
   QString old_name = row_desc->committedName;
-  if ( ! name.isEmpty() && ! already_used ) {
+  if ( ! name.isEmpty() ) {
     if ( io->type == IoType::TyEvent && ! old_name.isEmpty() && old_name != name && client.icKind == IcModel ) {
       for ( Diagram *d : client.icClient.model->getDiagrams() ) {
         for ( Transition *t : d->transitions() )

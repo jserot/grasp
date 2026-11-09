@@ -54,6 +54,7 @@ private:
   void updateStimButton(RowDesc *row_desc);
   QStringList transitionsTriggeredBy(const QString &event); // In all the diagrams of the model
   QString usedEventError(const QString &event, const QString &what);
+  bool isNameUsedByOther(const Iov *io, const QString &name) const;
 
 protected slots:
   void addRowFields(QHBoxLayout *row_layout, void *data) override;

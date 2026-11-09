@@ -23,6 +23,7 @@
 #include "model.h"
 #include "ChronogramEditorWidget.h"
 #include "viewerSize.h"
+#include "fieldValidation.h"
 #include <QDialog>
 #include <QVBoxLayout>
 
@@ -38,7 +39,13 @@ DynamicPanel::DynamicPanel(QString title, Client client) : QGroupBox(title)
   top_row_layout->addWidget(clear_button);
   this->client = client;
   layout->addLayout(top_row_layout);
-  setLayout(layout);
+  // The error label is kept out of [layout], whose items are the rows
+  QVBoxLayout *outer_layout = new QVBoxLayout();
+  outer_layout->setSpacing(0);
+  outer_layout->addLayout(layout);
+  error_label = newFieldErrorLabel();
+  outer_layout->addWidget(error_label);
+  setLayout(outer_layout);
   connect(add_button, &QPushButton::clicked, this, &DynamicPanel::addNewRow);
   connect(clear_button, &QPushButton::clicked, this, &DynamicPanel::clear);
   add_button->setDefault(false);

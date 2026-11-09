@@ -20,6 +20,7 @@ class QPushButton;
 class QBoxLayout;
 class QVBoxLayout;
 class QHBoxLayout;
+class QLabel;
 class Model;
 
 class DynamicPanel : public QGroupBox
@@ -36,7 +37,8 @@ public:
     } Client;
 
 protected:
-  QVBoxLayout *layout;
+  QVBoxLayout *layout; // Top row (buttons), then one row per item
+  QLabel *error_label; // Under the rows: error of the field being edited, if any (see fieldValidation.h)
   QPushButton *add_button;
   QPushButton *clear_button;
   QHash<QPushButton*, QBoxLayout*> mButtonToLayoutMap;
