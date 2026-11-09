@@ -77,6 +77,9 @@
   to the model panel (renamed from "Model IOs" to "Model"), instead of a dialog opened by right-clicking
   on the diagram. Right-clicking on the background of a diagram now shows this panel and opens a context
   menu (zoom, new, duplicate, delete and check diagram)
+* The generated VHDL and SystemC files now have their own syntax highlighting (SystemC files got the
+  CTask one, VHDL files had none). All the occurrences of a keyword in a line are now highlighted (only
+  the first one was)
 * The application version is now read from the `VERSION` file
 
 # 1.0.3 (Mar 5, 2026)
