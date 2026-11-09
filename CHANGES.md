@@ -59,6 +59,8 @@
   content, within 80% of the screen, with scroll bars beyond (they had a fixed size)
 * The stimuli editor window is now sized after the number of model inputs (one band per input) and
   the whole time range, within 80% of the screen, with scroll bars beyond (it had a fixed size)
+* In the Inputs panel of the model properties, each input row has a "Stim" button ("-" when no stimulus
+  is attached to the input), opening the stimuli editor. It replaces the global STIM button
 * The application version is now read from the `VERSION` file
 
 # 1.0.3 (Mar 5, 2026)
