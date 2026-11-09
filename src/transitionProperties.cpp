@@ -27,6 +27,7 @@
 #include "transitionGuards.h"
 #include "transitionActions.h"
 #include "compiler.h"
+#include "fieldValidation.h"
 
 TransitionProperties::TransitionProperties(
   Transition *transition, Diagram *diagram, bool isInitial, QWidget *parent)
@@ -167,32 +168,33 @@ void TransitionProperties::accept()
   QStringList guards = guards_panel->retrieve();
   QStringList actions = actions_panel->retrieve();
 
-  // All the guards and actions are checked; the faulty rows are marked and the errors shown under each panel
+  // All the guards and actions are checked (by the compiler if model checking is enabled); the faulty rows are
+  // marked and the errors shown under each panel
   bool ok = true;
-  if ( Globals::check_model ) {
-    QList<QLineEdit*> faulty;
-    QStringList errors;
-    if ( ! isInitial ) {
-      for ( QLineEdit *field: guards_panel->rowFields() ) {
-        QString guard = field->text().trimmed();
-        if ( guard.isEmpty() ) continue; // Empty rows are ignored
-        QString error = transition->guard_error(guard);
-        if ( ! error.isEmpty() ) { faulty << field; errors << "Guard \"" + guard + "\": " + error; }
-        }
-      guards_panel->showRowErrors(faulty, errors);
-      ok = errors.isEmpty();
+  QList<QLineEdit*> faulty;
+  QStringList errors;
+  if ( ! isInitial ) {
+    for ( QLineEdit *field: guards_panel->rowFields() ) {
+      QString guard = field->text().trimmed();
+      if ( guard.isEmpty() ) continue; // Empty rows are ignored
+      QString error = listItemError(guard, "guard");
+      if ( error.isEmpty() && Globals::check_model ) error = transition->guard_error(guard);
+      if ( ! error.isEmpty() ) { faulty << field; errors << "Guard \"" + guard + "\": " + error; }
       }
-    faulty.clear();
-    errors.clear();
-    for ( QLineEdit *field: actions_panel->rowFields() ) {
-      QString action = field->text().trimmed();
-      if ( action.isEmpty() ) continue;
-      QString error = transition->action_error(action, dstState);
-      if ( ! error.isEmpty() ) { faulty << field; errors << "Action \"" + action + "\": " + error; }
-      }
-    actions_panel->showRowErrors(faulty, errors);
-    ok = ok && errors.isEmpty();
+    guards_panel->showRowErrors(faulty, errors);
+    ok = errors.isEmpty();
     }
+  faulty.clear();
+  errors.clear();
+  for ( QLineEdit *field: actions_panel->rowFields() ) {
+    QString action = field->text().trimmed();
+    if ( action.isEmpty() ) continue;
+    QString error = listItemError(action, "action");
+    if ( error.isEmpty() && Globals::check_model ) error = transition->action_error(action, dstState);
+    if ( ! error.isEmpty() ) { faulty << field; errors << "Action \"" + action + "\": " + error; }
+    }
+  actions_panel->showRowErrors(faulty, errors);
+  ok = ok && errors.isEmpty();
 
   if ( ok  ) {
     transition->setStates(isInitial ? transition->getSrcState() : srcState, dstState);

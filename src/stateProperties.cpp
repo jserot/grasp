@@ -105,24 +105,25 @@ void StateProperties::accept()
     return;
     }
   QStringList valuations = valuations_panel->retrieve();
-  // All the valuations are checked; the faulty rows are marked and the errors shown under the panel
-  bool ok = true;
-  if ( Globals::check_model ) {
-    QList<QLineEdit*> faulty;
-    QStringList errors;
-    QStringList lhss;
-    for ( QLineEdit *field: valuations_panel->rowFields() ) {
-      QString valuation = field->text().trimmed();
-      if ( valuation.isEmpty() ) continue; // Empty rows are ignored
-      QString error = state->valuation_error(valuation);
+  // All the valuations are checked (by the compiler if model checking is enabled); the faulty rows are marked and
+  // the errors shown under the panel
+  QList<QLineEdit*> faulty;
+  QStringList errors;
+  QStringList lhss;
+  for ( QLineEdit *field: valuations_panel->rowFields() ) {
+    QString valuation = field->text().trimmed();
+    if ( valuation.isEmpty() ) continue; // Empty rows are ignored
+    QString error = listItemError(valuation, "valuation");
+    if ( error.isEmpty() && Globals::check_model ) {
+      error = state->valuation_error(valuation);
       QString lhs = valuation.split("=").at(0).trimmed();
       if ( error.isEmpty() && lhss.contains(lhs) ) error = lhs + " is already assigned by another valuation";
       lhss << lhs;
-      if ( ! error.isEmpty() ) { faulty << field; errors << "Valuation \"" + valuation + "\": " + error; }
       }
-    valuations_panel->showRowErrors(faulty, errors);
-    ok = errors.isEmpty();
+    if ( ! error.isEmpty() ) { faulty << field; errors << "Valuation \"" + valuation + "\": " + error; }
     }
+  valuations_panel->showRowErrors(faulty, errors);
+  bool ok = errors.isEmpty();
   if ( ok ) {
     state->setId(id);
     state->setAttrs(valuations);

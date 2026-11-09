@@ -23,6 +23,14 @@
 
 static const char *const fieldErrorColor = "#e0443e"; // Readable on both light and dark backgrounds
 
+// Guards, actions and valuations are saved in .fsd files as comma-separated lists : a comma cannot appear in one
+// of them (it is never needed, the RFSM subset accepted by Grasp having no function calls, arrays nor records).
+// Returns the error for [item], a [what] (guard, action, valuation), or an empty string.
+inline QString listItemError(const QString &item, const QString &what)
+{
+  return item.contains(',') ? "commas are not allowed (put each " + what + " on its own row)" : QString();
+}
+
 // Label displaying the error of a field (hidden when the field is valid)
 inline QLabel* newFieldErrorLabel()
 {
