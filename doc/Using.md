@@ -144,6 +144,8 @@ being highlighted.
 
 ![](./snaps/stim_ed.png)
 
+![](./snaps/stim_ed.png)
+
 In this editor :
 - a left click in a track adds a stimulus at the corresponding date (an event for an input with type
   `event`, a value change otherwise). A dialog lets the date (and, for a value change, the value) be
