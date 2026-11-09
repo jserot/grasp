@@ -1,15 +1,19 @@
 # Makefile to build the Linux distribution
 
 include config
+include VERSION # After config, whose VERSION may be outdated (it is only updated by ./configure)
 ARCH=$(shell dpkg --print-architecture)
 
 PKG_NAME="grasp"
-PKG_VERSION="1.0.1"
+PKG_VERSION=$(VERSION)
 PKG_MAINTAINER="J. Sérot <jocelyn.serot@uca.fr>"
 PKG_DESCRIPTION="A Qt-based app for designing for reactive state-machine based programs"
 PKG_SECTION="utils"
 PKG_PRIORITY="optional"
 PKG_ARCH=`dpkg --print-architecture`
+# External tools used to display the DOT graphs (dot) and the simulation results (gtkwave). They are only
+# recommended, since Grasp can be used without them
+PKG_RECOMMENDS="graphviz, gtkwave"
 PKG_FILE=./dist/linux/grasp/DEBIAN/control
 
 .PHONY: build install installer
@@ -39,6 +43,7 @@ install:
 	@echo "Section: $(PKG_SECTION)" >> $(PKG_FILE)
 	@echo "Priority: $(PKG_PRIORITY)" >> $(PKG_FILE)
 	@echo "Architecture: $(PKG_ARCH)" >> $(PKG_FILE)
+	@echo "Recommends: $(PKG_RECOMMENDS)" >> $(PKG_FILE)
 	@echo "Maintainer: J. Sérot <jocelyn.serot@uca.fr>" >> $(PKG_FILE)
 	@echo "Description: $(PKG_DESCRIPTION)" >> $(PKG_FILE)
 

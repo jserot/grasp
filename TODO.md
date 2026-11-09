@@ -8,7 +8,6 @@
 - Export to SCXML ?
 
 * BUILD
-- add graphviz and gtkwave to dep pkgs in debian dist
 
 * TOOLS
 
