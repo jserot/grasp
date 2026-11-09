@@ -34,6 +34,7 @@ public:
     void setRowHeight(int rowHeight);
     int rowHeight() const { return m_rowHeight; }
     int axisHeight() const { return kAxisHeight; }
+    int leftMargin() const { return kLeftMargin; }
 
     /// Pas d'accrochage temporel utilisé lors de l'AJOUT d'un stimulus par clic
     /// (la date cliquée est arrondie au multiple le plus proche). 0 = pas d'accrochage.
@@ -76,6 +77,8 @@ private:
     double m_snapStep = 5.0;
 
     static constexpr int kAxisHeight = 30;
+    // Marge à gauche de la date 0, pour que la première graduation (centrée sur sa date) ne soit pas coupée
+    static constexpr int kLeftMargin = 25;
     static constexpr double kClickToleranceUnits = 3.0;
 };
 

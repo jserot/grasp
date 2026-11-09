@@ -19,6 +19,7 @@
 #include <QCheckBox>
 #include <QStyle>
 #include <QTimer>
+#include <QKeyEvent>
 #include <cmath>
 
 ChronogramEditorWidget::ChronogramEditorWidget(QWidget *parent)
@@ -101,6 +102,14 @@ void ChronogramEditorWidget::setupUi()
     // --- Barre de boutons en bas : Annuler / Fermer ---
     m_cancelButton = new QPushButton(tr("Cancel"), this);
     m_closeButton = new QPushButton(tr("Close"), this);
+    // [Entrée] applique les modifications (Close) plutôt que de les abandonner (Cancel, qui était le bouton
+    // par défaut car créé en premier). Dans les champs Tmax et précision, [Entrée] valide seulement la valeur
+    // saisie (voir eventFilter).
+    m_cancelButton->setAutoDefault(false);
+    m_closeButton->setAutoDefault(true);
+    m_closeButton->setDefault(true);
+    m_tmaxSpin->installEventFilter(this);
+    m_precisionSpin->installEventFilter(this);
 
     m_bottomLayout = new QHBoxLayout();
     m_bottomLayout->addStretch();
@@ -222,23 +231,39 @@ void ChronogramEditorWidget::highlightTrack(StimulusTrack *track)
     });
 }
 
+bool ChronogramEditorWidget::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        const int key = static_cast<QKeyEvent *>(event)->key();
+        auto *spin = qobject_cast<QAbstractSpinBox *>(watched);
+        if (spin && (key == Qt::Key_Return || key == Qt::Key_Enter)) {
+            spin->interpretText(); // Valide la valeur saisie, sans fermer la fenêtre
+            spin->selectAll();
+            return true;
+        }
+    }
+    return QWidget::eventFilter(watched, event);
+}
+
 QSize ChronogramEditorWidget::sizeHint() const
 {
     // Les QScrollArea bornent leur propre sizeHint à quelques dizaines de lignes de texte : on calcule
     // donc explicitement la taille du contenu (axe + une bande par piste, largeur [0, Tmax]).
     // L'épaisseur des barres de défilement est ajoutée dans les deux sens : si le conteneur borne la
     // taille à l'écran, l'une d'elles apparaît sans masquer de piste ni la fin de l'axe.
+    // On part de la taille calculée par le layout (marges et espacements compris : layout()->spacing() vaut
+    // -1 sous macOS, où le style les donne widget par widget, et la hauteur était alors trop juste), dans
+    // laquelle on remplace la taille des zones de défilement par celle de leur contenu.
     const int frame = 2 * m_rightScrollArea->frameWidth();
     const int scrollBar = style()->pixelMetric(QStyle::PM_ScrollBarExtent, nullptr, m_rightScrollArea);
     const QSize content = m_multiView->sizeHint();
-    const QMargins margins = layout()->contentsMargins();
-    const int spacing = qMax(0, layout()->spacing());
+    const QSize base = QWidget::sizeHint();
+    const QSize leftHint = m_leftScrollArea->sizeHint();
+    const QSize rightHint = m_rightScrollArea->sizeHint();
 
-    const int splitWidth = m_leftScrollArea->width() + content.width() + frame + scrollBar;
-    const int width = qMax(m_toolbarLayout->sizeHint().width(), splitWidth) + margins.left() + margins.right();
-    const int height = margins.top() + m_toolbarLayout->sizeHint().height() + spacing
-        + content.height() + frame + scrollBar
-        + spacing + m_bottomLayout->sizeHint().height() + margins.bottom();
+    const int splitHeight = qMax(leftHint.height(), rightHint.height());
+    const int height = base.height() - splitHeight + content.height() + frame + scrollBar;
+    const int width = qMax(base.width(), base.width() - rightHint.width() + content.width() + frame + scrollBar);
     return QSize(width, height);
 }
 
@@ -292,7 +317,7 @@ void ChronogramEditorWidget::onZoomFitClicked()
         return;
 
     // On retire une petite marge pour ne pas coller le dernier repère au bord.
-    const double usableWidth = qMax(10, viewportWidth - 20);
+    const double usableWidth = qMax(10, viewportWidth - m_multiView->leftMargin() - 20);
     m_multiView->setPixelsPerUnit(usableWidth / tmax);
 }
 

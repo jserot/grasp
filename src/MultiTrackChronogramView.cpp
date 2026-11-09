@@ -76,12 +76,12 @@ QSize MultiTrackChronogramView::sizeHint() const
 
 double MultiTrackChronogramView::xToDate(int x) const
 {
-    return x / m_pixelsPerUnit;
+    return (x - kLeftMargin) / m_pixelsPerUnit;
 }
 
 int MultiTrackChronogramView::dateToX(double date) const
 {
-    return static_cast<int>(std::round(date * m_pixelsPerUnit));
+    return kLeftMargin + static_cast<int>(std::round(date * m_pixelsPerUnit));
 }
 
 void MultiTrackChronogramView::paintEvent(QPaintEvent *)
@@ -177,7 +177,7 @@ void MultiTrackChronogramView::drawValueTrack(QPainter &painter, StimulusTrack *
 
     painter.setPen(QPen(palette().highlight().color(), 2));
 
-    int prevX = 0;
+    int prevX = kLeftMargin;
     int prevY = -1;
     for (int i = 0; i < track->count(); ++i) {
         const auto *vc = static_cast<const ValueChangeStimulus *>(track->at(i));

@@ -66,6 +66,7 @@ private slots:
 
 private:
     void setupUi();
+    bool eventFilter(QObject *watched, QEvent *event) override;
     QWidget *buildTrackRow(StimulusTrack *track);
     void requestClearTrack(StimulusTrack *track);
 
