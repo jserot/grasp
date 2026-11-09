@@ -30,7 +30,9 @@ QFont TextViewer::defaultFont = createDefaultFont();
 SyntaxHighlighter* makeSyntaxHighlighter(QString suffix, QTextDocument* doc)
 {
     if ( suffix == "fsm" ) return new FsmSyntaxHighlighter(doc);
-    if ( suffix == "c" || suffix == "h" || suffix == "cpp" ) return new CTaskSyntaxHighlighter(doc);
+    if ( suffix == "c" ) return new CTaskSyntaxHighlighter(doc); // CTask code
+    if ( suffix == "cpp" || suffix == "h" ) return new SystemCSyntaxHighlighter(doc); // SystemC code
+    if ( suffix == "vhd" || suffix == "vhdl" ) return new VhdlSyntaxHighlighter(doc);
     return NULL;
 }
 

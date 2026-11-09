@@ -35,7 +35,15 @@ protected:
         QRegularExpression pattern;
         QTextCharFormat format;
     };
-    QVector<HighlightingRule> highlightingRules;
+    QVector<HighlightingRule> highlightingRules; // Applied in order (a later rule overrides an earlier one)
+
+    // Adds a rule highlighting the (whole) [words] with [format]
+    void addKeywords(const QStringList &words, const QTextCharFormat &format, bool caseInsensitive = false);
+
+    // Comments spanning several lines (/* ... */, for ex.); not highlighted if [commentStart] is not set
+    QRegularExpression commentStart;
+    QRegularExpression commentEnd;
+    QTextCharFormat commentFormat;
 };
 
 class FsmSyntaxHighlighter : public SyntaxHighlighter
@@ -50,3 +58,14 @@ public:
   CTaskSyntaxHighlighter(QTextDocument *parent = 0);
 };
 
+class SystemCSyntaxHighlighter : public SyntaxHighlighter
+{
+public:
+  SystemCSyntaxHighlighter(QTextDocument *parent = 0);
+};
+
+class VhdlSyntaxHighlighter : public SyntaxHighlighter
+{
+public:
+  VhdlSyntaxHighlighter(QTextDocument *parent = 0);
+};
