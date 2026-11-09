@@ -15,6 +15,7 @@
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QPushButton>
 #include <QMessageBox>
 #include <QStandardItemModel>
 #include <QRegularExpressionValidator>
@@ -146,6 +147,17 @@ void IovPanel::addRowFields(QHBoxLayout *row_layout, void *row_data)
 
   rows.push_back(std::make_unique<RowDesc>(io, row_layout, name_selector, type_selector));
   RowDesc *row_desc = rows.back().get();
+
+  if ( kind == IoKind::IoIn && client.icKind == IcModel ) { // Tells whether a stimulus is attached to the input
+    QPushButton *stim_button = new QPushButton("Stim");
+    stim_button->setFixedWidth(stim_button->sizeHint().width()); // Same width for all rows, whatever the text
+    stim_button->setAutoDefault(false); // [Return] in the name field must not open the editor
+    stim_button->setFocusPolicy(Qt::NoFocus);
+    row_layout->addWidget(stim_button);
+    connect(stim_button, &QPushButton::clicked, this, &IovPanel::editStim);
+    row_desc->stim_button = stim_button;
+    updateStimButton(row_desc);
+    }
   
   widgetToRow.insert((QWidget*)name_selector, row_desc);
   widgetToRow.insert((QWidget*)type_selector, row_desc);
@@ -187,6 +199,37 @@ void IovPanel::updateTypeChoices(RowDesc *row_desc)
 {
   bool enabled = row_desc->name_selector->text().trimmed() != "";
   setTypeSelector(row_desc->type_selector, enabled, row_desc->io);
+}
+
+static int stimItemCount(const Stimulus &stim)
+{
+  switch ( stim.kind ) {
+  case Stimulus::Sporadic: return stim.desc.sporadic.dates.size();
+  case Stimulus::ValueChanges: return stim.desc.valueChanges.vcs.size();
+  default: return 0;
+  }
+}
+
+void IovPanel::updateStimButton(RowDesc *row_desc)
+{
+  QPushButton *button = row_desc->stim_button;
+  if ( ! button ) return;
+  const Stimulus &stim = static_cast<Input*>(row_desc->io)->stim;
+  int n = stimItemCount(stim);
+  if ( n == 0 ) {
+    button->setText("-");
+    button->setToolTip("No stimulus. Click to edit the stimuli");
+    }
+  else {
+    button->setText("Stim");
+    button->setToolTip(QString(stim.kind == Stimulus::Sporadic ? "%1 event(s)" : "%1 value change(s)").arg(n)
+                       + ". Click to edit the stimuli");
+    }
+}
+
+void IovPanel::stimuliEdited()
+{
+  for ( const auto &row: rows ) updateStimButton(row.get());
 }
 
 void IovPanel::nameChanged()

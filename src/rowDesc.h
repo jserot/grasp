@@ -18,6 +18,7 @@ class Iov;
 class QHBoxLayout;
 class QLineEdit;
 class QComboBox;
+class QPushButton;
 
 class RowDesc {
 public:
@@ -31,4 +32,5 @@ public:
   QLineEdit* name_selector;
   QComboBox* type_selector;
   QString committedName; // Name of the IO when last validated (and used by the transitions it triggers)
+  QPushButton* stim_button = nullptr; // Tells whether a stimulus is attached and opens the stimuli editor (model inputs only)
 };

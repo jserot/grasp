@@ -37,22 +37,12 @@ DynamicPanel::DynamicPanel(QString title, Client client) : QGroupBox(title)
   top_row_layout->addWidget(add_button);
   top_row_layout->addWidget(clear_button);
   this->client = client;
-  if ( client.ctTag == CtInputs ) {  // When displaying input rows, add a button to show the "edit stimuli" dialog
-    // TODO : the button and the associated callback should be passed as the custom data
-    custom_button = new QPushButton("STIM");
-    top_row_layout->addWidget(custom_button);
-    }
   layout->addLayout(top_row_layout);
   setLayout(layout);
   connect(add_button, &QPushButton::clicked, this, &DynamicPanel::addNewRow);
   connect(clear_button, &QPushButton::clicked, this, &DynamicPanel::clear);
   add_button->setDefault(false);
   clear_button->setDefault(false);
-  if ( client.ctTag == CtInputs ) {
-    connect(custom_button, &QPushButton::clicked, this, &DynamicPanel::editStim);
-    // TODO : the button and the associated callback should be passed as the custom data
-    custom_button->setDefault(false);
-    }
 }
 
 QHBoxLayout* DynamicPanel::addRow(void *row_data) {
@@ -225,7 +215,10 @@ void DynamicPanel::editStim()
       if ( ! adjustments.isEmpty() )
         QMessageBox::warning(Globals::mainWindow, tr("Stimuli editor"),
                              tr("Some stimuli have been adjusted:\n") + adjustments.join("\n"));
-      if ( modified ) emit modelModified();
+      if ( modified ) {
+        stimuliEdited();
+        emit modelModified();
+        }
    }
 }
 

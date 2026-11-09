@@ -41,6 +41,7 @@ public:
 
 protected:
   QString rowDeletionError(QHBoxLayout *row_layout) override;
+  void stimuliEdited() override;
 
 private:
   IoKind kind; // Input, output or variable
@@ -50,6 +51,7 @@ private:
   QString rowPrefix;
 
   void updateTypeChoices(RowDesc *row_desc);
+  void updateStimButton(RowDesc *row_desc);
   QStringList transitionsTriggeredBy(const QString &event); // In all the diagrams of the model
   QString usedEventError(const QString &event, const QString &what);
 

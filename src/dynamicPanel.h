@@ -39,7 +39,6 @@ protected:
   QVBoxLayout *layout;
   QPushButton *add_button;
   QPushButton *clear_button;
-  QPushButton *custom_button;
   QHash<QPushButton*, QBoxLayout*> mButtonToLayoutMap;
   Client client;
 
@@ -68,6 +67,8 @@ protected:
   virtual void deleteRowFields(QHBoxLayout *row_layout) = 0; 
   // Returns a non-empty explanation if the row cannot be deleted (default: always possible)
   virtual QString rowDeletionError(QHBoxLayout *) { return QString(); }
+  // Called when the stimuli of the model inputs have been changed by the stimuli editor (default: nothing)
+  virtual void stimuliEdited() {}
 public:
   virtual QStringList retrieve() = 0;
 };
