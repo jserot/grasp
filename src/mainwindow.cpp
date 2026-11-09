@@ -534,7 +534,7 @@ void MainWindow::newDiagram()
 {
   Q_ASSERT(model); 
   QString name = model->freshDiagramName();
-  Diagram *diagram = new Diagram(model.get(), name, diagrams);
+  Diagram *diagram = new Diagram(model.get(), name);
   model->addDiagram(diagram);
   addDiagramTab(diagram);
   setUnsavedChanges(true);

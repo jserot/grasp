@@ -49,13 +49,11 @@ Diagram::Diagram(
   QString name,
   QList<Iov*> vars,
   QList<State*> states,
-  QList<Transition*> transitions,
-  QWidget *parent)
-  : QGraphicsScene(parent)
+  QList<Transition*> transitions)
+  : QGraphicsScene(nullptr)
 {
   this->name = name;
   this->model = model;
-  this->parent = parent;
   this->view = new QGraphicsView(this);
   foreach ( Iov* var, vars) {
     qDebug () << "Creating diagram: adding var" << var->name << toString(var->type);
@@ -78,8 +76,8 @@ Diagram::Diagram(
     qDebug() << "Diagram::ctor: this=" << this << "view=" << view;
 }
 
-Diagram::Diagram(Model *model, QString name, QWidget *parent)
-  : Diagram(model, name, QList<Iov*>(), QList<State*>(), QList<Transition*>(), parent)
+Diagram::Diagram(Model *model, QString name)
+  : Diagram(model, name, QList<Iov*>(), QList<State*>(), QList<Transition*>())
 {
 }
 
@@ -118,7 +116,7 @@ Diagram *Diagram::duplicate()
       }
     QString new_name = model->freshDiagramName(name + "_"); // A1 -> A1_1, A1_2, ...
     Diagram *copied_diagram =
-      new Diagram(this->model, new_name, copied_vars, copied_states.values(), copied_transitions, parent); 
+      new Diagram(this->model, new_name, copied_vars, copied_states.values(), copied_transitions);
     // We now can update the enclosing diagram of the copied states and transitions
     for ( State *s : copied_states.values() ) 
       s->setDiagram(copied_diagram);
@@ -718,7 +716,7 @@ bool Diagram::check()
 
 // Reading and saving
 
-Diagram* Diagram::fromJson(nlohmann::json& json, Model *model, QWidget *parent)
+Diagram* Diagram::fromJson(nlohmann::json& json, Model *model)
 {
     qDebug() << "Reading diagram from JSON state";
 
@@ -790,7 +788,7 @@ Diagram* Diagram::fromJson(nlohmann::json& json, Model *model, QWidget *parent)
     for ( auto & t : transitions ) diagram_transitions.append(t.release());
     QList<Iov*> diagram_vars;
     for ( auto & v : vars ) diagram_vars.append(v.release());
-    Diagram *diagram = new Diagram(model, name, diagram_vars, diagram_states, diagram_transitions, parent);
+    Diagram *diagram = new Diagram(model, name, diagram_vars, diagram_states, diagram_transitions);
     for ( State *s : diagram_states ) // We now can update the enclosing diagram of the read states 
       s->setDiagram(diagram);
     for ( Transition *t : diagram_transitions) // We now can update the enclosing diagram of the read transition 

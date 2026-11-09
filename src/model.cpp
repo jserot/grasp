@@ -240,7 +240,7 @@ Model* Model::readFromFile(QString fname)
       }
     QList<Diagram*>& diagrams = model->getDiagrams();
     for ( auto & json_diagram : json.at("diagrams") ) {
-      Diagram *a = Diagram::fromJson(json_diagram, model.get(), Globals::mainWindow);
+      Diagram *a = Diagram::fromJson(json_diagram, model.get());
       qDebug() << "Read diagram from JSON";
       a->dump();
       diagrams.append(a);

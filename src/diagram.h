@@ -38,8 +38,9 @@ class Diagram : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    explicit Diagram(Model *enclosingModel, QString name, QWidget *parent = 0);
-    explicit Diagram(Model *enclosingModel, QString name, QList<Iov*> vars, QList<State*> states, QList<Transition*> transitions, QWidget *parent);
+    // A diagram has no Qt parent: it is owned (and deleted) by its enclosing model only
+    explicit Diagram(Model *enclosingModel, QString name);
+    explicit Diagram(Model *enclosingModel, QString name, QList<Iov*> vars, QList<State*> states, QList<Transition*> transitions);
     ~Diagram();
 
     QString getName() const { return name; }
@@ -91,7 +92,7 @@ public:
     bool exportRfsmModel(QTextStream& os); // Returns false if the diagram is not valid (the user has been told why)
     void exportRfsmInstance(QTextStream& os);
 
-    static Diagram* fromJson(nlohmann::json& json, Model *model, QWidget *parent);
+    static Diagram* fromJson(nlohmann::json& json, Model *model);
     // This function is declared as static because it will be called a non-instance context in Model::readFromFile
     void toJson(nlohmann::json& json);
 
@@ -141,8 +142,6 @@ private:
     QGraphicsLineItem *line = nullptr;  // Line being drawn
     State *startState = nullptr;  // Initial pseudo-state being connected (between mouse press and release)
     QHash<QGraphicsItem*,QPointF> pressPositions; // Positions of the selected items at mouse press (SelectItem mode)
-
-    QWidget *parent;
 
     static QColor lineColor;
     static QColor boxColor;
