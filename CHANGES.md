@@ -72,6 +72,8 @@
   the dialog is accepted, the faulty rows being marked in red with their errors listed under the panel
   (only the first error was reported, by a message box). An action is now checked against the target
   state selected in the dialog
+* A comma is no longer accepted in a guard, an action or a valuation (they are saved as comma-separated
+  lists in .fsd files: an item containing a comma was split in two when the model was read again)
 * The application version is now read from the `VERSION` file
 
 # 1.0.3 (Mar 5, 2026)
