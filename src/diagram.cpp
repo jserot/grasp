@@ -15,7 +15,6 @@
 #include "model.h"
 #include "diagram.h"
 #include "transition.h"
-#include "diagramProperties.h"
 #include "stateProperties.h"
 #include "compiler.h"
 #include "transitionProperties.h"
@@ -73,6 +72,8 @@ Diagram::Diagram(
     connect(this, SIGNAL(modelModified()), Globals::mainWindow, SLOT(modelModified()));
     connect(this, SIGNAL(mouseEnter()), Globals::mainWindow, SLOT(updateCursor()));
     connect(this, SIGNAL(mouseLeave()), Globals::mainWindow, SLOT(resetCursor()));
+    connect(this, SIGNAL(propertiesRequested()), Globals::mainWindow, SLOT(showDiagramProperties()));
+    connect(this, SIGNAL(contextMenuRequested(QPoint)), Globals::mainWindow, SLOT(showDiagramContextMenu(QPoint)));
     qDebug() << "Diagram::ctor: this=" << this << "view=" << view;
 }
 
@@ -181,6 +182,13 @@ void Diagram::fitView(qreal maxScale)
   view->fitInView(r.adjusted(-20, -20, 20, 20), Qt::KeepAspectRatio); // Small margin around the diagram
   if ( view->transform().m11() > maxScale ) // Small diagrams are not magnified too much
     view->setTransform(QTransform::fromScale(maxScale, maxScale));
+  centerView();
+}
+
+void Diagram::setScale(qreal scale)
+{
+  if ( ! view ) return;
+  view->setTransform(QTransform::fromScale(scale, scale));
   centerView();
 }
 
@@ -466,8 +474,9 @@ void Diagram::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
       qDebug() << "** RightSelectItem got" << item;
       if ( item != NULL )
         editItem(item);
-      else {
-        edit();
+      else { // The context menu of the diagram is shown when the button is released (see showPropertiesDialog)
+        contextMenuPending = true;
+        contextMenuPos = mouseEvent->screenPos();
         }
       break;
     default:
@@ -494,13 +503,7 @@ void Diagram::editItem(QGraphicsItem *item)
 
 void Diagram::edit()
 {
-  if ( propertiesDialog ) { // Only one dialog per diagram (they would share the diagram variables)
-    propertiesDialog->raise();
-    propertiesDialog->activateWindow();
-    return;
-    }
-  propertiesDialog = new DiagramProperties(this, this->view);
-  showPropertiesDialog(propertiesDialog);
+  emit propertiesRequested();
 }
 
 // void Diagram::contextMenuEvent(QGraphicsSceneContextMenuEvent *contextMenuEvent)
@@ -560,6 +563,11 @@ void Diagram::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
     QDialog *dialog = pendingDialog;
     pendingDialog = nullptr;
     QTimer::singleShot(0, dialog, [dialog]() { dialog->show(); });
+    }
+  if ( contextMenuPending ) {
+    contextMenuPending = false;
+    QPoint pos = contextMenuPos;
+    QTimer::singleShot(0, this, [this, pos]() { emit contextMenuRequested(pos); });
     }
   Qt::MouseButton buttonPressed = mouseEvent->button();
   if ( buttonPressed != Qt::LeftButton ) return;

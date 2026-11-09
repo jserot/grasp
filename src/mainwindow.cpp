@@ -76,6 +76,7 @@ MainWindow::MainWindow()
     Globals::diagrams = diagrams;
 
     connect(diagrams, SIGNAL(tabCloseRequested(int)), this, SLOT(closeDiagram(int)));
+    connect(diagrams, &QTabWidget::currentChanged, this, &MainWindow::currentDiagramChanged);
     //connect(diagrams, SIGNAL(currentChanged(int)), this, SLOT(diagramTabChanged(int)));
     //connect(diagrams, SIGNAL(tabBarDoubleClicked(int)), this, SLOT(diagramTabChangeName(int)));
 
@@ -108,6 +109,9 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
+  // The model (and its diagrams) are deleted after this : the diagram panel must not follow the closed tabs
+  disconnect(diagrams, nullptr, this, nullptr);
+  if ( diagram_panel ) diagram_panel->setDiagram(nullptr);
   if ( Globals::compiler ) {
     Globals::compiler->close();
     delete Globals::compiler; // This will shutdown the compiler server
@@ -376,17 +380,96 @@ void MainWindow::createToolbar()
 
 // Dock for model IOs
 
+// A scroll area for a dock window content, scrolling vertically only : it is as wide as the content
+static QScrollArea *dockScrollArea(QWidget *content)
+{
+  QScrollArea *scroll = new QScrollArea();
+  scroll->setWidgetResizable(true);
+  scroll->setFrameShape(QFrame::NoFrame);
+  scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  scroll->setWidget(content);
+  int scrollBar = scroll->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+  scroll->setMinimumWidth(content->minimumSizeHint().width() + scrollBar);
+  return scroll;
+}
+
 void MainWindow::createDockWindow(Model *model)
 {
     if ( dock ) delete dock;
 
-    dock = new QDockWidget(tr("Model IOs"), this);
+    dock = new QDockWidget(tr("Model"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
-    model_panel = new ModelProperties(model, dock);
-    dock->setWidget(model_panel);
+    model_panel = new ModelProperties(model, nullptr); // Reparented by its scroll area
+    dock->setWidget(dockScrollArea(model_panel));
     addDockWidget(Qt::RightDockWidgetArea, dock);
     viewMenu->addAction(dock->toggleViewAction());
+
+    // The properties of the current diagram are shown in a second dock window, tabified with the first one
+    if ( diagram_dock ) delete diagram_dock;
+    diagram_dock = new QDockWidget(tr("Diagram"), this);
+    diagram_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    diagram_panel = new DiagramPanel();
+    diagram_dock->setWidget(dockScrollArea(diagram_panel));
+    addDockWidget(Qt::RightDockWidgetArea, diagram_dock);
+    tabifyDockWidget(dock, diagram_dock);
+    viewMenu->addAction(diagram_dock->toggleViewAction());
+    dock->raise(); // The model IOs are shown first
+    diagram_panel->setDiagram(currentDiagram());
+}
+
+void MainWindow::currentDiagramChanged(int index)
+{
+  if ( ! diagram_panel ) return;
+  QGraphicsView *view = index >= 0 ? qobject_cast<QGraphicsView*>(diagrams->widget(index)) : nullptr;
+  diagram_panel->setDiagram(view ? qobject_cast<Diagram*>(view->scene()) : nullptr);
+}
+
+void MainWindow::raiseDiagramPanel()
+{
+  if ( ! diagram_panel || ! diagram_dock ) return;
+  diagram_panel->setDiagram(currentDiagram());
+  diagram_dock->show();
+  diagram_dock->raise();
+}
+
+void MainWindow::showDiagramProperties()
+{
+  raiseDiagramPanel();
+  if ( diagram_panel ) diagram_panel->focusName();
+}
+
+void MainWindow::showDiagramContextMenu(QPoint screenPos)
+{
+  QPointer<Diagram> diagram = currentDiagram(); // The right-clicked diagram is the one shown
+  if ( ! diagram ) return;
+  raiseDiagramPanel();
+  QMenu *menu = new QMenu(this);
+  menu->setAttribute(Qt::WA_DeleteOnClose);
+  QMenu *zoom = menu->addMenu("Zoom");
+  int current = qRound(diagram->getView()->transform().m11() * 100);
+  for ( int z: { 50, 75, 100, 125, 150 } ) {
+    QAction *a = zoom->addAction(QString::number(z) + "%");
+    a->setCheckable(true);
+    a->setChecked(z == current);
+    connect(a, &QAction::triggered, this, [diagram, z]() { if ( diagram ) diagram->setScale(z / 100.0); });
+    }
+  zoom->addSeparator();
+  connect(zoom->addAction("Fit"), &QAction::triggered, this, [diagram]() {
+    if ( diagram ) diagram->fitView(1.5); // Not above the largest listed scale
+    });
+  menu->addSeparator();
+  connect(menu->addAction("New diagram"), &QAction::triggered, this, &MainWindow::newDiagram);
+  connect(menu->addAction("Duplicate diagram"), &QAction::triggered, this, &MainWindow::duplicateDiagram);
+  connect(menu->addAction("Delete diagram"), &QAction::triggered, this, [this, diagram]() {
+    if ( ! diagram ) return;
+    int index = diagrams->indexOf(diagram->getView());
+    if ( index >= 0 ) closeDiagram(index); // Asks for a confirmation
+    });
+  QAction *check = menu->addAction("Check diagram");
+  check->setEnabled(checkDiagramAction->isEnabled());
+  connect(check, &QAction::triggered, this, [this]() { checkDiagram(); });
+  menu->popup(screenPos);
 }
 
 // File IO
@@ -432,8 +515,12 @@ void MainWindow::openFile()
     if ( new_model ) {
       qDebug() << "MainWindow::openFile: read model completed";
       new_model->dump();
-      model.reset(new_model); // This also deletes the diagrams of the previous model
-      closeDiagramTabs();
+      if ( diagram_panel ) diagram_panel->setDiagram(nullptr);
+      {
+        const QSignalBlocker blocker(diagrams); // The tabs of the deleted diagrams must not be shown in the diagram panel
+        model.reset(new_model); // This also deletes the diagrams of the previous model
+        closeDiagramTabs();
+      }
       addDiagramTabs();
       createDockWindow(model.get());
       currentFileName = fname;
@@ -480,8 +567,12 @@ bool MainWindow::checkModelWithStimuli()
 void MainWindow::newModel()
 {
   if ( ! checkUnsavedChanges() ) return;
-  model = std::make_unique<Model>(); // This also deletes the diagrams of the previous model
-  closeDiagramTabs();
+  if ( diagram_panel ) diagram_panel->setDiagram(nullptr);
+  {
+    const QSignalBlocker blocker(diagrams); // The tabs of the deleted diagrams must not be shown in the diagram panel
+    model = std::make_unique<Model>(); // This also deletes the diagrams of the previous model
+    closeDiagramTabs();
+  }
   createDockWindow(model.get());
   newDiagram();
   currentFileName.clear();

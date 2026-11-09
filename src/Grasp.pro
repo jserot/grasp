@@ -15,7 +15,7 @@ HEADERS += include/nlohmann_json.h \
            state.h  \
            iov.h  \
            diagram.h  \
-           diagramProperties.h  \
+           diagramPanel.h  \
            model.h  \
            commandExec.h \
            fragment.h \
@@ -55,7 +55,7 @@ SOURCES += transition.cpp \
            state.cpp \
            iov.cpp  \
            diagram.cpp \
-           diagramProperties.cpp  \
+           diagramPanel.cpp  \
            model.cpp \
            commandExec.cpp \
            fragment.cpp \

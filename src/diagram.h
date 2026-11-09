@@ -72,6 +72,7 @@ public:
     State* getState(QString id);
     void centerView(); // Centers the view on the diagram items
     void fitView(qreal maxScale); // Scales (up to [maxScale]) and centers the view so that the whole diagram is visible
+    void setScale(qreal scale); // Scales and centers the view
     void updateSceneRect(); // Makes the scene cover the diagram items, with a large margin (see diagram.cpp)
     QString freshStateId(); // First identifier "S<n>" not used in this diagram
     bool hasPseudoState();
@@ -81,7 +82,7 @@ public:
 
     void save(nlohmann::json json_res);
 
-    void edit();
+    void edit(); // Shows the properties of the diagram (in the "Diagram" panel of the main window)
 
     bool check();
   //Fragment::Context build_context();
@@ -100,6 +101,8 @@ signals:
     void mouseEnter(void);
     void mouseLeave(void);
     void modelModified(void);
+    void propertiesRequested(void); // See edit()
+    void contextMenuRequested(QPoint screenPos); // Right-click on the background of the diagram
 
 protected:
     QString qual_id(QString id);
@@ -126,7 +129,8 @@ protected:
 private:
     void showPropertiesDialog(QDialog *dialog);
     QPointer<QDialog> pendingDialog; // Modal dialog waiting for the mouse button to be released (see showPropertiesDialog)
-    QPointer<QDialog> propertiesDialog; // Diagram properties dialog, if opened (only one at a time)
+    bool contextMenuPending = false; // Context menu waiting for the mouse button to be released (idem)
+    QPoint contextMenuPos; // Where it must be shown (screen coordinates)
     bool isItemChange(int type);
     State* addState(QPointF pos, QString id, QStringList attrs);
     State* addPseudoState(QPointF pos);

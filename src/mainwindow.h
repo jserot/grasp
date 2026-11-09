@@ -15,6 +15,7 @@
 #include "globals.h"
 #include "state.h"
 #include "modelProperties.h"
+#include "diagramPanel.h"
 #include "model.h"
 #include "compiler.h"
 
@@ -97,6 +98,9 @@ private slots:
     void compilerPathUpdated(QString path); 
     void dumpModel(void); // for debug only
     void serverError(QString err);
+    void currentDiagramChanged(int index); // Updates the diagram panel
+    void showDiagramProperties(); // Shows the diagram panel (for the current diagram), with the focus on its name
+    void showDiagramContextMenu(QPoint screenPos); // Right-click on the background of the current diagram
 
 private:
     void createActions();
@@ -105,6 +109,7 @@ private:
     void createMenus();
     void createToolbar();
     void createDockWindow(Model *model);
+    void raiseDiagramPanel(); // Shows the diagram panel for the current diagram
 
     bool checkUnsavedChanges(); // Returns false if the current operation must be cancelled
     void beginUserOperation(); // To be called at the start of operations using the model (save, check, export, ...)
@@ -123,6 +128,8 @@ private:
     std::unique_ptr<Model> model; // The model (ios + diagrams)
     ModelProperties *model_panel; // For editing model IOs
     QDockWidget* dock; // Holding the model_panel
+    DiagramPanel *diagram_panel = nullptr; // For editing the properties of the current diagram
+    QDockWidget* diagram_dock = nullptr; // Holding the diagram_panel (tabified with [dock])
     QTabWidget *diagrams; // The tabs holding the graphical representations of the model diagrams
     QFrame *toolbar;
     QButtonGroup *buttons;

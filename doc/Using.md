@@ -15,8 +15,8 @@ and another for editing the globals I/Os and variables of the model.
 
 ## Adding I/Os
 
-Click the `Add` button in the `Model IOs` panel (this panel is _dockable_ window; it can be detached
-from the main window if necessary and/or closed by (un)selecting the `Model IOs` item in the `View`
+Click the `Add` button in the `Model` panel (this panel is _dockable_ window; it can be detached
+from the main window if necessary and/or closed by (un)selecting the `Model` item in the `View`
 menu).
 
 When adding an input, output or global (shared) variable, give its name and type. For inputs, it's possible
@@ -61,9 +61,11 @@ outcoming transitions)
 
 ## Changing the name of the diagram or add local variables
 
-Right-click on the background of the corresponding panel.
+The name and local variables of the current diagram are shown in the `Diagram` panel, next to
+the `Model` panel (click on its tab to show it). The panels can be shown or hidden from the `View` menu.
 
-![](./snaps/editdiagram.png)
+Right-clicking on the background of a diagram also shows this panel, and opens a menu for changing
+the zoom of the diagram, adding a new diagram, duplicating, deleting or checking the diagram.
 
 ## Adding / removing a diagram from a model
 
@@ -120,7 +122,7 @@ compile the model to other formats. It normally won't be used by the casual user
   
 ## Simulating
 
-Provided that stimuli have been attached to inputs in the `Model IOs` panel, 
+Provided that stimuli have been attached to inputs in the `Model` panel, 
 the model can be simulated by invoking the `Run simulator` action of the `Compile` menu.
 
 The generated `.vcd` file is the passed to the corresponding viewer application (as specified in the
