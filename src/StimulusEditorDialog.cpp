@@ -13,7 +13,7 @@ StimulusEditorDialog::StimulusEditorDialog(QWidget *parent, const QString &track
     , m_type(type)
 {
     setupUi();
-    setWindowTitle(tr("Nouveau stimulus - %1").arg(trackName));
+    setWindowTitle(tr("New stimulus - %1").arg(trackName));
     m_dateSpin->setValue(initialDate);
 }
 
@@ -27,7 +27,7 @@ StimulusEditorDialog::StimulusEditorDialog(QWidget *parent, const TrackStimulus 
         : static_cast<const ValueChangeStimulus *>(existing)->targetName();
 
     setupUi();
-    setWindowTitle(tr("Modifier le stimulus - %1").arg(m_trackName));
+    setWindowTitle(tr("Edit stimulus - %1").arg(m_trackName));
     m_dateSpin->setValue(existing->date());
 
     if (m_type == TrackStimulusType::ValueChange) {
@@ -44,12 +44,12 @@ void StimulusEditorDialog::setupUi()
     m_dateSpin = new QDoubleSpinBox(this);
     m_dateSpin->setRange(0.0, 1e9);
     m_dateSpin->setDecimals(3);
-    form->addRow(tr("Date :"), m_dateSpin);
+    form->addRow(tr("Date:"), m_dateSpin);
 
     if (m_type == TrackStimulusType::ValueChange) {
         m_valueSpin = new QSpinBox(this);
         m_valueSpin->setRange(-1000000000, 1000000000);
-        form->addRow(tr("Valeur :"), m_valueSpin);
+        form->addRow(tr("Value:"), m_valueSpin);
     }
 
     mainLayout->addLayout(form);

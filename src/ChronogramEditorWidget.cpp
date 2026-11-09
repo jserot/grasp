@@ -49,16 +49,16 @@ void ChronogramEditorWidget::setupUi()
     m_precisionSpin->setDecimals(3);
     m_precisionSpin->setValue(5.0);
     m_precisionSpin->setToolTip(
-        tr("Lors d'un ajout par clic, la date est arrondie au multiple le plus proche "
-           "de cette valeur (0 = pas d'accrochage)."));
+        tr("When a stimulus is added by clicking, its date is rounded to the nearest multiple "
+           "of this value (0 = no rounding)."));
 
     m_toolbarLayout = new QHBoxLayout();
-    m_toolbarLayout->addWidget(new QLabel(tr("Tmax :"), this));
+    m_toolbarLayout->addWidget(new QLabel(tr("Tmax:"), this));
     m_toolbarLayout->addWidget(m_tmaxSpin);
     m_toolbarLayout->addWidget(m_zoomInButton);
     m_toolbarLayout->addWidget(m_zoomOutButton);
     m_toolbarLayout->addWidget(m_zoomFitButton);
-    m_toolbarLayout->addWidget(new QLabel(tr("Précision temporelle :"), this));
+    m_toolbarLayout->addWidget(new QLabel(tr("Time precision:"), this));
     m_toolbarLayout->addWidget(m_precisionSpin);
     m_toolbarLayout->addStretch();
 
@@ -98,8 +98,8 @@ void ChronogramEditorWidget::setupUi()
     splitLayout->addWidget(m_rightScrollArea, 1);
 
     // --- Barre de boutons en bas : Annuler / Fermer ---
-    m_cancelButton = new QPushButton(tr("Annuler"), this);
-    m_closeButton = new QPushButton(tr("Fermer"), this);
+    m_cancelButton = new QPushButton(tr("Cancel"), this);
+    m_closeButton = new QPushButton(tr("Close"), this);
 
     m_bottomLayout = new QHBoxLayout();
     m_bottomLayout->addStretch();
@@ -155,10 +155,10 @@ QWidget *ChronogramEditorWidget::buildTrackRow(StimulusTrack *track)
         row->setAutoFillBackground(true);
     }
     auto *typeLabel = new QLabel(
-        track->type() == TrackStimulusType::Event ? tr("Événement") : tr("Valeur"), row);
+        track->type() == TrackStimulusType::Event ? tr("Event") : tr("Value"), row);
     typeLabel->setStyleSheet(QStringLiteral("color: palette(mid);"));
 
-    auto *clearButton = new QPushButton(tr("Effacer"), row);
+    auto *clearButton = new QPushButton(tr("Clear"), row);
     clearButton->setFocusPolicy(Qt::NoFocus);
     connect(clearButton, &QPushButton::clicked, this, [this, track]() {
         requestClearTrack(track);
@@ -185,7 +185,7 @@ void ChronogramEditorWidget::rebuildPanels()
     header->setFixedHeight(m_multiView->axisHeight());
     auto *headerLayout = new QHBoxLayout(header);
     headerLayout->setContentsMargins(2, 0, 2, 0);
-    headerLayout->addWidget(new QLabel(tr("Nom"), header), 1);
+    headerLayout->addWidget(new QLabel(tr("Name"), header), 1);
     headerLayout->addWidget(new QLabel(tr("Type"), header));
     m_leftContentLayout->addWidget(header);
 
@@ -247,10 +247,10 @@ void ChronogramEditorWidget::requestClearTrack(StimulusTrack *track)
         return; // rien à effacer
 
     auto *box = new QMessageBox(
-        QMessageBox::Question, tr("Confirmer"),
+        QMessageBox::Question, tr("Confirm"),
         track->count() == 1
-            ? tr("Effacer le stimulus de la piste '%1' ?").arg(track->name())
-            : tr("Effacer les %1 stimuli de la piste '%2' ?").arg(track->count()).arg(track->name()),
+            ? tr("Clear the stimulus of track '%1'?").arg(track->name())
+            : tr("Clear the %1 stimuli of track '%2'?").arg(track->count()).arg(track->name()),
         QMessageBox::Yes | QMessageBox::No, this);
     box->setAttribute(Qt::WA_DeleteOnClose);
     box->setModal(false);
@@ -374,8 +374,8 @@ void ChronogramEditorWidget::onRemoveStimulusRequested(StimulusTrack *track, int
     // Voir onEditStimulusRequested : l'index peut changer avant la confirmation
     const quint64 id = existing->id();
 
-    auto *box = new QMessageBox(QMessageBox::Question, tr("Confirmer"),
-                                 tr("Supprimer ce stimulus ?"),
+    auto *box = new QMessageBox(QMessageBox::Question, tr("Confirm"),
+                                 tr("Delete this stimulus?"),
                                  QMessageBox::Yes | QMessageBox::No, this);
     box->setAttribute(Qt::WA_DeleteOnClose);
     box->setModal(false);
@@ -401,7 +401,7 @@ void ChronogramEditorWidget::onPeriodicFillRequested(StimulusTrack *track, doubl
     auto *dlg = new QDialog(this);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     dlg->setModal(false);
-    dlg->setWindowTitle(tr("Remplissage périodique - %1").arg(track->name()));
+    dlg->setWindowTitle(tr("Periodic fill - %1").arg(track->name()));
 
     auto *form = new QFormLayout(dlg);
 
@@ -420,12 +420,12 @@ void ChronogramEditorWidget::onPeriodicFillRequested(StimulusTrack *track, doubl
     endSpin->setDecimals(3);
     endSpin->setValue(m_tmaxSpin->value());
 
-    auto *clearCheck = new QCheckBox(tr("Effacer les événements existants avant remplissage"), dlg);
+    auto *clearCheck = new QCheckBox(tr("Clear the existing events before filling"), dlg);
     clearCheck->setChecked(true);
 
-    form->addRow(tr("Date de début :"), startSpin);
-    form->addRow(tr("Période :"), periodSpin);
-    form->addRow(tr("Date de fin :"), endSpin);
+    form->addRow(tr("Start date:"), startSpin);
+    form->addRow(tr("Period:"), periodSpin);
+    form->addRow(tr("End date:"), endSpin);
     form->addRow(clearCheck);
 
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, dlg);
@@ -446,9 +446,9 @@ void ChronogramEditorWidget::onPeriodicFillRequested(StimulusTrack *track, doubl
         const bool clearFirst = clearCheck->isChecked();
 
         if (period <= 0.0 || end < start) {
-            QMessageBox::warning(this, tr("Paramètres invalides"),
-                                  tr("La période doit être positive et la date de fin postérieure "
-                                     "ou égale à la date de début."));
+            QMessageBox::warning(this, tr("Invalid parameters"),
+                                  tr("The period must be positive and the end date must not be "
+                                     "earlier than the start date."));
             return;
         }
 
@@ -464,8 +464,8 @@ void ChronogramEditorWidget::onPeriodicFillRequested(StimulusTrack *track, doubl
 
         if (count > 5000) {
             auto *confirmBox = new QMessageBox(
-                QMessageBox::Question, tr("Confirmer"),
-                tr("Cela va générer %1 événements. Continuer ?").arg(count),
+                QMessageBox::Question, tr("Confirm"),
+                tr("This will generate %1 events. Continue?").arg(count),
                 QMessageBox::Yes | QMessageBox::No, this);
             confirmBox->setAttribute(Qt::WA_DeleteOnClose);
             confirmBox->setModal(false);

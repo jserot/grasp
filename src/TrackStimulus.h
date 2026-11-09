@@ -64,7 +64,7 @@ public:
 
     QString description() const override
     {
-        return QString("[t=%1] Événement '%2'%3")
+        return QString("[t=%1] Event '%2'%3")
             .arg(m_date)
             .arg(m_eventName)
             .arg(m_param.isValid() ? QString(" (param=%1)").arg(m_param.toString()) : QString());
