@@ -17,6 +17,7 @@
 #include <QFormLayout>
 #include <QCheckBox>
 #include <QStyle>
+#include <QTimer>
 #include <cmath>
 
 ChronogramEditorWidget::ChronogramEditorWidget(QWidget *parent)
@@ -144,6 +145,15 @@ QWidget *ChronogramEditorWidget::buildTrackRow(StimulusTrack *track)
     layout->setContentsMargins(2, 4, 2, 4);
 
     auto *nameLabel = new QLabel(track->name(), row);
+    if (track == m_multiView->highlightedTrack()) {
+        QFont font = nameLabel->font();
+        font.setBold(true);
+        nameLabel->setFont(font);
+        QPalette pal = row->palette();
+        pal.setColor(QPalette::Window, MultiTrackChronogramView::highlightTint(pal));
+        row->setPalette(pal);
+        row->setAutoFillBackground(true);
+    }
     auto *typeLabel = new QLabel(
         track->type() == TrackStimulusType::Event ? tr("Événement") : tr("Valeur"), row);
     typeLabel->setStyleSheet(QStringLiteral("color: palette(mid);"));
@@ -194,6 +204,21 @@ void ChronogramEditorWidget::rebuildPanels()
     m_leftContent->show();
 
     m_multiView->setTracks(tracks); // redimensionne déjà le widget en interne
+}
+
+void ChronogramEditorWidget::highlightTrack(StimulusTrack *track)
+{
+    m_multiView->setHighlightedTrack(track);
+    rebuildPanels();
+    const int index = m_scenario.tracks().indexOf(track);
+    if (index < 0)
+        return;
+    // Le défilement n'a d'effet qu'une fois la fenêtre affichée et les zones de défilement
+    // dimensionnées : on le diffère au retour dans la boucle d'événements.
+    const int center = m_multiView->axisHeight() + index * m_multiView->rowHeight() + m_multiView->rowHeight() / 2;
+    QTimer::singleShot(0, this, [this, center]() {
+        m_rightScrollArea->ensureVisible(0, center, 0, m_multiView->rowHeight());
+    });
 }
 
 QSize ChronogramEditorWidget::sizeHint() const

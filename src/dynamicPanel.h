@@ -58,7 +58,7 @@ signals:
 protected slots:
   void addNewRow();
   void deleteRow();
-  void editStim();
+  void editStim(Input *focus = nullptr); // The track of input [focus], if any, is highlighted in the editor
   // The following methods must be defined in the derived classes 
 protected:
   virtual void addRowFields(QHBoxLayout *row_layout, void *row_data) = 0;

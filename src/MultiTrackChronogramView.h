@@ -42,6 +42,11 @@ public:
 
     QSize sizeHint() const override;
 
+    /// Piste mise en évidence (fond teinté), nullptr pour aucune
+    void setHighlightedTrack(StimulusTrack *track);
+    StimulusTrack *highlightedTrack() const { return m_highlightedTrack; }
+    static QColor highlightTint(const QPalette &palette);
+
 signals:
     void addStimulusRequested(StimulusTrack *track, double date);
     void editStimulusRequested(StimulusTrack *track, int index);
@@ -64,6 +69,7 @@ private:
     bool hitTest(const QPoint &pos, StimulusTrack **outTrack, int *outIndex, double *outDate) const;
 
     QVector<StimulusTrack *> m_tracks;
+    StimulusTrack *m_highlightedTrack = nullptr;
     double m_pixelsPerUnit = 4.0;
     double m_duration = 200.0;
     int m_rowHeight = 70;

@@ -18,6 +18,21 @@ void MultiTrackChronogramView::setTracks(const QVector<StimulusTrack *> &tracks)
     update();
 }
 
+void MultiTrackChronogramView::setHighlightedTrack(StimulusTrack *track)
+{
+    m_highlightedTrack = track;
+    update();
+}
+
+/// Teinte de fond d'une piste mise en évidence (couleur de sélection, translucide pour rester
+/// lisible en thème clair comme en thème sombre)
+QColor MultiTrackChronogramView::highlightTint(const QPalette &palette)
+{
+    QColor c = palette.highlight().color();
+    c.setAlpha(60);
+    return c;
+}
+
 void MultiTrackChronogramView::setPixelsPerUnit(double ppu)
 {
     m_pixelsPerUnit = qMax(0.1, ppu);
@@ -83,6 +98,8 @@ void MultiTrackChronogramView::paintEvent(QPaintEvent *)
 
         if (i % 2 == 1)
             painter.fillRect(0, bandTop, width(), m_rowHeight, palette().alternateBase());
+        if (track == m_highlightedTrack)
+            painter.fillRect(0, bandTop, width(), m_rowHeight, highlightTint(palette()));
 
         painter.setPen(QPen(palette().mid().color()));
         painter.drawLine(0, bandTop + m_rowHeight, width(), bandTop + m_rowHeight);

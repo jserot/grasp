@@ -167,7 +167,7 @@ static Stimulus trackToStimulus(const StimulusTrack *track, const Input *inp, QS
     }
 }
 
-void DynamicPanel::editStim()
+void DynamicPanel::editStim(Input *focus)
 // TODO : this should not be in DynamicPanel but in function defined in the StimEditor class and
 // passed as a parameter to the DynamicPanel class (and called when the "Custom" button is clicked
 {
@@ -189,12 +189,15 @@ void DynamicPanel::editStim()
     connect(editor, &ChronogramEditorWidget::cancelRequested, &dialog, &QDialog::reject);
 
     StimulusScenario &scenario = editor->scenario();
+    StimulusTrack *focus_track = nullptr;
     foreach (Iov *io, model->inputs()) {
         Q_ASSERT(io->kind() == IoKind::IoIn);
         auto track = std::make_unique<StimulusTrack>(static_cast<Input*>(io));
+        if ( io == focus ) focus_track = track.get();
         scenario.addTrack(std::move(track));
     }
     editor->rebuildPanels();
+    editor->highlightTrack(focus_track);
     dialog.resize(boundedViewerSize(dialog.sizeHint())); // After the tracks have been added
     if (dialog.exec() == QDialog::Accepted) {
       // Report the edited tracks back to the model inputs

@@ -43,6 +43,10 @@ public:
     /// sans défilement (le conteneur la borne ensuite à l'écran).
     QSize sizeHint() const override;
 
+    /// Met en évidence la piste [track] (nom en gras, fond teinté) et fait défiler la vue
+    /// pour la rendre visible. nullptr : aucune piste mise en évidence.
+    void highlightTrack(StimulusTrack *track);
+
 signals:
     void closeRequested();
     void cancelRequested();

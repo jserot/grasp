@@ -154,7 +154,7 @@ void IovPanel::addRowFields(QHBoxLayout *row_layout, void *row_data)
     stim_button->setAutoDefault(false); // [Return] in the name field must not open the editor
     stim_button->setFocusPolicy(Qt::NoFocus);
     row_layout->addWidget(stim_button);
-    connect(stim_button, &QPushButton::clicked, this, &IovPanel::editStim);
+    connect(stim_button, &QPushButton::clicked, this, [this, io]() { editStim(static_cast<Input*>(io)); });
     row_desc->stim_button = stim_button;
     updateStimButton(row_desc);
     }
