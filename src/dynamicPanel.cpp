@@ -22,6 +22,7 @@
 #include "globals.h"
 #include "model.h"
 #include "ChronogramEditorWidget.h"
+#include "viewerSize.h"
 #include <QDialog>
 #include <QVBoxLayout>
 
@@ -188,7 +189,6 @@ void DynamicPanel::editStim()
 
     QDialog dialog(Globals::mainWindow);
     dialog.setWindowTitle(tr("Stimuli editor"));
-    dialog.resize(900, 500);
 
     auto *editor = new ChronogramEditorWidget(&dialog);
     auto *layout = new QVBoxLayout(&dialog);
@@ -205,6 +205,7 @@ void DynamicPanel::editStim()
         scenario.addTrack(std::move(track));
     }
     editor->rebuildPanels();
+    dialog.resize(boundedViewerSize(dialog.sizeHint())); // After the tracks have been added
     if (dialog.exec() == QDialog::Accepted) {
       // Report the edited tracks back to the model inputs
       // TODO : get rid of all this forth-and-back conversion work by directly storing _tracks_ in model inputs !

@@ -8,6 +8,7 @@ class QPushButton;
 class QDoubleSpinBox;
 class QScrollArea;
 class QVBoxLayout;
+class QHBoxLayout;
 class MultiTrackChronogramView;
 
 /**
@@ -37,6 +38,10 @@ public:
     /// À appeler après toute modification du scénario faite par programme
     /// (ajout/suppression de pistes en amont, avant affichage typiquement).
     void rebuildPanels();
+
+    /// Taille permettant d'afficher toutes les pistes et toute la durée [0, Tmax]
+    /// sans défilement (le conteneur la borne ensuite à l'écran).
+    QSize sizeHint() const override;
 
 signals:
     void closeRequested();
@@ -69,6 +74,9 @@ private:
     QDoubleSpinBox *m_precisionSpin = nullptr;
     QPushButton *m_closeButton = nullptr;
     QPushButton *m_cancelButton = nullptr;
+
+    QHBoxLayout *m_toolbarLayout = nullptr;
+    QHBoxLayout *m_bottomLayout = nullptr;
 
     QScrollArea *m_leftScrollArea = nullptr;
     QWidget *m_leftContent = nullptr;

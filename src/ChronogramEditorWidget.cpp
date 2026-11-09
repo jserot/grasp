@@ -16,6 +16,7 @@
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QCheckBox>
+#include <QStyle>
 #include <cmath>
 
 ChronogramEditorWidget::ChronogramEditorWidget(QWidget *parent)
@@ -50,15 +51,15 @@ void ChronogramEditorWidget::setupUi()
         tr("Lors d'un ajout par clic, la date est arrondie au multiple le plus proche "
            "de cette valeur (0 = pas d'accrochage)."));
 
-    auto *toolbarLayout1 = new QHBoxLayout();
-    toolbarLayout1->addWidget(new QLabel(tr("Tmax :"), this));
-    toolbarLayout1->addWidget(m_tmaxSpin);
-    toolbarLayout1->addWidget(m_zoomInButton);
-    toolbarLayout1->addWidget(m_zoomOutButton);
-    toolbarLayout1->addWidget(m_zoomFitButton);
-    toolbarLayout1->addWidget(new QLabel(tr("Précision temporelle :"), this));
-    toolbarLayout1->addWidget(m_precisionSpin);
-    toolbarLayout1->addStretch();
+    m_toolbarLayout = new QHBoxLayout();
+    m_toolbarLayout->addWidget(new QLabel(tr("Tmax :"), this));
+    m_toolbarLayout->addWidget(m_tmaxSpin);
+    m_toolbarLayout->addWidget(m_zoomInButton);
+    m_toolbarLayout->addWidget(m_zoomOutButton);
+    m_toolbarLayout->addWidget(m_zoomFitButton);
+    m_toolbarLayout->addWidget(new QLabel(tr("Précision temporelle :"), this));
+    m_toolbarLayout->addWidget(m_precisionSpin);
+    m_toolbarLayout->addStretch();
 
     // --- Panneau de droite : chronogrammes empilés ---
     m_multiView = new MultiTrackChronogramView(this);
@@ -99,15 +100,15 @@ void ChronogramEditorWidget::setupUi()
     m_cancelButton = new QPushButton(tr("Annuler"), this);
     m_closeButton = new QPushButton(tr("Fermer"), this);
 
-    auto *bottomLayout = new QHBoxLayout();
-    bottomLayout->addStretch();
-    bottomLayout->addWidget(m_cancelButton);
-    bottomLayout->addWidget(m_closeButton);
+    m_bottomLayout = new QHBoxLayout();
+    m_bottomLayout->addStretch();
+    m_bottomLayout->addWidget(m_cancelButton);
+    m_bottomLayout->addWidget(m_closeButton);
 
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->addLayout(toolbarLayout1);
+    mainLayout->addLayout(m_toolbarLayout);
     mainLayout->addLayout(splitLayout, 1);
-    mainLayout->addLayout(bottomLayout);
+    mainLayout->addLayout(m_bottomLayout);
 
     connect(m_tmaxSpin, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &ChronogramEditorWidget::onTmaxChanged);
@@ -193,6 +194,26 @@ void ChronogramEditorWidget::rebuildPanels()
     m_leftContent->show();
 
     m_multiView->setTracks(tracks); // redimensionne déjà le widget en interne
+}
+
+QSize ChronogramEditorWidget::sizeHint() const
+{
+    // Les QScrollArea bornent leur propre sizeHint à quelques dizaines de lignes de texte : on calcule
+    // donc explicitement la taille du contenu (axe + une bande par piste, largeur [0, Tmax]).
+    // L'épaisseur des barres de défilement est ajoutée dans les deux sens : si le conteneur borne la
+    // taille à l'écran, l'une d'elles apparaît sans masquer de piste ni la fin de l'axe.
+    const int frame = 2 * m_rightScrollArea->frameWidth();
+    const int scrollBar = style()->pixelMetric(QStyle::PM_ScrollBarExtent, nullptr, m_rightScrollArea);
+    const QSize content = m_multiView->sizeHint();
+    const QMargins margins = layout()->contentsMargins();
+    const int spacing = qMax(0, layout()->spacing());
+
+    const int splitWidth = m_leftScrollArea->width() + content.width() + frame + scrollBar;
+    const int width = qMax(m_toolbarLayout->sizeHint().width(), splitWidth) + margins.left() + margins.right();
+    const int height = margins.top() + m_toolbarLayout->sizeHint().height() + spacing
+        + content.height() + frame + scrollBar
+        + spacing + m_bottomLayout->sizeHint().height() + margins.bottom();
+    return QSize(width, height);
 }
 
 void ChronogramEditorWidget::requestClearTrack(StimulusTrack *track)
