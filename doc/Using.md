@@ -129,22 +129,24 @@ menu).
 
 # Trouble-shooting, debugging
 
-When the `debug` option (in the `General` tab of the `Compiler
-options` window accessible from the `Configuration` menu) is set, 
-the application produces a log file (named `grasp.log`). This file can inspected to diagnose
-problems. By default, this file is located in the working directory. 
+When running, the application writes a log file, named `grasp.log`, which can be inspected to
+diagnose problems. This file is located
+- in `~/.local/share/grasp/` under Linux
+- in `~/Library/Application Support/grasp/` under MacOS
+- in `C:\Users\<User>\AppData\Roaming\grasp\` under Windows.
 
-Another possibility for debugging is  to launch the application from a command line interpreter
-("console", "terminal", ...) so that log messages are produced directly on the standard output.
-- under Windows
-  - open a terminal (console, PowerShell, Cygwin, MSYS, ...)
-  - cd to the directory where the `Grasp` application has been installed
-  - launch it from the command line
-- under MacOS / Linux
-  - open a terminal (`Applications/Tools/Terminal.app` for MacOS)
-  - cd to the directory where the `Grasp` application has been installed
-  - launch it from the command line
+This file is overwritten each time the application is launched: copy it before launching the
+application again if its content is needed.
 
 The most common problems are due to wrong locations of the `dot` and `gtkwave` external tools
-(used, respectively, to display to FSM diagrams and the simulation results). Check the paths
-by choosing the `Compiler and Tools` in the `Configuration` menu. 
+(used, respectively, to display the FSM diagrams and the simulation results). Check the paths
+by choosing `Compiler and tools` in the `Configuration` menu.
+
+Another possible cause is an invalid (or already used) port number for the socket used to communicate
+with the underlying `rfsmc` compiler server (default value: 51000). In this case, change the
+`SOCKETPORT` entry of the application configuration file `grasp.conf`, located
+- in `~/.config/grasp/` under Linux
+- in `~/Library/Preferences/grasp/` under MacOS
+- in `C:\Users\<User>\AppData\Roaming\grasp\` under Windows.
+
+Since all the instances of the application use the same port, only one of them can run at a time.

@@ -16,4 +16,3 @@
 * TOOLS
 
 * DOC
-- update the section *Trouble Shooting* in `doc/Using.md`
