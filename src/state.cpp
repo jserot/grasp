@@ -211,6 +211,16 @@ bool State::check_valuation(Fragment::Context ctx, QString valuation)
   return Globals::compiler->handle_response("State checking", "Valuation " + valuation, r); // Ignore [rds] and [wrs] results here
 }
 
+QString State::valuation_error(QString valuation)
+{
+  Fragment::Context ctx = {
+    enclosingDiagram->potentialInputs(),
+    enclosingDiagram->potentialOutputs(),
+    enclosingDiagram->localVars()
+    };
+  return Globals::compiler->fragment_error(scan_valuation(ctx, valuation));
+}
+
 bool State::check_valuations(QStringList valuations)
 {
   qDebug() << "Checking state valuations for state " << getId() << " : " << valuations;

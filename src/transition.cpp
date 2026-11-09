@@ -340,6 +340,32 @@ bool Transition::check_action(Fragment::Context ctx, QString action)
   return true;
 }
 
+static Fragment::Context checkContext(Diagram *diagram)
+{
+  return Fragment::Context {
+    diagram->potentialInputs(), // Inputs, including global variables
+    diagram->potentialOutputs(), // Outputs, including global variables
+    diagram->localVars() // Local variables
+    };
+}
+
+QString Transition::guard_error(QString guard)
+{
+  return Globals::compiler->fragment_error(scan_guard(checkContext(enclosingDiagram), guard));
+}
+
+QString Transition::action_error(QString action, State *dst)
+{
+  QString error = Globals::compiler->fragment_error(scan_action(checkContext(enclosingDiagram), action));
+  if ( ! error.isEmpty() ) return error;
+  // An output modified by an action must not be assigned in the target state
+  QString lhs = action.split(":=").at(0).trimmed();
+  for ( const QString &valuation: dst->getAttrs() )
+    if ( valuation.split("=").at(0).trimmed() == lhs )
+      return "it sets output " + lhs + ", which is already assigned in the target state";
+  return QString();
+}
+
 bool Transition::check_guards(QStringList guards)
 {
   Fragment::Context ctx = {

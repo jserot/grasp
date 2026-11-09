@@ -18,6 +18,7 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QTimer>
+#include <QLineEdit>
 
 #include "globals.h"
 #include "transition.h"
@@ -166,13 +167,32 @@ void TransitionProperties::accept()
   QStringList guards = guards_panel->retrieve();
   QStringList actions = actions_panel->retrieve();
 
-  bool ok;
+  // All the guards and actions are checked; the faulty rows are marked and the errors shown under each panel
+  bool ok = true;
   if ( Globals::check_model ) {
-    ok = isInitial ? true : transition->check_guards(guards);
-    ok = ok && transition->check_actions(actions);
+    QList<QLineEdit*> faulty;
+    QStringList errors;
+    if ( ! isInitial ) {
+      for ( QLineEdit *field: guards_panel->rowFields() ) {
+        QString guard = field->text().trimmed();
+        if ( guard.isEmpty() ) continue; // Empty rows are ignored
+        QString error = transition->guard_error(guard);
+        if ( ! error.isEmpty() ) { faulty << field; errors << "Guard \"" + guard + "\": " + error; }
+        }
+      guards_panel->showRowErrors(faulty, errors);
+      ok = errors.isEmpty();
+      }
+    faulty.clear();
+    errors.clear();
+    for ( QLineEdit *field: actions_panel->rowFields() ) {
+      QString action = field->text().trimmed();
+      if ( action.isEmpty() ) continue;
+      QString error = transition->action_error(action, dstState);
+      if ( ! error.isEmpty() ) { faulty << field; errors << "Action \"" + action + "\": " + error; }
+      }
+    actions_panel->showRowErrors(faulty, errors);
+    ok = ok && errors.isEmpty();
     }
-  else
-    ok = true;
 
   if ( ok  ) {
     transition->setStates(isInitial ? transition->getSrcState() : srcState, dstState);

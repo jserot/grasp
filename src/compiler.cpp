@@ -292,6 +292,14 @@ bool Compiler::handle_response(QString ctx, QString loc, Response r)
     }
 }
 
+QString Compiler::fragment_error(Response r)
+{
+  if ( r.kind() == Response::Kind::Checked )
+    return r.result() ? QString() : r.message();
+  qDebug() << "compiler: wrong response to check_fragment request: " << r.message();
+  return r.message(); // Server not available, for instance
+}
+
 void Compiler::close(void)
 {
   Request q = Request::Close();

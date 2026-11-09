@@ -17,6 +17,7 @@
 #include <QPushButton>
 #include <QBoxLayout>
 #include <QHBoxLayout>
+#include <QLineEdit>
 #include <QtDebug>
 #include <QMessageBox>
 #include "globals.h"
@@ -99,6 +100,24 @@ void DynamicPanel::deleteRow()
     return;
     }
   DynamicPanel::delete_row(row_layout);
+}
+
+QList<QLineEdit*> DynamicPanel::rowFields() const
+{
+  QList<QLineEdit*> fields;
+  for ( int i = 1; i < layout->count(); i++ ) { // First row holds the buttons
+    QLayout *row = layout->itemAt(i)->layout();
+    if ( ! row || row->count() == 0 ) continue;
+    if ( QLineEdit *field = qobject_cast<QLineEdit*>(row->itemAt(0)->widget()) ) fields.append(field);
+    }
+  return fields;
+}
+
+void DynamicPanel::showRowErrors(const QList<QLineEdit*> &fields, const QStringList &errors)
+{
+  for ( QLineEdit *field: rowFields() ) showFieldError(field, error_label, QString());
+  QString message = errors.join("\n");
+  for ( QLineEdit *field: fields ) showFieldError(field, error_label, message);
 }
 
 void DynamicPanel::clear()

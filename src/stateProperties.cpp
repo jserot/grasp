@@ -105,7 +105,24 @@ void StateProperties::accept()
     return;
     }
   QStringList valuations = valuations_panel->retrieve();
-  bool ok = Globals::check_model ? state->check_valuations(valuations) : true;
+  // All the valuations are checked; the faulty rows are marked and the errors shown under the panel
+  bool ok = true;
+  if ( Globals::check_model ) {
+    QList<QLineEdit*> faulty;
+    QStringList errors;
+    QStringList lhss;
+    for ( QLineEdit *field: valuations_panel->rowFields() ) {
+      QString valuation = field->text().trimmed();
+      if ( valuation.isEmpty() ) continue; // Empty rows are ignored
+      QString error = state->valuation_error(valuation);
+      QString lhs = valuation.split("=").at(0).trimmed();
+      if ( error.isEmpty() && lhss.contains(lhs) ) error = lhs + " is already assigned by another valuation";
+      lhss << lhs;
+      if ( ! error.isEmpty() ) { faulty << field; errors << "Valuation \"" + valuation + "\": " + error; }
+      }
+    valuations_panel->showRowErrors(faulty, errors);
+    ok = errors.isEmpty();
+    }
   if ( ok ) {
     state->setId(id);
     state->setAttrs(valuations);

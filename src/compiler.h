@@ -40,6 +40,7 @@ public:
     void stopServer();
 
     bool handle_response(QString ctx, QString loc, Response r);
+    QString fragment_error(Response r); // Error for the response [r] to a fragment check, empty if the fragment is correct (nothing is displayed)
     void report_error(QString ctx, QString loc, QString msg);
 
     // Low-level requests

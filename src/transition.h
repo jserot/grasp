@@ -62,6 +62,9 @@ public:
     bool check_guards(QStringList guards);
     bool check_action(Fragment::Context ctx, QString action);
     bool check_guard(Fragment::Context ctx, QString guard);
+    // Same checks, returning the error (empty if none) instead of displaying it. [dst] is the target state
+    QString guard_error(QString guard);
+    QString action_error(QString action, State *dst);
     bool check();
 
     QPair<QMap<QString,QString>,QMap<QString,QString>> varsOf();

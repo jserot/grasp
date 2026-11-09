@@ -21,6 +21,7 @@ class QBoxLayout;
 class QVBoxLayout;
 class QHBoxLayout;
 class QLabel;
+class QLineEdit;
 class Model;
 
 class DynamicPanel : public QGroupBox
@@ -49,6 +50,11 @@ protected:
 public:
   DynamicPanel(QString title, Client client = { .ctTag = CtOther });
   ~DynamicPanel();
+
+  // For panels whose rows begin with a text field (guards, actions, valuations, ...)
+  QList<QLineEdit*> rowFields() const; // The text field of each row
+  void showRowErrors(const QList<QLineEdit*> &fields, const QStringList &errors);
+    // Marks [fields] (red frame) and shows [errors] under the rows; the previous errors are cleared
 
 public slots:
   void clear();

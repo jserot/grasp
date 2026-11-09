@@ -69,6 +69,7 @@ public:
 
   bool check_valuation(Fragment::Context ctx, QString valuation);
   bool check_valuations(QStringList valuations);
+  QString valuation_error(QString valuation); // Same check as check_valuation, returning the error (empty if none) instead of displaying it
   bool check();
 
   QPair<QMap<QString,QString>,QMap<QString,QString>> varsOf(); // Symbols (with type) read (resp. written) by the attached state valuations
