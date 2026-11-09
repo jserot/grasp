@@ -68,6 +68,10 @@
   editor, are now checked as they are typed: an invalid field gets a red frame, the error is displayed
   under it and the dialog cannot be accepted (errors were reported by message boxes)
 * A name already used by another IO or variable is no longer applied: the previous name is restored
+* In the transition and state properties, all the guards, actions and valuations are checked when
+  the dialog is accepted, the faulty rows being marked in red with their errors listed under the panel
+  (only the first error was reported, by a message box). An action is now checked against the target
+  state selected in the dialog
 * The application version is now read from the `VERSION` file
 
 # 1.0.3 (Mar 5, 2026)
