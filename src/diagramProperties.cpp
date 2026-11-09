@@ -26,6 +26,7 @@
 #include "iovPanel.h"
 #include "globals.h"
 #include "model.h"
+#include "fieldValidation.h"
 #include <QRegularExpression>
 
 DiagramProperties::DiagramProperties(Diagram *diagram, QWidget *parent)
@@ -44,6 +45,8 @@ DiagramProperties::DiagramProperties(Diagram *diagram, QWidget *parent)
   row_layout1->addWidget(name_label1);
   row_layout1->addWidget(name_field);
   layout->addLayout(row_layout1);
+  name_error = newFieldErrorLabel();
+  layout->addWidget(name_error);
 
   QHBoxLayout *row_layout3 = new QHBoxLayout();
   QLabel* name_label3 = new QLabel("Scale");
@@ -66,7 +69,7 @@ DiagramProperties::DiagramProperties(Diagram *diagram, QWidget *parent)
 
   QHBoxLayout *row_layout2 = new QHBoxLayout();
   QPushButton *cancel_button = new QPushButton("Cancel");
-  QPushButton *accept_button = new QPushButton("Done");
+  accept_button = new QPushButton("Done");
   cancel_button->setDefault(false);
   accept_button->setDefault(true);
   row_layout2->addWidget(cancel_button);
@@ -78,6 +81,26 @@ DiagramProperties::DiagramProperties(Diagram *diagram, QWidget *parent)
   connect(scaleCombo, &QComboBox::currentTextChanged, this, &DiagramProperties::changeScale);
   connect(cancel_button, &QPushButton::clicked, this, &DiagramProperties::cancel);
   connect(accept_button, &QPushButton::clicked, this, &DiagramProperties::accept);
+  connect(name_field, &QLineEdit::textChanged, this, &DiagramProperties::validateName);
+  validateName();
+}
+
+QString DiagramProperties::nameError(const QString &id) const
+{
+  // Diagram names are used as identifiers in the generated RFSM and DOT code
+  static const QRegularExpression re_id("^[A-Za-z][A-Za-z0-9_]*$");
+  if ( ! re_id.match(id).hasMatch() )
+    return "Invalid diagram name. It must start with a letter, followed by letters, digits or _";
+  if ( diagram->enclosingModel()->isDiagramNameUsed(id, diagram) )
+    return "The name " + id + " is already used by another diagram";
+  return QString();
+}
+
+void DiagramProperties::validateName()
+{
+  QString error = nameError(name_field->text().trimmed());
+  showFieldError(name_field, name_error, error);
+  accept_button->setEnabled(error.isEmpty());
 }
 
 void DiagramProperties::fill()
@@ -109,15 +132,9 @@ void DiagramProperties::accept()
 {
   QString id = name_field->text().trimmed();
   qDebug() << "DiagramProperties::accept";
-  // Diagram names are used as identifiers in the generated RFSM and DOT code
-  static const QRegularExpression re_id("^[A-Za-z][A-Za-z0-9_]*$");
-  if ( ! re_id.match(id).hasMatch() ) {
-    QMessageBox::warning(this, "Error", "Invalid diagram name. It must start with a letter, followed by letters, digits or _");
+  if ( ! nameError(id).isEmpty() ) { // Normally not reached: [Done] is disabled while the name is invalid
+    validateName();
     return; // Leave the dialog opened
-    }
-  if ( diagram->enclosingModel()->isDiagramNameUsed(id, diagram) ) {
-    QMessageBox::warning(this, "Error", "The name " + id + " is already used by another diagram");
-    return;
     }
   if ( id != diagram->getName() ) {
     diagram->setName(id);

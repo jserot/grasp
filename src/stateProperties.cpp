@@ -25,6 +25,7 @@
 #include "model.h"
 #include "stateValuations.h"
 #include "compiler.h"
+#include "fieldValidation.h"
 
 const QRegularExpression StateProperties::re_uid("[A-Z][A-Za-z0-9_]*");
 
@@ -45,6 +46,8 @@ StateProperties::StateProperties(State *state, Diagram *diagram, QWidget *parent
   row_layout1->addWidget(name_label);
   row_layout1->addWidget(state_name_field);
   layout->addLayout(row_layout1);
+  name_error = newFieldErrorLabel();
+  layout->addWidget(name_error);
 
   QStringList valuations = state->getAttrs();
   valuations_panel = new StateValuations("Valuations", valuations);
@@ -52,7 +55,7 @@ StateProperties::StateProperties(State *state, Diagram *diagram, QWidget *parent
   
   QHBoxLayout *row_layout2 = new QHBoxLayout();
   QPushButton *cancel_button = new QPushButton("Cancel");
-  QPushButton *accept_button = new QPushButton("Done");
+  accept_button = new QPushButton("Done");
   cancel_button->setDefault(false);
   accept_button->setDefault(true);
   row_layout2->addWidget(cancel_button);
@@ -69,6 +72,26 @@ StateProperties::StateProperties(State *state, Diagram *diagram, QWidget *parent
 
   this->state = state;
   this->diagram = diagram;
+
+  connect(state_name_field, &QLineEdit::textChanged, this, &StateProperties::validateName);
+  validateName();
+}
+
+QString StateProperties::nameError(const QString &id) const
+{
+  if ( id.isEmpty() || ! re_uid.match(id).hasMatch() || re_uid.match(id).capturedLength() != id.length() )
+    return "Invalid state name. It must start with an uppercase letter, followed by letters, digits or _";
+  State *other = diagram->getState(id);
+  if ( other && other != state )
+    return "The name " + id + " is already used by another state of this diagram";
+  return QString();
+}
+
+void StateProperties::validateName()
+{
+  QString error = nameError(state_name_field->text().trimmed());
+  showFieldError(state_name_field, name_error, error);
+  accept_button->setEnabled(error.isEmpty());
 }
 
 void StateProperties::accept()
@@ -77,13 +100,8 @@ void StateProperties::accept()
   Globals::compiler->resetReports();
   QString id = state_name_field->text().trimmed();
   // The state is left unchanged (and the dialog opened) if its new name or valuations are invalid
-  if ( id.isEmpty() || ! re_uid.match(id).hasMatch() || re_uid.match(id).capturedLength() != id.length() ) {
-    QMessageBox::warning(this, "Error", "Invalid state name. It must start with an uppercase letter, followed by letters, digits or _");
-    return;
-    }
-  State *other = diagram->getState(id);
-  if ( other && other != state ) {
-    QMessageBox::warning(this, "Error", "The name " + id + " is already used by another state of this diagram");
+  if ( ! nameError(id).isEmpty() ) { // Normally not reached: [Done] is disabled while the name is invalid
+    validateName();
     return;
     }
   QStringList valuations = valuations_panel->retrieve();

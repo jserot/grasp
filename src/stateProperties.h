@@ -18,6 +18,8 @@
 class State;
 class Diagram;
 class QLineEdit;
+class QLabel;
+class QPushButton;
 class StateValuations;
 class Compiler;
 
@@ -36,6 +38,10 @@ private:
   Diagram *diagram;
 
   QLineEdit* state_name_field;
+  QLabel* name_error; // Error of the name field, shown under it
+  QPushButton* accept_button;
+
+  QString nameError(const QString &id) const; // Empty if [id] is a valid name for the state
   StateValuations *valuations_panel;
 
 signals:
@@ -44,4 +50,5 @@ signals:
 protected slots:
   void accept();
   void cancel();
+  void validateName(); // Updates the name error and the [Done] button as the name is typed
 };

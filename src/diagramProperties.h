@@ -16,6 +16,8 @@
 
 class Diagram;
 class QLineEdit;
+class QLabel;
+class QPushButton;
 class QTabWidget;
 class QComboBox;
 class IovPanel;
@@ -32,6 +34,10 @@ private:
   QTabWidget *diagrams;
   Diagram *diagram;
   QLineEdit* name_field;
+  QLabel* name_error; // Error of the name field, shown under it
+  QPushButton* accept_button;
+
+  QString nameError(const QString &id) const; // Empty if [id] is a valid name for the diagram
   QComboBox *scaleCombo;
   IovPanel *vars_panel;
     
@@ -40,4 +46,5 @@ protected slots:
   void changeScale(const QString& scale);
   void accept();
   void cancel();
+  void validateName(); // Updates the name error and the [Done] button as the name is typed
 };

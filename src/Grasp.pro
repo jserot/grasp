@@ -43,6 +43,7 @@ HEADERS += include/nlohmann_json.h \
            textsViewer.h \
            textProperties.h \
            viewerSize.h \
+           fieldValidation.h \
            syntaxHighlighters.h \
            compilerPaths.h \
            compilerOption.h \
