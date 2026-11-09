@@ -248,7 +248,9 @@ void ChronogramEditorWidget::requestClearTrack(StimulusTrack *track)
 
     auto *box = new QMessageBox(
         QMessageBox::Question, tr("Confirmer"),
-        tr("Effacer les %1 stimulus(es) de la piste '%2' ?").arg(track->count()).arg(track->name()),
+        track->count() == 1
+            ? tr("Effacer le stimulus de la piste '%1' ?").arg(track->name())
+            : tr("Effacer les %1 stimuli de la piste '%2' ?").arg(track->count()).arg(track->name()),
         QMessageBox::Yes | QMessageBox::No, this);
     box->setAttribute(Qt::WA_DeleteOnClose);
     box->setModal(false);
