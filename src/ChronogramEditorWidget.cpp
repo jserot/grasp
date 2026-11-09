@@ -1,6 +1,7 @@
 #include "ChronogramEditorWidget.h"
 #include "MultiTrackChronogramView.h"
 #include "StimulusEditorDialog.h"
+#include "fieldValidation.h"
 
 #include <QPushButton>
 #include <QDoubleSpinBox>
@@ -428,8 +429,23 @@ void ChronogramEditorWidget::onPeriodicFillRequested(StimulusTrack *track, doubl
     form->addRow(tr("End date:"), endSpin);
     form->addRow(clearCheck);
 
+    // Validation au fil de la saisie (la période est toujours > 0, cf. setRange)
+    auto *errorLabel = newFieldErrorLabel();
+    form->addRow(errorLabel);
+
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, dlg);
     form->addRow(buttons);
+
+    auto validate = [startSpin, endSpin, errorLabel, buttons]() {
+        const QString error = endSpin->value() < startSpin->value()
+            ? tr("The end date must not be earlier than the start date")
+            : QString();
+        showFieldError(endSpin, errorLabel, error);
+        buttons->button(QDialogButtonBox::Ok)->setEnabled(error.isEmpty());
+    };
+    connect(startSpin, QOverload<double>::of(&QDoubleSpinBox::valueChanged), dlg, validate);
+    connect(endSpin, QOverload<double>::of(&QDoubleSpinBox::valueChanged), dlg, validate);
+    validate();
     connect(buttons, &QDialogButtonBox::accepted, dlg, &QDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, dlg, &QDialog::reject);
 
@@ -445,12 +461,8 @@ void ChronogramEditorWidget::onPeriodicFillRequested(StimulusTrack *track, doubl
         const double end = endSpin->value();
         const bool clearFirst = clearCheck->isChecked();
 
-        if (period <= 0.0 || end < start) {
-            QMessageBox::warning(this, tr("Invalid parameters"),
-                                  tr("The period must be positive and the end date must not be "
-                                     "earlier than the start date."));
-            return;
-        }
+        if (period <= 0.0 || end < start)
+            return; // Normalement impossible : OK est désactivé tant que les paramètres sont invalides
 
         const int count = static_cast<int>(std::floor((end - start) / period)) + 1;
 
