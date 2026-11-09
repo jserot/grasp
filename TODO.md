@@ -1,7 +1,6 @@
 * GENERAL
 
 * GUI
-- in the transition edit panel, add a combo for selecting side (N,E,W,S) ?
 - add a clickable region in the diagram panel to access local variables (more intuitive than right-click) ?
 - use json format for options save file
 - add sized ints
