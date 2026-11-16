@@ -1,7 +1,7 @@
 # Building from source
 
 Building from sources is currently supported for (at least) the following platforms :
-- MacOS 14.7 (Sonoma) with Qt6 (platform name: `macos`)
+- MacOS 15.7 (Sequoia) with Qt6 (platform name: `macos`)
 - LinuxMint 6.8 with Qt6) (platform name: `linux`)
 - Windows 10 with Qt6 (platform name: `windows`)
 
