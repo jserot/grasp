@@ -32,7 +32,7 @@ install:
 	cp ./src/Grasp ./dist/linux/grasp/usr/bin/grasp
 	patchelf --set-rpath '$$ORIGIN/../lib/grasp/qt6' ./dist/linux/grasp/usr/bin/grasp
 	rm -f ./dist/linux/grasp/usr/lib/grasp/rfsmc.exe
-	cp $(RFSMC) ./dist/linux/grasp/usr/lib/grasp/rfsmc.exe
+	cp ./dist/linux/rfsmc.exe ./dist/linux/grasp/usr/lib/grasp/ # Source file has been copied by configure
 	cp ./dist/linux/grasp.conf ./dist/linux/grasp/usr/share/grasp/
 	cp ./src/options_spec.txt ./dist/linux/grasp/usr/share/grasp/
 	rm -rf ./dist/linux/grasp/usr/share/grasp/examples/*
