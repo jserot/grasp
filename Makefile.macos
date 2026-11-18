@@ -11,6 +11,7 @@ INSTALL_DIR=./dist/macos
 DEPLOY_DIR=./dist/macos/deploy
 ARCH= $(shell arch)
 MACDEPLOYQT=macdeployqt
+QT_LIBS=$(shell qmake -query QT_INSTALL_LIBS)
 
 build-gui:
 	@echo "** Building GUI"
@@ -21,10 +22,20 @@ install:
 	rm -rf $(DEPLOY_DIR)
 	mkdir $(DEPLOY_DIR)
 	cp -r ./src/Grasp.app $(DEPLOY_DIR)
+	# Some Qt plugins (the SVG icon engine, for ex.) find their frameworks through a path relative to their own
+	# location (@loader_path/../../../../lib, i.e. <Qt prefix>/lib). macdeployqt resolves this path from the copy
+	# of the plugin in the bundle, i.e. $(DEPLOY_DIR)/lib : this directory temporarily points to the Qt libraries
+	# (with Homebrew, it gathers the frameworks installed by separate packages, such as qtsvg)
+	ln -sfn $(QT_LIBS) $(DEPLOY_DIR)/lib
 	$(MACDEPLOYQT) $(DEPLOY_DIR)/Grasp.app # Add Framework
+	rm -f $(DEPLOY_DIR)/lib
 	cp -f $(INSTALL_DIR)/rfsmc.exe $(DEPLOY_DIR)/Grasp.app/Contents/MacOS
 	cp -f ./src/options_spec.txt $(DEPLOY_DIR)/Grasp.app/Contents/MacOS
 	cp -f $(INSTALL_DIR)/grasp.conf $(DEPLOY_DIR)/Grasp.app/Contents/MacOS
+	# macdeployqt modifies the copied frameworks and libraries, which invalidates their signature : on Apple
+	# Silicon, the app is then killed at launch ("Code Signature Invalid"). The whole bundle (including the
+	# files copied above) is signed again, with an ad-hoc signature
+	codesign --force --deep --sign - $(DEPLOY_DIR)/Grasp.app
 	mkdir $(DEPLOY_DIR)/doc
 	cp  doc/Using.md $(DEPLOY_DIR)/doc
 	cp -r doc/imgs $(DEPLOY_DIR)/doc
