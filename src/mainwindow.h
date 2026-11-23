@@ -124,6 +124,8 @@ private:
     void recordSnapshot(); // Records the current state of the model, if it has changed
     void restoreSnapshot(const QString &snapshot);
     void updateUndoActions();
+    QString findProgram(const QString &toolName, const QString &defaultName) const; // Empty if not found
+    bool checkDotProgram(); // If dot cannot be found, proposes the built-in export instead and returns false
     void raiseDiagramPanel(); // Shows the diagram panel for the current diagram
 
     bool checkUnsavedChanges(); // Returns false if the current operation must be cancelled

@@ -906,10 +906,37 @@ QString removeSuffix(QString fname)
   return f.path() + "/" + f.completeBaseName();
 }
 
+// Path of the external program set for [toolName] in the configuration (or [defaultName]), if it can be found
+// (either as an executable file or in the PATH). Empty otherwise
+QString MainWindow::findProgram(const QString &toolName, const QString &defaultName) const
+{
+  QString program = Globals::compilerPaths->getPath(toolName);
+  if ( program.isEmpty() ) program = defaultName;
+  QFileInfo fi(program);
+  if ( fi.isAbsolute() ) return fi.isFile() && fi.isExecutable() ? program : QString();
+  return QStandardPaths::findExecutable(program);
+}
+
+bool MainWindow::checkDotProgram()
+{
+  if ( ! findProgram("DOTPROGRAM", "dot").isEmpty() ) return true;
+  QMessageBox box(QMessageBox::Information, "DOT representation",
+                  "The DOT program (Graphviz), needed to display the DOT representation, cannot be found ("
+                  + Globals::compilerPaths->getPath("DOTPROGRAM") + ").\n\n"
+                  "Install Graphviz and set the path of its dot program with Configuration > Compiler and tools, "
+                  "or export the current diagram as an image (PNG or PDF), which does not require Graphviz.",
+                  QMessageBox::Cancel, this);
+  QPushButton *export_button = box.addButton("Export diagram as image...", QMessageBox::AcceptRole);
+  box.exec();
+  if ( box.clickedButton() == export_button ) exportDiagram();
+  return false;
+}
+
 void MainWindow::renderDots()
 {
     Q_ASSERT(model); 
     beginUserOperation();
+    if ( ! checkDotProgram() ) return;
     QString sFname = getCurrentFileName();
     qDebug() << "renderDots" << sFname;
     if ( sFname.isEmpty() ) return;
@@ -926,6 +953,7 @@ void MainWindow::renderDot()
 {
     Q_ASSERT(model); 
     beginUserOperation();
+    if ( ! checkDotProgram() ) return;
     QString sFname = getCurrentFileName();
     if ( sFname.isEmpty() ) return;
     QString rFname = changeSuffix(sFname, ".dot");
