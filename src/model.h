@@ -72,6 +72,8 @@ public:
 
     static Model* readFromFile(QString fname);
     bool saveToFile(QString fname); // Returns false (after warning the user) if the file could not be written
+    QString toJsonString(bool snapshot = false); // See model.cpp
+    static Model* fromJsonString(const QString &txt); // Throws an exception if [txt] is not a valid description
 
     void report_error(QString msg);
     bool check(bool withStimuli);

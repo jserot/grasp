@@ -95,7 +95,7 @@ public:
 
     static Diagram* fromJson(nlohmann::json& json, Model *model);
     // This function is declared as static because it will be called a non-instance context in Model::readFromFile
-    void toJson(nlohmann::json& json);
+    void toJson(nlohmann::json& json, bool snapshot = false); // [snapshot] : see Model::toJsonString
 
 signals:
     void mouseEnter(void);

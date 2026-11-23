@@ -917,7 +917,7 @@ Diagram* Diagram::fromJson(nlohmann::json& json, Model *model)
     return diagram;
 }
 
-void Diagram::toJson(nlohmann::json& json_top)
+void Diagram::toJson(nlohmann::json& json_top, bool snapshot)
 {
     json_top["name"] = this->name.toStdString();
 
@@ -925,7 +925,7 @@ void Diagram::toJson(nlohmann::json& json_top)
     int cnt = 1;
     for ( const Iov* io: this->vars ) {
       nlohmann::json json;
-      if ( io->name == "" ) {
+      if ( io->name == "" && ! snapshot ) {
         QMessageBox::warning(Globals::mainWindow, "Warning", tr("Var #%1").arg(cnt) + " has no name. Ignoring it");
         continue;
         }

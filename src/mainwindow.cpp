@@ -134,6 +134,12 @@ void MainWindow::modelModified()
   qDebug() << "MainWindow::modelModified called by " << sender();
   updateActions();
   setUnsavedChanges(true);
+  // The snapshot is recorded once the current event has been processed, so that it includes all the changes made
+  // by the operation (some of them are notified before being completed)
+  if ( ! snapshotPending && ! restoring ) {
+    snapshotPending = true;
+    QTimer::singleShot(0, this, &MainWindow::recordSnapshot);
+    }
 }
 
 void MainWindow::compilerPathUpdated(QString path)
@@ -331,6 +337,13 @@ void MainWindow::createMenus()
     fileMenu->addAction(aboutAction);
     fileMenu->addAction(exitAction);
 
+    editMenu = menuBar()->addMenu(tr("&Edit"));
+    undoAction = editMenu->addAction(tr("Undo"), this, &MainWindow::undo);
+    undoAction->setShortcut(QKeySequence::Undo);
+    redoAction = editMenu->addAction(tr("Redo"), this, &MainWindow::redo);
+    redoAction->setShortcut(QKeySequence::Redo);
+    updateUndoActions();
+
     modelMenu = menuBar()->addMenu(tr("&Model"));
     modelMenu->addAction(addDiagramAction);
     modelMenu->addAction(duplDiagramAction);
@@ -398,6 +411,20 @@ static QScrollArea *dockScrollArea(QWidget *content)
 
 void MainWindow::createDockWindow(Model *model)
 {
+    if ( dock && diagram_dock ) {
+      // The dock windows are kept (with their position and their current tab) : only their content is replaced
+      if ( diagram_panel ) diagram_panel->setDiagram(nullptr);
+      QWidget *old_model_content = dock->widget();
+      QWidget *old_diagram_content = diagram_dock->widget();
+      model_panel = new ModelProperties(model, nullptr);
+      dock->setWidget(dockScrollArea(model_panel));
+      diagram_panel = new DiagramPanel();
+      diagram_dock->setWidget(dockScrollArea(diagram_panel));
+      delete old_model_content;
+      delete old_diagram_content;
+      diagram_panel->setDiagram(currentDiagram());
+      return;
+      }
     if ( dock ) delete dock;
 
     dock = new QDockWidget(tr("Model"), this);
@@ -535,6 +562,7 @@ bool MainWindow::loadFile(const QString &fname)
       setUnsavedChanges(false);
       updateActions();
       addRecentFile(fname);
+      resetHistory();
       return true;
       }
     else {
@@ -589,6 +617,7 @@ void MainWindow::newModel()
   currentFileName.clear();
   setUnsavedChanges(false);
   updateActions();
+  resetHistory();
 }
 
 bool MainWindow::saveToFile(QString fname)
@@ -597,7 +626,110 @@ bool MainWindow::saveToFile(QString fname)
   if ( ! model->saveToFile(fname) ) return false; // The user has already been warned
   logMessage("Saved file " + fname);
   setUnsavedChanges(false);
+  recordSnapshot(); // Pending changes, if any
+  savedSnapshot = historyIndex >= 0 ? history[historyIndex] : QString();
   return true;
+}
+
+// Undo / redo
+
+static const int maxHistory = 100;
+
+void MainWindow::resetHistory()
+{
+  snapshotPending = false;
+  history.clear();
+  historyIndex = -1;
+  if ( model ) {
+    history.append(model->toJsonString(true));
+    historyIndex = 0;
+    }
+  savedSnapshot = historyIndex >= 0 ? history[0] : QString();
+  updateUndoActions();
+}
+
+void MainWindow::recordSnapshot()
+{
+  snapshotPending = false;
+  if ( ! model || restoring || historyIndex < 0 ) return;
+  QString snapshot = model->toJsonString(true);
+  if ( snapshot == history[historyIndex] ) return; // Nothing has actually changed
+  while ( history.size() > historyIndex + 1 ) history.removeLast(); // The undone states can no longer be redone
+  history.append(snapshot);
+  while ( history.size() > maxHistory ) history.removeFirst();
+  historyIndex = history.size() - 1;
+  updateUndoActions();
+}
+
+void MainWindow::undo()
+{
+  beginUserOperation(); // Validates a pending edit (an IO name, for ex.)
+  recordSnapshot(); // Pending changes, if any, are recorded first, so that they are undone
+  if ( historyIndex <= 0 ) return;
+  historyIndex--;
+  restoreSnapshot(history[historyIndex]);
+}
+
+void MainWindow::redo()
+{
+  beginUserOperation();
+  recordSnapshot(); // A pending change cancels the redo history
+  if ( historyIndex < 0 || historyIndex >= history.size() - 1 ) return;
+  historyIndex++;
+  restoreSnapshot(history[historyIndex]);
+}
+
+// Replaces the model by the one described by [snapshot]. The views (current tab, zoom and scroll position of each
+// diagram, identified by its name) are kept.
+void MainWindow::restoreSnapshot(const QString &snapshot)
+{
+  Model *new_model;
+  try {
+    new_model = Model::fromJsonString(snapshot);
+    }
+  catch ( const std::exception &e ) { // Should not happen
+    QMessageBox::warning(this, "Error", "Cannot restore the model: " + QString(e.what()));
+    return;
+    }
+  restoring = true;
+  struct ViewState { QTransform transform; int h, v; };
+  QMap<QString,ViewState> views;
+  for ( Diagram *d : model->getDiagrams() ) {
+    QGraphicsView *view = d->getView();
+    views.insert(d->getName(), { view->transform(), view->horizontalScrollBar()->value(), view->verticalScrollBar()->value() });
+    }
+  int current_index = diagrams->currentIndex();
+  if ( diagram_panel ) diagram_panel->setDiagram(nullptr);
+  {
+    const QSignalBlocker blocker(diagrams); // The tabs of the deleted diagrams must not be shown in the diagram panel
+    model.reset(new_model);
+    closeDiagramTabs();
+  }
+  addDiagramTabs();
+  if ( current_index >= 0 && current_index < diagrams->count() ) diagrams->setCurrentIndex(current_index);
+  createDockWindow(model.get());
+  // Once the new views have been laid out and centered (see addDiagramTab)
+  QTimer::singleShot(0, this, [this, views]() {
+    if ( ! model ) return;
+    for ( Diagram *d : model->getDiagrams() ) {
+      if ( ! views.contains(d->getName()) ) continue;
+      const ViewState &vs = views.value(d->getName());
+      QGraphicsView *view = d->getView();
+      view->setTransform(vs.transform);
+      view->horizontalScrollBar()->setValue(vs.h);
+      view->verticalScrollBar()->setValue(vs.v);
+      }
+    });
+  setUnsavedChanges(snapshot != savedSnapshot);
+  updateActions();
+  restoring = false;
+  updateUndoActions();
+}
+
+void MainWindow::updateUndoActions()
+{
+  undoAction->setEnabled(historyIndex > 0);
+  redoAction->setEnabled(historyIndex >= 0 && historyIndex < history.size() - 1);
 }
 
 bool MainWindow::save()
@@ -705,7 +837,7 @@ void MainWindow::newDiagram()
   Diagram *diagram = new Diagram(model.get(), name);
   model->addDiagram(diagram);
   addDiagramTab(diagram);
-  setUnsavedChanges(true);
+  modelModified(); // Also records an undo snapshot
 }
 
 void MainWindow::duplicateDiagram()
@@ -717,7 +849,7 @@ void MainWindow::duplicateDiagram()
   model->addDiagram(diagram2);
   addDiagramTab(diagram2);
   diagram2->edit();
-  setUnsavedChanges(true);
+  modelModified();
 }
 
 void MainWindow::editDiagram(QAction *action)
@@ -851,7 +983,7 @@ void MainWindow::closeDiagram(int index, bool confirm)
   diagrams->removeTab(index);
   model->removeDiagram(diagram);
   delete diagram; // removeTab does _not_ delete the tabbed widget
-  setUnsavedChanges(true);
+  modelModified();
 }
 
 void MainWindow::closeDiagramTabs() // Note: this does _not_ delete the displayed diagram !

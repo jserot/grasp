@@ -200,10 +200,48 @@ bool Model::check(bool withStimuli)
 
 // Reading and saving
 
+// Builds a model from its JSON description (the content of a .fsd file, or a snapshot, see toJsonString).
+// Throws an exception if the description is invalid
+Model* Model::fromJsonString(const QString &txt)
+{
+  std::unique_ptr<Model> model = std::make_unique<Model>(); // Deleted (with the diagrams already read) on error
+  auto json = nlohmann::json::parse(txt.toStdString()); 
+
+  QString name = QString::fromStdString(json.at("name"));
+
+  for ( const auto & json_io : json.at("ios") ) {
+    QString name = QString::fromStdString(json_io.at("name"));
+    std::optional<IoKind> kind = ioKindFromString(QString::fromStdString(json_io.at("kind")));
+    if ( ! kind ) throw std::invalid_argument("Model::readFromFile:: invalid kind");
+    std::optional<IoType> type = ioTypeFromString(QString::fromStdString(json_io.at("type")));
+    if ( ! type ) throw std::invalid_argument("Model::readFromFile:: invalid type");
+    QString stim = QString::fromStdString(json_io.at("stim"));
+    switch ( kind.value() ) {
+    case IoKind::IoIn: 
+      model->addInput(name, type.value(), Stimulus(stim));
+      break;
+    case IoKind::IoOut: 
+      model->addOutput(name, type.value());
+      break;
+    case IoKind::IoVar: 
+      model->addGvar(name, type.value());
+      break;
+    }
+    }
+  QList<Diagram*>& diagrams = model->getDiagrams();
+  for ( auto & json_diagram : json.at("diagrams") ) {
+    Diagram *a = Diagram::fromJson(json_diagram, model.get());
+    qDebug() << "Read diagram from JSON";
+    a->dump();
+    diagrams.append(a);
+    }   
+
+  model->setName(name);
+  return model.release();
+}
+
 Model* Model::readFromFile(QString fname)
 {
-  // Deleted (with the diagrams already read) if reading fails
-  std::unique_ptr<Model> model = std::make_unique<Model>();
   try {
     QFile file(fname);
     qDebug() << "Reading model from file" << file.fileName();
@@ -215,46 +253,49 @@ Model* Model::readFromFile(QString fname)
     QTextStream is(&file);
     QString txt = is.readAll();
   
-    auto json = nlohmann::json::parse(txt.toStdString()); 
-
-    QString name = QString::fromStdString(json.at("name"));
-
-    for ( const auto & json_io : json.at("ios") ) {
-      QString name = QString::fromStdString(json_io.at("name"));
-      std::optional<IoKind> kind = ioKindFromString(QString::fromStdString(json_io.at("kind")));
-      if ( ! kind ) throw std::invalid_argument("Model::readFromFile:: invalid kind");
-      std::optional<IoType> type = ioTypeFromString(QString::fromStdString(json_io.at("type")));
-      if ( ! type ) throw std::invalid_argument("Model::readFromFile:: invalid type");
-      QString stim = QString::fromStdString(json_io.at("stim"));
-      switch ( kind.value() ) {
-      case IoKind::IoIn: 
-        model->addInput(name, type.value(), Stimulus(stim));
-        break;
-      case IoKind::IoOut: 
-        model->addOutput(name, type.value());
-        break;
-      case IoKind::IoVar: 
-        model->addGvar(name, type.value());
-        break;
-      }
-      }
-    QList<Diagram*>& diagrams = model->getDiagrams();
-    for ( auto & json_diagram : json.at("diagrams") ) {
-      Diagram *a = Diagram::fromJson(json_diagram, model.get());
-      qDebug() << "Read diagram from JSON";
-      a->dump();
-      diagrams.append(a);
-      }   
-
-    model->setName(name);
-
+    Model *model = fromJsonString(txt);
     qDebug() << "Done";
-    return model.release();
+    return model;
     }
   catch(const std::exception& e) {
     QMessageBox::warning(Globals::mainWindow, "Error", "Error when reading file " + fname + ": " + QString(e.what()));
     return nullptr;
   }
+}
+
+// JSON description of the model (content of a .fsd file). For a [snapshot] (see MainWindow::recordSnapshot), the
+// IOs and variables with no name are kept, silently (they are ignored, with a warning, when saving to a file)
+QString Model::toJsonString(bool snapshot)
+{
+  nlohmann::json json_top;
+
+  json_top["name"] = name.toStdString();
+
+  json_top["ios"] = nlohmann::json::array();
+  int cnt = 1;
+  QList<Iov*> ios = ginps + goutps + gvars;
+  for ( const Iov* io: ios ) {
+    nlohmann::json json;
+    if ( io->name == "" && ! snapshot ) {
+      QMessageBox::warning(Globals::mainWindow, "Warning", "IO #" + QString::number(cnt) + " has no name. Ignoring it");
+      continue;
+      }
+    json["name"] = io->name.toStdString(); 
+    json["kind"] = toString(io->kind()).toStdString(); 
+    json["type"] = toString(io->type).toStdString(); 
+    json["stim"] = io->kind() == IoKind::IoIn ? static_cast<const Input*>(io)->stim.toString().toStdString() : "None";  // For backward compatibility
+    json_top["ios"].push_back(json);
+    cnt++;
+    }
+
+  json_top["diagrams"] = nlohmann::json::array();
+  for ( Diagram* a: diagrams ) {
+    nlohmann::json json;
+    json["name"] = "main";
+    a->toJson(json, snapshot);
+    json_top["diagrams"].push_back(json);
+    }
+  return QString::fromStdString(json_top.dump(2));
 }
 
 bool Model::saveToFile(QString fname)
@@ -267,37 +308,10 @@ bool Model::saveToFile(QString fname)
       return false;
       }
 
-    nlohmann::json json_top;
-
-    json_top["name"] = name.toStdString();
-
-    json_top["ios"] = nlohmann::json::array();
-    int cnt = 1;
-    QList<Iov*> ios = ginps + goutps + gvars;
-    for ( const Iov* io: ios ) {
-      nlohmann::json json;
-      if ( io->name == "" ) {
-        QMessageBox::warning(Globals::mainWindow, "Warning", "IO #" + QString::number(cnt) + " has no name. Ignoring it");
-        continue;
-        }
-      json["name"] = io->name.toStdString(); 
-      json["kind"] = toString(io->kind()).toStdString(); 
-      json["type"] = toString(io->type).toStdString(); 
-      json["stim"] = io->kind() == IoKind::IoIn ? static_cast<const Input*>(io)->stim.toString().toStdString() : "None";  // For backward compatibility
-      json_top["ios"].push_back(json);
-      cnt++;
-      }
-
-    json_top["diagrams"] = nlohmann::json::array();
-    for ( Diagram* a: diagrams ) {
-      nlohmann::json json;
-      json["name"] = "main";
-      a->toJson(json);
-      json_top["diagrams"].push_back(json);
-      }
+    QString txt = toJsonString(false);
 
     QTextStream os(&file);
-    os << QString::fromStdString(json_top.dump(2));
+    os << txt;
     os.flush();
     file.close();
     if ( os.status() != QTextStream::Ok || file.error() != QFile::NoError ) {

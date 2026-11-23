@@ -70,6 +70,8 @@ private slots:
     void openFile();
     void openRecentFile(const QString &fname);
     void selectMode(); // Back to the SelectItem editing mode ([Escape] in a diagram)
+    void undo();
+    void redo();
     void newModel();
     Diagram* diagramOf(int index);
     void editDiagram(QAction *);    
@@ -116,6 +118,11 @@ private:
     void setRecentFiles(const QStringList &files);
     void addRecentFile(const QString &fname);
     void updateRecentFilesMenu();
+    // Undo/redo : a JSON snapshot of the model is recorded after each modification (see modelModified)
+    void resetHistory(); // When a model is created or opened
+    void recordSnapshot(); // Records the current state of the model, if it has changed
+    void restoreSnapshot(const QString &snapshot);
+    void updateUndoActions();
     void raiseDiagramPanel(); // Shows the diagram panel for the current diagram
 
     bool checkUnsavedChanges(); // Returns false if the current operation must be cancelled
@@ -179,6 +186,14 @@ private:
     QAction* deleteItemAction;
 
     QMenu *fileMenu;
+    QMenu *editMenu;
+    QAction *undoAction;
+    QAction *redoAction;
+    QStringList history; // Snapshots of the model, oldest first
+    int historyIndex = -1; // Index of the snapshot of the current state
+    QString savedSnapshot; // Snapshot of the last saved (or opened) state
+    bool snapshotPending = false;
+    bool restoring = false;
     QMenu *recentFilesMenu = nullptr;
     QMenu *modelMenu;
     QMenu *compileMenu;
