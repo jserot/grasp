@@ -1,6 +1,6 @@
 ## Changes
 
-# 1.1.1 (unreleased)
+# 1.1.1 (Nov 23, 2026)
 
 * Keyboard shortcuts in diagrams: [Delete] deletes the selected items, [Escape] goes back to the
   select mode, [Return] edits the selected item
