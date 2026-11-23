@@ -51,6 +51,13 @@ class AppFiles {
     return configPath;
   }
 
+  // User settings kept by the application itself (recent files, ...)
+  static QString settingsFile() {
+    QString dir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    QDir().mkpath(dir);
+    return dir + "/settings.ini";
+  }
+
 static QString logFile() {
     QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir().mkpath(dir);

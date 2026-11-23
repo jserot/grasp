@@ -103,6 +103,7 @@ signals:
     void modelModified(void);
     void propertiesRequested(void); // See edit()
     void contextMenuRequested(QPoint screenPos); // Right-click on the background of the diagram
+    void selectModeRequested(void); // [Escape] key
 
 protected:
     QString qual_id(QString id);
@@ -110,7 +111,12 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void wheelEvent(QGraphicsSceneWheelEvent *event) override;
+    bool eventFilter(QObject *watched, QEvent *event) override; // Pinch gestures on the view
     void editItem(QGraphicsItem *item);
+    void deleteSelectedItems();
+    void zoomAt(qreal factor, QPoint viewportPos); // Scales the view, keeping the point at [viewportPos] in place
 //  void contextMenuEvent(QGraphicsSceneContextMenuEvent *contextMenuEvent) override;
 
     void addState(State *state);
@@ -128,6 +134,8 @@ protected:
 
 private:
     void showPropertiesDialog(QDialog *dialog);
+    bool panning = false; // Background dragged in SelectItem mode (moves the view)
+    QPoint panLastPos; // Last mouse position while panning (screen coordinates)
     QPointer<QDialog> pendingDialog; // Modal dialog waiting for the mouse button to be released (see showPropertiesDialog)
     bool contextMenuPending = false; // Context menu waiting for the mouse button to be released (idem)
     QPoint contextMenuPos; // Where it must be shown (screen coordinates)

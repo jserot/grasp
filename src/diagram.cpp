@@ -24,6 +24,11 @@
 #include <QDir>
 #include <QGraphicsView>
 #include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneWheelEvent>
+#include <QKeyEvent>
+#include <QNativeGestureEvent>
+#include <QScrollBar>
+#include <cmath>
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>
@@ -54,6 +59,8 @@ Diagram::Diagram(
   this->name = name;
   this->model = model;
   this->view = new QGraphicsView(this);
+  view->setFocusPolicy(Qt::StrongFocus); // For the keyboard shortcuts (see keyPressEvent)
+  view->viewport()->installEventFilter(this); // For the pinch gestures (see eventFilter)
   foreach ( Iov* var, vars) {
     qDebug () << "Creating diagram: adding var" << var->name << toString(var->type);
       this->vars.append(var);
@@ -74,6 +81,7 @@ Diagram::Diagram(
     connect(this, SIGNAL(mouseLeave()), Globals::mainWindow, SLOT(resetCursor()));
     connect(this, SIGNAL(propertiesRequested()), Globals::mainWindow, SLOT(showDiagramProperties()));
     connect(this, SIGNAL(contextMenuRequested(QPoint)), Globals::mainWindow, SLOT(showDiagramContextMenu(QPoint)));
+    connect(this, SIGNAL(selectModeRequested()), Globals::mainWindow, SLOT(selectMode()));
     qDebug() << "Diagram::ctor: this=" << this << "view=" << view;
 }
 
@@ -467,6 +475,12 @@ void Diagram::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
                 pressPositions.clear();
                 for ( QGraphicsItem *it : selectedItems() ) pressPositions.insert(it, it->pos());
               }
+            else if ( view ) { // Dragging the background moves the view
+              clearSelection();
+              panning = true;
+              panLastPos = mouseEvent->screenPos();
+              view->viewport()->setCursor(Qt::ClosedHandCursor);
+              }
         } // Mode
       break;
     case Qt::RightButton: // if ( mode == SelectItem ) 
@@ -547,6 +561,13 @@ void Diagram::removeTransition(Transition *transition)
 
 void Diagram::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+  if ( panning && view ) {
+    QPoint delta = mouseEvent->screenPos() - panLastPos;
+    panLastPos = mouseEvent->screenPos();
+    view->horizontalScrollBar()->setValue(view->horizontalScrollBar()->value() - delta.x());
+    view->verticalScrollBar()->setValue(view->verticalScrollBar()->value() - delta.y());
+    return;
+    }
   if ( (Globals::mode == Globals::InsertTransition || Globals::mode == Globals::InsertPseudoState) && line != 0 ) {
     QLineF newLine(line->line().p1(), mouseEvent->scenePos());
     line->setLine(newLine);
@@ -571,6 +592,11 @@ void Diagram::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
     }
   Qt::MouseButton buttonPressed = mouseEvent->button();
   if ( buttonPressed != Qt::LeftButton ) return;
+  if ( panning ) {
+    panning = false;
+    if ( view ) view->viewport()->unsetCursor(); // Back to the cursor of the editing mode
+    return;
+    }
   if ( ! pressPositions.isEmpty() ) {
     bool moved = false;
     for ( QGraphicsItem *it : selectedItems() )
@@ -616,6 +642,93 @@ void Diagram::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
   line = nullptr;
   startState = nullptr;
   QGraphicsScene::mouseReleaseEvent(mouseEvent);
+}
+
+// Keyboard shortcuts (the view has the focus once it has been clicked)
+void Diagram::keyPressEvent(QKeyEvent *event)
+{
+  switch ( event->key() ) {
+  case Qt::Key_Delete:
+  case Qt::Key_Backspace: // The "delete" key of Mac keyboards
+    if ( ! selectedItems().isEmpty() ) {
+      deleteSelectedItems();
+      event->accept();
+      return;
+      }
+    break;
+  case Qt::Key_Escape:
+    clearSelection();
+    emit selectModeRequested();
+    event->accept();
+    return;
+  case Qt::Key_Return:
+  case Qt::Key_Enter:
+    if ( selectedItems().size() == 1 ) {
+      editItem(selectedItems().first());
+      event->accept();
+      return;
+      }
+    break;
+  default:
+    break;
+  }
+  QGraphicsScene::keyPressEvent(event);
+}
+
+void Diagram::deleteSelectedItems()
+{
+  pressPositions.clear();
+  // The list is read again after each deletion : deleting a state also deletes its transitions, and deleting the
+  // initial transition also deletes the initial pseudo-state (deleted items are no longer selected)
+  while ( ! selectedItems().isEmpty() ) {
+    QGraphicsItem *item = selectedItems().first();
+    if ( item->type() == State::Type )
+      removeState(qgraphicsitem_cast<State *>(item));
+    else if ( item->type() == Transition::Type )
+      removeTransition(qgraphicsitem_cast<Transition *>(item));
+    else
+      item->setSelected(false);
+    }
+}
+
+// Zoom : [Ctrl]+wheel ([Cmd]+wheel on macOS) or pinch gesture. The wheel alone scrolls the view, as before.
+static const qreal minScale = 0.2;
+static const qreal maxScale = 3.0;
+
+void Diagram::zoomAt(qreal factor, QPoint viewportPos)
+{
+  if ( ! view ) return;
+  qreal current = view->transform().m11();
+  qreal scale = qBound(minScale, current * factor, maxScale);
+  if ( qFuzzyCompare(scale, current) ) return;
+  QPointF scenePos = view->mapToScene(viewportPos);
+  view->setTransform(QTransform::fromScale(scale, scale));
+  // Scroll so that the scene point which was under [viewportPos] is still there
+  QPoint shift = view->mapFromScene(scenePos) - viewportPos;
+  view->horizontalScrollBar()->setValue(view->horizontalScrollBar()->value() + shift.x());
+  view->verticalScrollBar()->setValue(view->verticalScrollBar()->value() + shift.y());
+}
+
+void Diagram::wheelEvent(QGraphicsSceneWheelEvent *event)
+{
+  if ( view && (event->modifiers() & Qt::ControlModifier) && event->orientation() == Qt::Vertical ) {
+    zoomAt(std::pow(1.2, event->delta() / 120.0), view->viewport()->mapFromGlobal(event->screenPos()));
+    event->accept();
+    return;
+    }
+  QGraphicsScene::wheelEvent(event); // Not accepted : the view scrolls
+}
+
+bool Diagram::eventFilter(QObject *watched, QEvent *event)
+{
+  if ( view && watched == view->viewport() && event->type() == QEvent::NativeGesture ) {
+    QNativeGestureEvent *gesture = static_cast<QNativeGestureEvent *>(event);
+    if ( gesture->gestureType() == Qt::ZoomNativeGesture ) {
+      zoomAt(1.0 + gesture->value(), gesture->position().toPoint());
+      return true;
+      }
+    }
+  return QGraphicsScene::eventFilter(watched, event);
 }
 
 bool Diagram::isItemChange(int type)

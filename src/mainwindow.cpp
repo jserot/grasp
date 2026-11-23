@@ -25,6 +25,7 @@
 #include "compiler.h"
 #include "debug.h"
 #include "modelProperties.h"
+#include "appFiles.h"
 
 #include <QtWidgets>
 #include <QVariant>
@@ -50,7 +51,10 @@ MainWindow::MainWindow()
     // prevents popup windows (such as combo box lists) from being displayed afterwards.
     QTimer::singleShot(0, this, [this]() {
       Globals::compiler->startServer();
-      QTimer::singleShot(300, this, [this]() { checkCompilerVersion(); }); // Allow 300ms delay for server to start up
+      QTimer::singleShot(300, this, [this]() { // Allow 300ms delay for server to start up
+        checkCompilerVersion();
+        reopenLastFile();
+        });
     });
 
     Globals::executor = new CommandExec(); // For other programs (graphviz, ...)
@@ -323,6 +327,8 @@ void MainWindow::createMenus()
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(newModelAction);
     fileMenu->addAction(openFileAction);
+    recentFilesMenu = fileMenu->addMenu(tr("Open recent"));
+    updateRecentFilesMenu();
     fileMenu->addAction(saveFileAction);
     fileMenu->addAction(saveFileAsAction);
     fileMenu->addAction(aboutAction);
@@ -511,6 +517,11 @@ void MainWindow::openFile()
     if ( dir.isEmpty() ) dir = Globals::initDir;
     QString fname = QFileDialog::getOpenFileName(this, "Open file", dir, "FSD file (*.fsd)");
     if ( fname.isEmpty() ) return;
+    loadFile(fname);
+}
+
+bool MainWindow::loadFile(const QString &fname)
+{
     Model *new_model = Model::readFromFile(fname);
     if ( new_model ) {
       qDebug() << "MainWindow::openFile: read model completed";
@@ -526,10 +537,13 @@ void MainWindow::openFile()
       currentFileName = fname;
       setUnsavedChanges(false);
       updateActions();
+      addRecentFile(fname);
+      return true;
       }
     else {
       QMessageBox::warning(this, "Error", "Error when reading file " + fname);
       // Leave current model unchanged
+      return false;
       }
 }
 
@@ -603,7 +617,80 @@ bool MainWindow::saveAs()
   if ( fname.isEmpty() ) return false;
   if ( ! saveToFile(fname) ) return false;
   currentFileName = fname;
+  addRecentFile(fname);
   return true;
+}
+
+// Recent files (File/Open recent menu), kept in the application settings file
+
+static const int maxRecentFiles = 10;
+
+QStringList MainWindow::recentFiles() const
+{
+  QSettings settings(AppFiles::settingsFile(), QSettings::IniFormat);
+  return settings.value("recentFiles").toStringList();
+}
+
+void MainWindow::setRecentFiles(const QStringList &files)
+{
+  QSettings settings(AppFiles::settingsFile(), QSettings::IniFormat);
+  settings.setValue("recentFiles", files);
+  updateRecentFilesMenu();
+}
+
+void MainWindow::addRecentFile(const QString &fname)
+{
+  QString path = QFileInfo(fname).absoluteFilePath();
+  QStringList files = recentFiles();
+  files.removeAll(path);
+  files.prepend(path);
+  while ( files.size() > maxRecentFiles ) files.removeLast();
+  setRecentFiles(files);
+}
+
+void MainWindow::updateRecentFilesMenu()
+{
+  if ( ! recentFilesMenu ) return;
+  recentFilesMenu->clear();
+  QStringList files = recentFiles();
+  for ( const QString &path : files ) {
+    QFileInfo fi(path);
+    QAction *action = recentFilesMenu->addAction(fi.fileName() + "  (" + QDir::toNativeSeparators(fi.absolutePath()) + ")");
+    connect(action, &QAction::triggered, this, [this, path]() { openRecentFile(path); });
+    }
+  if ( ! files.isEmpty() ) {
+    recentFilesMenu->addSeparator();
+    connect(recentFilesMenu->addAction(tr("Clear menu")), &QAction::triggered, this, [this]() {
+      setRecentFiles(QStringList());
+      });
+    }
+  recentFilesMenu->setEnabled(! files.isEmpty());
+}
+
+void MainWindow::openRecentFile(const QString &fname)
+{
+  if ( ! checkUnsavedChanges() ) return;
+  if ( ! QFileInfo::exists(fname) ) {
+    QMessageBox::warning(this, "Error", "File " + fname + " does not exist anymore. It is removed from the list");
+    QStringList files = recentFiles();
+    files.removeAll(fname);
+    setRecentFiles(files);
+    return;
+    }
+  loadFile(fname);
+}
+
+void MainWindow::reopenLastFile()
+{
+  if ( model ) return; // A model has already been created or opened
+  QStringList files = recentFiles();
+  if ( ! files.isEmpty() && QFileInfo::exists(files.first()) ) loadFile(files.first());
+}
+
+void MainWindow::selectMode()
+{
+  selectItemAction->trigger(); // Also sets Globals::mode (see editDiagram)
+  updateCursor();
 }
 
 // Model and diagram editing

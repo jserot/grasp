@@ -68,6 +68,8 @@ private slots:
     bool save();   // Returns false if the model has not been saved (cancelled or failed)
     bool saveAs(); // Idem
     void openFile();
+    void openRecentFile(const QString &fname);
+    void selectMode(); // Back to the SelectItem editing mode ([Escape] in a diagram)
     void newModel();
     Diagram* diagramOf(int index);
     void editDiagram(QAction *);    
@@ -109,6 +111,12 @@ private:
     void createMenus();
     void createToolbar();
     void createDockWindow(Model *model);
+    bool loadFile(const QString &fname); // Returns false if the file could not be read (the user has been told)
+    QStringList recentFiles() const; // Most recent first
+    void setRecentFiles(const QStringList &files);
+    void addRecentFile(const QString &fname);
+    void updateRecentFilesMenu();
+    void reopenLastFile(); // At startup
     void raiseDiagramPanel(); // Shows the diagram panel for the current diagram
 
     bool checkUnsavedChanges(); // Returns false if the current operation must be cancelled
@@ -172,6 +180,7 @@ private:
     QAction* deleteItemAction;
 
     QMenu *fileMenu;
+    QMenu *recentFilesMenu = nullptr;
     QMenu *modelMenu;
     QMenu *compileMenu;
     QMenu *viewMenu;
