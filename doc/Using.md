@@ -126,6 +126,12 @@ The `Compile` menu is used to generate various representations of the model and 
 Compilation options can be adjusted, for each target representation, by invoking the `Compiler
 options` action from the `Configuration` menu.
 
+### Exporting a diagram as an image
+
+The `Export current diagram as image` action of the `Model` menu (or the `Export diagram as image` entry
+of the menu opened by right-clicking on the background of a diagram) saves the current diagram, as it is
+drawn in Grasp, in a PNG or PDF file (the format is given by the extension of the file name). No external
+tool is needed.
 
 ### DOT
 
@@ -140,6 +146,9 @@ the `-dot_external_viewer` option in the `General` tab of the `Compiler options`
 from the `Configuration` menu. Again, for this to work, the path to the `graphviz` application must
 have been correctly set in the `Compiler paths` window accessible from the `Compiler and tools`
 action of the `Configuration` menu.
+
+When the `dot` program cannot be found, a message proposes to export the current diagram as an image
+instead (see below), which does not require `Graphviz`.
 
 The`Generate DOT representation` generates a single file, in which the diagrams composing a model
 are displayed as sub-graphs ("clusters"). It is sometimes useful to generate separates `.dot` files for
@@ -187,9 +196,27 @@ to integers and the values of boolean inputs set to 0 or 1, the adjustments, if 
 Provided that stimuli have been attached to inputs (see above), the model can be simulated by invoking the
 `Run simulator` action of the `Compile` menu.
 
-The generated `.vcd` file is the passed to the corresponding viewer application (as specified in the
-`Compiler paths` window accessible from the `Compiler and tools` action from the `Configuration`
-menu). 
+The simulation results (the generated `.vcd` file) are displayed in a separate window, as chronograms
+(one track per signal : arrows for events, levels for booleans, labelled bands for integer values and
+states).
+
+![](./snaps/vcd_viewer.png)
+
+In this window :
+- the `Zoom in`, `Zoom out` and `Fit` buttons change the time scale, as `Cmd+wheel` (`Ctrl+wheel`) or the
+  pinch gesture on the chronograms. The wheel alone scrolls the view
+- a click on the chronograms places a cursor, and the values of the signals at this date are shown next
+  to their names. The cursor snaps to the nearest change; the `Left` and `Right` keys move it to the
+  previous / next change, and `Escape` hides it
+- the signals can be reordered by dragging their names (or with the menu opened by right-clicking on a
+  name, or with `Alt+Up` / `Alt+Down` after selecting one). The `Save layout` button saves this order
+  in a `.gtkw` file, named after the `.vcd` file, which is read when the results are displayed again
+  (only the list of signals of an existing `.gtkw` file is replaced)
+
+The results can also be passed to an external viewer, such as `gtkwave`, by selecting the
+`-vcd_external_viewer` option in the `Sim` tab of the `Compiler options` window. The path to this viewer
+is set in the `Compiler paths` window accessible from the `Compiler and tools` action of the
+`Configuration` menu. 
 
 # Trouble-shooting, debugging
 
@@ -202,11 +229,7 @@ diagnose problems. This file is located
 This file is overwritten each time the application is launched: copy it before launching the
 application again if its content is needed.
 
-The most common problems are due to wrong locations of the `dot` and `gtkwave` external tools
-(used, respectively, to display the FSM diagrams and the simulation results). Check the paths
-by choosing `Compiler and tools` in the `Configuration` menu.
-
-Another possible cause is an invalid (or already used) port number for the socket used to communicate
+A possible cause is an invalid (or already used) port number for the socket used to communicate
 with the underlying `rfsmc` compiler server (default value: 51000). In this case, change the
 `SOCKETPORT` entry of the application configuration file `grasp.conf`, located
 - in `~/.config/grasp/` under Linux

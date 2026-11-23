@@ -1,5 +1,16 @@
 ## Changes
 
+# 1.2.0 (unreleased)
+
+* Grasp no longer needs external tools to display diagrams and simulation results :
+  * the current diagram can be exported as an image (PNG or PDF), with the `Export current diagram as
+    image` action of the `Model` menu (or the right-click menu of the diagram). When the `dot` program
+    (Graphviz) cannot be found, the DOT actions propose this export
+  * simulation results are displayed in a built-in viewer (chronograms with zoom and a cursor showing
+    the values at a given time). The signals can be reordered by dragging their names, and this order
+    saved in a `.gtkw` file (also read by gtkwave). gtkwave can still be used, by setting the new
+    `-vcd_external_viewer` option (`Sim` tab of the compiler options)
+
 # 1.1.1 (Nov 23, 2026)
 
 * Keyboard shortcuts in diagrams: [Delete] deletes the selected items, [Escape] goes back to the
