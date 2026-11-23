@@ -112,6 +112,12 @@ right-click menu) and confirm.
 * Models can be saved to (resp. read from) files by invoking the `Save` or `Save as` (resp. `Open`)
   actions from the `File` menu. 
 * The `Open recent` sub-menu of the `File` menu lists the last opened or saved models.
+
+## Undoing and redoing
+
+All the modifications of a model (diagrams, states, transitions, I/Os, stimuli, ...) can be undone and
+redone with the `Undo` and `Redo` actions of the `Edit` menu (`Cmd+Z` and `Cmd+Shift+Z` on macOS, `Ctrl+Z`
+and `Ctrl+Shift+Z` or `Ctrl+Y` elsewhere). The history is reset when a model is created or opened.
   
 ## Compiling
 

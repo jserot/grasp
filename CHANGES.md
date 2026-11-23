@@ -7,6 +7,7 @@
 * Diagrams can be zoomed with [Cmd]+wheel ([Ctrl]+wheel) or the pinch gesture, and moved by dragging
   their background (in select mode)
 * New File/Open recent menu
+* Undo / redo of all the editing operations (new Edit menu, [Cmd]+Z / [Cmd]+[Shift]+Z)
 
 # 1.1.0 (Nov 16, 2026)
 
