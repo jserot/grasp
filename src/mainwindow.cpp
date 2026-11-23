@@ -257,6 +257,8 @@ void MainWindow::createActions()
 
     duplDiagramAction = new QAction(QIcon(":/images/page.png")," Duplicate current diagram", modelActions);
     connect(duplDiagramAction, SIGNAL(triggered()), this, SLOT(duplicateDiagram()));
+    exportDiagramAction = new QAction(tr("Export current diagram as image..."), this);
+    connect(exportDiagramAction, &QAction::triggered, this, &MainWindow::exportDiagram);
 
     // dumpModelAction = new QAction("Dump", modelActions); // For debug only
     // connect(dumpModelAction, SIGNAL(triggered()), this, SLOT(dumpModel())); // For debug only
@@ -315,6 +317,7 @@ void MainWindow::updateActions()
     runSimulationAction->setEnabled(enabled);
     addDiagramAction->setEnabled(enabled);
     duplDiagramAction->setEnabled(enabled);
+    exportDiagramAction->setEnabled(enabled);
     selectItemAction->setEnabled(enabled);
     addStateAction->setEnabled(enabled);
     addInitStateAction->setEnabled(enabled);
@@ -347,6 +350,7 @@ void MainWindow::createMenus()
     modelMenu = menuBar()->addMenu(tr("&Model"));
     modelMenu->addAction(addDiagramAction);
     modelMenu->addAction(duplDiagramAction);
+    modelMenu->addAction(exportDiagramAction);
     modelMenu->addAction(checkDiagramAction);
     modelMenu->addAction(checkModelAction);
     modelMenu->addAction(checkModelWithStimuliAction);
@@ -491,6 +495,7 @@ void MainWindow::showDiagramContextMenu(QPoint screenPos)
   menu->addSeparator();
   connect(menu->addAction("New diagram"), &QAction::triggered, this, &MainWindow::newDiagram);
   connect(menu->addAction("Duplicate diagram"), &QAction::triggered, this, &MainWindow::duplicateDiagram);
+  connect(menu->addAction("Export diagram as image..."), &QAction::triggered, this, &MainWindow::exportDiagram);
   connect(menu->addAction("Delete diagram"), &QAction::triggered, this, [this, diagram]() {
     if ( ! diagram ) return;
     int index = diagrams->indexOf(diagram->getView());
@@ -724,6 +729,26 @@ void MainWindow::restoreSnapshot(const QString &snapshot)
   updateActions();
   restoring = false;
   updateUndoActions();
+}
+
+void MainWindow::exportDiagram()
+{
+  Diagram *diagram = currentDiagram();
+  if ( ! diagram ) return;
+  // Default file name : <model file>_<diagram>.png, next to the model file
+  QString dir = currentFileName.isEmpty() ? Globals::initDir : QFileInfo(currentFileName).absolutePath();
+  QString base = currentFileName.isEmpty() ? diagram->getName() : QFileInfo(currentFileName).completeBaseName() + "_" + diagram->getName();
+  const QString pngFilter = "PNG image (*.png)", pdfFilter = "PDF document (*.pdf)";
+  QString filter = pngFilter;
+  QString fname = QFileDialog::getSaveFileName(this, "Export diagram " + diagram->getName(), dir + "/" + base + ".png",
+                                               pngFilter + ";;" + pdfFilter, &filter);
+  if ( fname.isEmpty() ) return;
+  if ( QFileInfo(fname).suffix().isEmpty() ) fname += filter == pdfFilter ? ".pdf" : ".png";
+  QString error;
+  if ( diagram->exportImage(fname, &error) )
+    logMessage("Exported diagram " + diagram->getName() + " to " + fname);
+  else
+    QMessageBox::warning(this, "Export diagram", error);
 }
 
 void MainWindow::updateUndoActions()

@@ -71,6 +71,7 @@ private slots:
     void openRecentFile(const QString &fname);
     void selectMode(); // Back to the SelectItem editing mode ([Escape] in a diagram)
     void undo();
+    void exportDiagram(); // Exports the current diagram as an image (PNG or PDF)
     void redo();
     void newModel();
     Diagram* diagramOf(int index);
@@ -176,6 +177,7 @@ private:
     QActionGroup *modelActions;
     QAction* addDiagramAction;
     QAction* duplDiagramAction;
+    QAction* exportDiagramAction;
     QAction* dumpModelAction;
     QActionGroup *diagramActions;
     QAction* selectItemAction;

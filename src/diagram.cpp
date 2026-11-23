@@ -28,6 +28,11 @@
 #include <QKeyEvent>
 #include <QNativeGestureEvent>
 #include <QScrollBar>
+#include <QImage>
+#include <QPainter>
+#include <QPdfWriter>
+#include <QPageSize>
+#include <QFileInfo>
 #include <cmath>
 #include <QFile>
 #include <QTextStream>
@@ -191,6 +196,51 @@ void Diagram::fitView(qreal maxScale)
   if ( view->transform().m11() > maxScale ) // Small diagrams are not magnified too much
     view->setTransform(QTransform::fromScale(maxScale, maxScale));
   centerView();
+}
+
+// Exports the diagram, as drawn (with its layout), to a PNG or PDF file : the items, with a small margin, on a white
+// background and without the selection marks
+bool Diagram::exportImage(const QString &fname, QString *error)
+{
+  QRectF source = itemsBoundingRect();
+  if ( source.isEmpty() ) { *error = "The diagram is empty"; return false; }
+  source.adjust(-20, -20, 20, 20);
+  QList<QGraphicsItem*> selected = selectedItems();
+  clearSelection();
+  bool ok = false;
+  QString suffix = QFileInfo(fname).suffix().toLower();
+  if ( suffix == "png" ) {
+    const qreal resolution = 2.0; // Twice the screen size, for a sharper image
+    QImage image((source.size() * resolution).toSize(), QImage::Format_ARGB32);
+    image.fill(Qt::white);
+    QPainter painter(&image);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::TextAntialiasing);
+    render(&painter, QRectF(QPointF(0, 0), source.size() * resolution), source);
+    painter.end();
+    ok = image.save(fname, "PNG");
+    }
+  else if ( suffix == "pdf" ) {
+    QPdfWriter writer(fname);
+    writer.setResolution(72); // 1 scene unit = 1 point
+    writer.setPageSize(QPageSize(source.size(), QPageSize::Point));
+    writer.setPageMargins(QMarginsF(0, 0, 0, 0));
+    QPainter painter;
+    if ( painter.begin(&writer) ) {
+      painter.setRenderHint(QPainter::Antialiasing);
+      painter.setRenderHint(QPainter::TextAntialiasing);
+      render(&painter, QRectF(QPointF(0, 0), source.size()), source);
+      ok = painter.end();
+      }
+    }
+  else {
+    for ( QGraphicsItem *item: selected ) item->setSelected(true);
+    *error = "Unsupported image format (." + suffix + "): use .png or .pdf";
+    return false;
+    }
+  for ( QGraphicsItem *item: selected ) item->setSelected(true);
+  if ( ! ok ) *error = "Cannot write file " + fname;
+  return ok;
 }
 
 void Diagram::setScale(qreal scale)

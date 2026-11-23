@@ -72,6 +72,7 @@ public:
     State* getState(QString id);
     void centerView(); // Centers the view on the diagram items
     void fitView(qreal maxScale); // Scales (up to [maxScale]) and centers the view so that the whole diagram is visible
+    bool exportImage(const QString &fname, QString *error); // PNG or PDF image of the diagram, after the suffix of [fname]
     void setScale(qreal scale); // Scales and centers the view
     void updateSceneRect(); // Makes the scene cover the diagram items, with a large margin (see diagram.cpp)
     QString freshStateId(); // First identifier "S<n>" not used in this diagram
