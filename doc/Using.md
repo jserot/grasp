@@ -60,13 +60,30 @@ To **move a state**, select the ![](./imgs/select.png) button and drag the state
 
 ## Editing a state or a transition
 
-Select the ![](./imgs/select.png) button, and right-click (or Ctl-Click on a Mac) on the corresponding item 
+Select the ![](./imgs/select.png) button, and right-click (or Ctl-Click on a Mac) on the corresponding item.
+Alternatively, select the item (click on it) and press `Return`.
 
 ## Deleting a state or a transition
 
 select the ![](./imgs/delete.png) button
 and click on the state or transition (deleting a state will also delete all incoming and
-outcoming transitions)
+outcoming transitions).
+
+Alternatively, select the item(s) to delete (click on them, holding the `Cmd` (`Ctrl`) key to select
+several items) and press `Delete` (or `Backspace`).
+
+## Keyboard shortcuts, zooming and moving around a diagram
+
+Once a diagram has been clicked :
+- `Delete` (or `Backspace`) deletes the selected items
+- `Escape` clears the selection and goes back to the selection mode (![](./imgs/select.png) button)
+- `Return` edits the selected item (state or transition)
+
+The diagram can be zoomed in and out with the mouse wheel (or a two-finger scroll on a trackpad) while
+holding the `Cmd` (`Ctrl`) key, or with a pinch gesture on a trackpad; the zoom is centered on the pointed
+location. The zoom can also be set from the menu opened by right-clicking on the background of the diagram.
+
+The diagram can be moved around by scrolling, or, in selection mode, by dragging its background.
 
 ## Changing the name of the diagram or add local variables
 
@@ -94,6 +111,7 @@ right-click menu) and confirm.
 
 * Models can be saved to (resp. read from) files by invoking the `Save` or `Save as` (resp. `Open`)
   actions from the `File` menu. 
+* The `Open recent` sub-menu of the `File` menu lists the last opened or saved models.
   
 ## Compiling
 

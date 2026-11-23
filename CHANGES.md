@@ -1,5 +1,13 @@
 ## Changes
 
+# 1.1.1 (unreleased)
+
+* Keyboard shortcuts in diagrams: [Delete] deletes the selected items, [Escape] goes back to the
+  select mode, [Return] edits the selected item
+* Diagrams can be zoomed with [Cmd]+wheel ([Ctrl]+wheel) or the pinch gesture, and moved by dragging
+  their background (in select mode)
+* New File/Open recent menu
+
 # 1.1.0 (Nov 16, 2026)
 
 * Added a graphical editor for attaching stimuli to inputs. The editor is invoked by clicking  the
