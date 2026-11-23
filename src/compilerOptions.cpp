@@ -31,6 +31,10 @@ CompilerOptions::CompilerOptions(QWidget *parent)
   // options.insert("-dot_no_captions", CompilerOption("dot","-dot_no_captions",true));
   // The above is a hack until the rfsmc option -dot_no_captions is replaced by -dot_captions
   options.insert("-no_model_check", CompilerOption("general","-no_model_check",false));
+  options.insert("-vcd_external_viewer",
+                 CompilerOption("sim", "-vcd_external_viewer", CompilerOption::UnitOpt, "",
+                                "Display the simulation results with an external VCD viewer (set in Configuration > "
+                                "Compiler and tools, gtkwave by default) instead of the built-in viewer"));
   // dump();
   dialog = NULL;
   tabs = NULL;

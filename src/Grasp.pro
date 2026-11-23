@@ -39,6 +39,7 @@ HEADERS += include/nlohmann_json.h \
            stimulus.h \
            command.h \
            imageViewer.h \
+           vcdViewer.h \
            textViewer.h \
            textsViewer.h \
            textProperties.h \
@@ -85,6 +86,7 @@ SOURCES += transition.cpp \
            textsViewer.cpp \
            textProperties.cpp \
            imageViewer.cpp \
+           vcdViewer.cpp \
            debug.cpp \
            main.cpp \
            mainwindow.cpp

@@ -17,6 +17,7 @@
 #include "mainwindow.h"
 #include <QCloseEvent>
 #include "imageViewer.h"
+#include "vcdViewer.h"
 #include "textViewer.h"
 #include "textsViewer.h"
 #include "compilerPaths.h"
@@ -1094,10 +1095,24 @@ void MainWindow::openResultFile(QString fname)
       openImageFile(changeSuffix(fname, ".gif"));
     }
   else if ( f.suffix() == "vcd" ) {
-    QString gFile = changeSuffix(fname, ".gtkw");
-    QFile gf(gFile);
-    if ( gf.exists() ) args << gFile;
-    customView("VCDVIEWER", args, wDir, true);
+    // Simulation results are shown by the built-in viewer, unless an external one (gtkwave) is asked for
+    bool external = Globals::compilerOptions->getOptions("sim").contains("-vcd_external_viewer");
+    if ( external && findProgram("VCDVIEWER", "gtkwave").isEmpty() ) {
+      QMessageBox::information(this, "Simulation results",
+        "The external VCD viewer (" + Globals::compilerPaths->getPath("VCDVIEWER") + ") cannot be found. "
+        "The results are shown by the built-in viewer.\n\n"
+        "Set the path of the external viewer with Configuration > Compiler and tools, or uncheck the "
+        "-vcd_external_viewer option (Configuration > Compiler options, Sim tab).");
+      external = false;
+      }
+    if ( external ) {
+      QString gFile = changeSuffix(fname, ".gtkw");
+      QFile gf(gFile);
+      if ( gf.exists() ) args << gFile;
+      customView("VCDVIEWER", args, wDir, true);
+      }
+    else
+      VcdViewer::open(fname, this);
     }
   else {
     openTextFile(fname);
@@ -1150,8 +1165,11 @@ void MainWindow::generate(QString target, bool withTestbench)
       QDir().mkdir(targetPath);
       }
     }
-  for ( const QString &opt : Globals::guiOnlyOpts ) // These options are not understood by the compiler
+  QStringList targetOpts = Globals::compilerOptions->getOptions(target);
+  for ( const QString &opt : Globals::guiOnlyOpts ) { // These options are not understood by the compiler
     genOpts.removeAll(opt);
+    targetOpts.removeAll(opt);
+    }
   QString mainName = model->getName();
   if ( mainName.isEmpty() ) mainName = "main";
   QStringList args =
@@ -1160,7 +1178,7 @@ void MainWindow::generate(QString target, bool withTestbench)
     << "-main" << mainName
     << "-target_dir" << targetDir
     << genOpts
-    << Globals::compilerOptions->getOptions(target);
+    << targetOpts;
   if ( target == "ctask" || target == "systemc" ) args << "-show_models";
   args << fi.filePath();
   Response r = Globals::compiler->compile(args);
