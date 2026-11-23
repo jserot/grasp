@@ -116,7 +116,6 @@ private:
     void setRecentFiles(const QStringList &files);
     void addRecentFile(const QString &fname);
     void updateRecentFilesMenu();
-    void reopenLastFile(); // At startup
     void raiseDiagramPanel(); // Shows the diagram panel for the current diagram
 
     bool checkUnsavedChanges(); // Returns false if the current operation must be cancelled

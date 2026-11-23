@@ -51,10 +51,7 @@ MainWindow::MainWindow()
     // prevents popup windows (such as combo box lists) from being displayed afterwards.
     QTimer::singleShot(0, this, [this]() {
       Globals::compiler->startServer();
-      QTimer::singleShot(300, this, [this]() { // Allow 300ms delay for server to start up
-        checkCompilerVersion();
-        reopenLastFile();
-        });
+      QTimer::singleShot(300, this, [this]() { checkCompilerVersion(); }); // Allow 300ms delay for server to start up
     });
 
     Globals::executor = new CommandExec(); // For other programs (graphviz, ...)
@@ -678,13 +675,6 @@ void MainWindow::openRecentFile(const QString &fname)
     return;
     }
   loadFile(fname);
-}
-
-void MainWindow::reopenLastFile()
-{
-  if ( model ) return; // A model has already been created or opened
-  QStringList files = recentFiles();
-  if ( ! files.isEmpty() && QFileInfo::exists(files.first()) ) loadFile(files.first());
 }
 
 void MainWindow::selectMode()
