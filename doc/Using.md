@@ -126,33 +126,41 @@ The `Compile` menu is used to generate various representations of the model and 
 Compilation options can be adjusted, for each target representation, by invoking the `Compiler
 options` action from the `Configuration` menu.
 
-### Exporting a diagram as an image
+### Exporting diagrams and models as images
 
 The `Export current diagram as image` action of the `Model` menu (or the `Export diagram as image` entry
 of the menu opened by right-clicking on the background of a diagram) saves the current diagram, as it is
 drawn in Grasp, in a PNG or PDF file (the format is given by the extension of the file name). No external
 tool is needed.
 
+The `Export model as images` action of the `Model` menu exports all the diagrams of the model. A dialog
+first asks for the format (PNG or PDF) and for the kind of export :
+- `One file per diagram` : a name is then asked, and each diagram is saved in a file named
+  `<name>_<diagram>.png` (or `.pdf`). The existing files which would be replaced are listed first
+- `A single file with all the diagrams, side by side` : the diagrams are drawn in a single image (or PDF
+  page), each one in a frame with its name. Two options can be selected in this case :
+  - `Show the local variables of each diagram` : the local variables (name and type) of a diagram are
+    listed in its frame, between its name and its drawing
+  - `Show the global variables of the model` : the global variables are listed in a separate frame,
+    placed before the diagrams
+
+Empty diagrams are not exported.
+
 ### DOT
 
-The `Generate DOT representation` action is used to produce a `.dot` representation, to be viewed by
-the `Graphviz` set of tools. By default, this action generates a `.gif` image which is displayed in
-a separate window. For this to work, the path to the `dot` program must have been correctly set in
-the `Compiler paths` window accessible from the `Compiler and tools` action of the `Configuration`
-menu.
+It is also possible to display diagrams and models using the [dot](https://graphviz.org) format and
+program. This generally produces nicer representations. For this the
+[Graphviz](http://www.graphviz.org) package must be installed separately (they are _not_ included in
+the `Grasp` distribution) and the path to the  provided executables must be specified using the
+`Compiler and tools` panel accessible from the `Configuration` menu.
 
-It is also possible to view the `.dot` file using the `Graphviz` application. For this, select
-the `-dot_external_viewer` option in the `General` tab of the `Compiler options` window accessible
-from the `Configuration` menu. Again, for this to work, the path to the `graphviz` application must
-have been correctly set in the `Compiler paths` window accessible from the `Compiler and tools`
-action of the `Configuration` menu.
+The `Generate DOT representation` action (from the `Compile` menu) generates (and displays) a `.gif` image
+describing the entire model.
+
+The`Generate DOT representations` generates a single `.gif` file for each diagram of the model. 
 
 When the `dot` program cannot be found, a message proposes to export the current diagram as an image
-instead (see below), which does not require `Graphviz`.
-
-The`Generate DOT representation` generates a single file, in which the diagrams composing a model
-are displayed as sub-graphs ("clusters"). It is sometimes useful to generate separates `.dot` files for
-each diagram. For this, invoke the `Generate separate DOT representation` action. 
+instead (see above).
 
 ### CTask, SystemC and VHDL
 
@@ -213,10 +221,21 @@ In this window :
   in a `.gtkw` file, named after the `.vcd` file, which is read when the results are displayed again
   (only the list of signals of an existing `.gtkw` file is replaced)
 
-The results can also be passed to an external viewer, such as `gtkwave`, by selecting the
-`-vcd_external_viewer` option in the `Sim` tab of the `Compiler options` window. The path to this viewer
-is set in the `Compiler paths` window accessible from the `Compiler and tools` action of the
-`Configuration` menu. 
+### Using gtkwave
+
+The simulation results can also be displayed with [gtkwave](http://gtkwave.sourceforge.net) (or another
+external VCD viewer), which offers more advanced features (signal formats, markers, searches, ...). This
+application is not included in the Grasp distribution : it must have been installed beforehand. For
+using it
+- select the `-vcd_external_viewer` option in the `Sim` tab of the `Compiler options` window (`Configuration`
+  menu)
+- check the path to the viewer (`VCDVIEWER` entry, `gtkwave` by default) in the `Compiler paths` window
+  accessible from the `Compiler and tools` action of the `Configuration` menu
+
+The `Run simulator` action then launches `gtkwave` on the generated `.vcd` file, with the `.gtkw` file of
+the same name if it exists (for instance the one written by the `Save layout` button of the built-in
+viewer, or by `gtkwave` itself). If the viewer cannot be found, a message is displayed and the results are
+shown by the built-in viewer.
 
 # Trouble-shooting, debugging
 

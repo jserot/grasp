@@ -6,6 +6,10 @@
   * the current diagram can be exported as an image (PNG or PDF), with the `Export current diagram as
     image` action of the `Model` menu (or the right-click menu of the diagram). When the `dot` program
     (Graphviz) cannot be found, the DOT actions propose this export
+  * the whole model can be exported with the `Export model as images` action of the `Model` menu,
+    either in a file per diagram or in a single file showing all the diagrams side by side (each one
+    framed, with its name and, optionally, its local variables; the global variables can be shown in a
+    separate frame)
   * simulation results are displayed in a built-in viewer (chronograms with zoom and a cursor showing
     the values at a given time). The signals can be reordered by dragging their names, and this order
     saved in a `.gtkw` file (also read by gtkwave). gtkwave can still be used, by setting the new

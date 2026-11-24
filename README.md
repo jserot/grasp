@@ -39,10 +39,6 @@ straightforward.
 Ready-to-install versions are available for Linux (`.deb` package), MacOS (`.dmg`) and Windows
 (`setup`) are available [here](https://github.com/jserot/grasp/releases) (check the `Assets` tab).
 
-**Note** the [Graphviz](http://www.graphviz.org) package and the [gtkwave](http://gtkwave.sourceforge.net)
-application (used, respectively, to display diagrams and viewing simulation results) are _not_
-included in the distribution and must be installed separately. 
-
 ### Building from source 
 
 See [this file](https://github.com/jserot/grasp/blob/master/BUILDING.md)
@@ -55,7 +51,7 @@ problems. The log file is named `grasp.log` and located
 - in `~/Library/Application Support/grasp/` under MacOS
 - in `C:\Users\<Utilisateur>\AppData\Roaming\grasp\` under Windows. 
 
-Most often, problems are due to incorrect paths to auxilliary programs (`dot`, `gtkwave`).
+Most often, problems are due to incorrect paths to auxilliary programs (`dot`, `gtkwave`), when they are used.
 Another possibility is an invalid (or already used) port number for the socket used to communicate
 with the underlying `rfsmc` server (default value: 51000). In the latter case, a solution is to
 change this number in the application config file `grasp.conf`.
