@@ -72,6 +72,7 @@ private slots:
     void selectMode(); // Back to the SelectItem editing mode ([Escape] in a diagram)
     void undo();
     void exportDiagram(); // Exports the current diagram as an image (PNG or PDF)
+    void exportModel();   // Exports all the diagrams, in a file per diagram or in a single file (PNG or PDF)
     void redo();
     void newModel();
     Diagram* diagramOf(int index);
@@ -180,6 +181,7 @@ private:
     QAction* addDiagramAction;
     QAction* duplDiagramAction;
     QAction* exportDiagramAction;
+    QAction* exportModelAction;
     QAction* dumpModelAction;
     QActionGroup *diagramActions;
     QAction* selectItemAction;

@@ -200,47 +200,189 @@ void Diagram::fitView(qreal maxScale)
 
 // Exports the diagram, as drawn (with its layout), to a PNG or PDF file : the items, with a small margin, on a white
 // background and without the selection marks
-bool Diagram::exportImage(const QString &fname, QString *error)
+// Exported images. A diagram is drawn with a margin around its items. In a multi-diagram file, it is framed, with
+// its name (and possibly its local variables) above it. The global variables can be shown in a separate frame
+static const qreal exportMargin = 20;
+static const qreal exportFrameInset = 6;   // Frame, within the margin
+static const qreal exportFrameRadius = 10;
+static const qreal exportPngResolution = 2.0; // Twice the screen size, for a sharper image
+// Pixel sizes are used, so that the texts have the same size (in scene units) in PNG and PDF files
+static const int exportTitlePixelSize = 18;
+static const int exportTextPixelSize = 13;
+
+static QRectF exportSource(Diagram *diagram)
 {
-  QRectF source = itemsBoundingRect();
-  if ( source.isEmpty() ) { *error = "The diagram is empty"; return false; }
-  source.adjust(-20, -20, 20, 20);
-  QList<QGraphicsItem*> selected = selectedItems();
-  clearSelection();
+  QRectF source = diagram->itemsBoundingRect();
+  if ( ! source.isEmpty() ) source.adjust(-exportMargin, -exportMargin, exportMargin, exportMargin);
+  return source;
+}
+
+// A framed part of a multi-diagram picture : a title, lines of text (variables) and possibly a diagram
+struct ExportBlock
+{
+  QString title;       // Empty : no title nor frame (single diagram)
+  QStringList lines;
+  bool boxedLines = false; // Lines framed by a thinner frame (local variables)
+  Diagram *diagram = nullptr;
+  static const int linesPadding = 5; // Between the lines and their frame
+  static QFont font(int pixelSize, bool bold)
+  {
+    QFont f;
+    f.setPixelSize(pixelSize);
+    f.setBold(bold);
+    return f;
+  }
+  qreal titleHeight() const { return title.isEmpty() ? 0 : exportMargin + exportTitlePixelSize; }
+  qreal linesHeight() const
+  {
+    if ( lines.isEmpty() ) return 0;
+    qreal h = lines.size() * QFontMetricsF(font(exportTextPixelSize, false)).lineSpacing();
+    return boxedLines ? 8 + h + 2 * linesPadding : 6 + h;
+  }
+  qreal diagramHeight() const { return diagram ? exportSource(diagram).height() : exportMargin; }
+  QSizeF size() const
+  {
+    qreal w = diagram ? exportSource(diagram).width() : 0;
+    if ( ! title.isEmpty() )
+      w = std::max(w, QFontMetricsF(font(exportTitlePixelSize, true)).horizontalAdvance(title) + 2 * exportMargin);
+    QFontMetricsF fm(font(exportTextPixelSize, false));
+    for ( const QString &line: lines )
+      w = std::max(w, fm.horizontalAdvance(line) + 2 * exportMargin + (boxedLines ? 2 * linesPadding : 0));
+    return QSizeF(w, titleHeight() + linesHeight() + diagramHeight());
+  }
+  void render(QPainter &painter, QPointF topLeft) const
+  {
+    QSizeF s = size();
+    if ( ! title.isEmpty() ) {
+      painter.setPen(QPen(QColor("#808080"), 1.5));
+      painter.setBrush(Qt::NoBrush);
+      painter.drawRoundedRect(QRectF(topLeft, s).adjusted(exportFrameInset, exportFrameInset, -exportFrameInset,
+                                                           -exportFrameInset), exportFrameRadius, exportFrameRadius);
+      painter.setPen(Qt::black);
+      painter.setFont(font(exportTitlePixelSize, true));
+      painter.drawText(QRectF(topLeft.x() + exportMargin, topLeft.y(), s.width() - exportMargin, titleHeight()),
+                       Qt::AlignLeft | Qt::AlignBottom, title);
+      }
+    qreal y = topLeft.y() + titleHeight();
+    if ( ! lines.isEmpty() ) {
+      painter.setPen(Qt::black);
+      QFont f = font(exportTextPixelSize, false);
+      painter.setFont(f);
+      QFontMetricsF fm(f);
+      qreal lineSpacing = fm.lineSpacing();
+      qreal x = topLeft.x() + exportMargin;
+      y += boxedLines ? 8 : 6;
+      if ( boxedLines ) {
+        qreal w = 0;
+        for ( const QString &line: lines ) w = std::max(w, fm.horizontalAdvance(line));
+        painter.setPen(QPen(QColor("#808080"), 0.75));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawRoundedRect(QRectF(x, y, w + 2 * linesPadding, lines.size() * lineSpacing + 2 * linesPadding), 5, 5);
+        painter.setPen(Qt::black);
+        x += linesPadding;
+        y += linesPadding;
+        }
+      for ( const QString &line: lines ) {
+        painter.drawText(QRectF(x, y, s.width() - exportMargin, lineSpacing), Qt::AlignLeft | Qt::AlignVCenter, line);
+        y += lineSpacing;
+        }
+      if ( boxedLines ) y += linesPadding;
+      }
+    if ( diagram ) { // The selection is not shown
+      QRectF source = exportSource(diagram);
+      QList<QGraphicsItem*> selected = diagram->selectedItems();
+      diagram->clearSelection();
+      diagram->render(&painter, QRectF(QPointF(topLeft.x(), y), source.size()), source);
+      for ( QGraphicsItem *item: selected ) item->setSelected(true);
+      }
+  }
+};
+
+static QStringList varLines(const QList<Iov*> &vars)
+{
+  QStringList lines;
+  for ( Iov *v: vars ) lines << v->name + " : " + toString(v->type);
+  return lines;
+}
+
+// Exports [blocks] side by side (aligned at the top) in a single PNG image or PDF page
+static bool exportBlocks(const QList<ExportBlock> &blocks, const QString &fname, QString *error)
+{
+  QSizeF size(0, 0);
+  for ( const ExportBlock &b: blocks ) {
+    QSizeF s = b.size();
+    size = QSizeF(size.width() + s.width(), std::max(size.height(), s.height()));
+    }
+  auto renderAll = [&](QPainter &painter) {
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::TextAntialiasing);
+    qreal x = 0;
+    for ( const ExportBlock &b: blocks ) {
+      b.render(painter, QPointF(x, 0));
+      x += b.size().width();
+      }
+    };
   bool ok = false;
   QString suffix = QFileInfo(fname).suffix().toLower();
   if ( suffix == "png" ) {
-    const qreal resolution = 2.0; // Twice the screen size, for a sharper image
-    QImage image((source.size() * resolution).toSize(), QImage::Format_ARGB32);
+    QImage image((size * exportPngResolution).toSize(), QImage::Format_ARGB32);
     image.fill(Qt::white);
     QPainter painter(&image);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::TextAntialiasing);
-    render(&painter, QRectF(QPointF(0, 0), source.size() * resolution), source);
+    painter.scale(exportPngResolution, exportPngResolution);
+    renderAll(painter);
     painter.end();
     ok = image.save(fname, "PNG");
     }
   else if ( suffix == "pdf" ) {
     QPdfWriter writer(fname);
     writer.setResolution(72); // 1 scene unit = 1 point
-    writer.setPageSize(QPageSize(source.size(), QPageSize::Point));
     writer.setPageMargins(QMarginsF(0, 0, 0, 0));
+    writer.setPageSize(QPageSize(size, QPageSize::Point));
     QPainter painter;
     if ( painter.begin(&writer) ) {
-      painter.setRenderHint(QPainter::Antialiasing);
-      painter.setRenderHint(QPainter::TextAntialiasing);
-      render(&painter, QRectF(QPointF(0, 0), source.size()), source);
+      renderAll(painter);
       ok = painter.end();
       }
     }
   else {
-    for ( QGraphicsItem *item: selected ) item->setSelected(true);
     *error = "Unsupported image format (." + suffix + "): use .png or .pdf";
     return false;
     }
-  for ( QGraphicsItem *item: selected ) item->setSelected(true);
   if ( ! ok ) *error = "Cannot write file " + fname;
   return ok;
+}
+
+bool Diagram::exportImage(const QString &fname, QString *error)
+{
+  if ( exportSource(this).isEmpty() ) { *error = "The diagram is empty"; return false; }
+  ExportBlock b;
+  b.diagram = this;
+  return exportBlocks({ b }, fname, error);
+}
+
+bool Diagram::exportImages(const QList<Diagram*> &diagrams, const QString &fname, const QList<Iov*> *globalVars,
+                           bool withLocalVars, QString *error)
+{
+  QList<ExportBlock> blocks;
+  if ( globalVars && ! globalVars->isEmpty() ) {
+    ExportBlock b;
+    b.title = "Global variables";
+    b.lines = varLines(*globalVars);
+    blocks << b;
+    }
+  bool someDiagram = false;
+  for ( Diagram *d: diagrams ) {
+    if ( exportSource(d).isEmpty() ) continue; // Empty diagrams are skipped
+    ExportBlock b;
+    b.title = d->getName();
+    if ( withLocalVars ) b.lines = varLines(d->getVars());
+    b.boxedLines = true;
+    b.diagram = d;
+    blocks << b;
+    someDiagram = true;
+    }
+  if ( ! someDiagram ) { *error = "All the diagrams are empty"; return false; }
+  return exportBlocks(blocks, fname, error);
 }
 
 void Diagram::setScale(qreal scale)

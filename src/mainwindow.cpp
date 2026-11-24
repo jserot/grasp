@@ -260,6 +260,8 @@ void MainWindow::createActions()
     connect(duplDiagramAction, SIGNAL(triggered()), this, SLOT(duplicateDiagram()));
     exportDiagramAction = new QAction(tr("Export current diagram as image..."), this);
     connect(exportDiagramAction, &QAction::triggered, this, &MainWindow::exportDiagram);
+    exportModelAction = new QAction(tr("Export model as images..."), this);
+    connect(exportModelAction, &QAction::triggered, this, &MainWindow::exportModel);
 
     // dumpModelAction = new QAction("Dump", modelActions); // For debug only
     // connect(dumpModelAction, SIGNAL(triggered()), this, SLOT(dumpModel())); // For debug only
@@ -319,6 +321,7 @@ void MainWindow::updateActions()
     addDiagramAction->setEnabled(enabled);
     duplDiagramAction->setEnabled(enabled);
     exportDiagramAction->setEnabled(enabled);
+    exportModelAction->setEnabled(enabled);
     selectItemAction->setEnabled(enabled);
     addStateAction->setEnabled(enabled);
     addInitStateAction->setEnabled(enabled);
@@ -352,6 +355,7 @@ void MainWindow::createMenus()
     modelMenu->addAction(addDiagramAction);
     modelMenu->addAction(duplDiagramAction);
     modelMenu->addAction(exportDiagramAction);
+    modelMenu->addAction(exportModelAction);
     modelMenu->addAction(checkDiagramAction);
     modelMenu->addAction(checkModelAction);
     modelMenu->addAction(checkModelWithStimuliAction);
@@ -750,6 +754,83 @@ void MainWindow::exportDiagram()
     logMessage("Exported diagram " + diagram->getName() + " to " + fname);
   else
     QMessageBox::warning(this, "Export diagram", error);
+}
+
+void MainWindow::exportModel()
+{
+  if ( ! model || model->getDiagrams().isEmpty() ) return;
+  // The kind of export (a file per diagram, or a single file) and the format are chosen first
+  QDialog dialog(this);
+  dialog.setWindowTitle("Export model as images");
+  QRadioButton *perDiagram = new QRadioButton("One file per diagram (<name>_<diagram>.<format>)");
+  QRadioButton *single = new QRadioButton("A single file with all the diagrams, side by side");
+  perDiagram->setChecked(true);
+  QCheckBox *localVars = new QCheckBox("Show the local variables of each diagram");
+  QCheckBox *globalVars = new QCheckBox("Show the global variables of the model");
+  for ( QCheckBox *b: { localVars, globalVars } ) b->setEnabled(false); // Only for a single file
+  connect(single, &QRadioButton::toggled, &dialog, [=](bool on) { localVars->setEnabled(on); globalVars->setEnabled(on); });
+  QComboBox *format = new QComboBox();
+  format->addItems({ "PNG", "PDF" });
+  QFormLayout *form = new QFormLayout();
+  form->addRow("Format", format);
+  QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+  connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+  connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+  QVBoxLayout *layout = new QVBoxLayout(&dialog);
+  layout->addWidget(perDiagram);
+  layout->addWidget(single);
+  QVBoxLayout *varsLayout = new QVBoxLayout();
+  varsLayout->setContentsMargins(24, 0, 0, 0); // Indented under their radio button
+  varsLayout->addWidget(localVars);
+  varsLayout->addWidget(globalVars);
+  layout->addLayout(varsLayout);
+  layout->addLayout(form);
+  layout->addWidget(buttons);
+  if ( dialog.exec() != QDialog::Accepted ) return;
+  QString suffix = format->currentText().toLower();
+  QString filter = format->currentText() + (suffix == "png" ? " image (*.png)" : " document (*.pdf)");
+
+  // Default file name : <model file>.<format>, next to the model file
+  QString dir = currentFileName.isEmpty() ? Globals::initDir : QFileInfo(currentFileName).absolutePath();
+  QString base = ! currentFileName.isEmpty() ? QFileInfo(currentFileName).completeBaseName()
+                 : ! model->getName().isEmpty() ? model->getName() : QString("model");
+  QString title = perDiagram->isChecked() ? "Export model : name of the files (completed with the diagram names)"
+                                          : "Export model";
+  // For a file per diagram, the name returned is not a file to be written (the files replaced are listed below)
+  QFileDialog::Options options = perDiagram->isChecked() ? QFileDialog::DontConfirmOverwrite : QFileDialog::Options();
+  QString fname = QFileDialog::getSaveFileName(this, title, dir + "/" + base + "." + suffix, filter, nullptr, options);
+  if ( fname.isEmpty() ) return;
+  if ( QFileInfo(fname).suffix().toLower() != suffix ) fname += "." + suffix;
+
+  QString error;
+  if ( single->isChecked() ) {
+    if ( Diagram::exportImages(model->getDiagrams(), fname, globalVars->isChecked() ? &model->globalVars() : nullptr,
+                               localVars->isChecked(), &error) )
+      logMessage("Exported model to " + fname);
+    else
+      QMessageBox::warning(this, "Export model", error);
+    return;
+    }
+  // One file per diagram
+  QString stem = QFileInfo(fname).absolutePath() + "/" + QFileInfo(fname).completeBaseName();
+  QStringList existing;
+  for ( Diagram *d: model->getDiagrams() ) {
+    QString f = stem + "_" + d->getName() + "." + suffix;
+    if ( QFileInfo::exists(f) ) existing << QFileInfo(f).fileName();
+    }
+  if ( ! existing.isEmpty()
+       && QMessageBox::question(this, "Export model", "The following files will be replaced :\n" + existing.join("\n")
+                                + "\n\nContinue ?") != QMessageBox::Yes )
+    return;
+  QStringList written, errors;
+  for ( Diagram *d: model->getDiagrams() ) {
+    QString f = stem + "_" + d->getName() + "." + suffix;
+    if ( d->exportImage(f, &error) ) written << QFileInfo(f).fileName();
+    else errors << d->getName() + " : " + error;
+    }
+  if ( ! written.isEmpty() ) logMessage("Exported model to " + written.join(", "));
+  if ( ! errors.isEmpty() )
+    QMessageBox::warning(this, "Export model", "Some diagrams were not exported :\n" + errors.join("\n"));
 }
 
 void MainWindow::updateUndoActions()
