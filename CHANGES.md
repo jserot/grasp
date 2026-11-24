@@ -1,6 +1,6 @@
 ## Changes
 
-# 1.2.0 (unreleased)
+# 1.2.0 (Nov 24, 2026)
 
 * Grasp no longer needs external tools to display diagrams and simulation results :
   * the current diagram can be exported as an image (PNG or PDF), with the `Export current diagram as
